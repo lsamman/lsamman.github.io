@@ -1098,6 +1098,9 @@
       }
     }
     updateWindowAnims(dt);
+
+    // Distant rocket launches (js/launches.js).
+    if (window.Launches) window.Launches.update(dt);
   }
 
   // Draw one full frame.
@@ -1115,6 +1118,7 @@
     drawStars(P);
     drawMoon(P);
     drawSun(P);
+    if (window.Launches) window.Launches.draw(ctx, { W: W, H: H, P: P, hour: hour });   // behind the city
     ctx.drawImage(farLayer.canvas, 0, 0, W, H);
     drawHaze(P);
     ctx.drawImage(nearLayer.canvas, 0, 0, W, H);

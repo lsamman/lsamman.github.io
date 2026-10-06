@@ -9,6 +9,7 @@
 (function () {
   var SITE = window.SITE;
   var Sound = window.Sound || { play: function () {}, unlock: function () { return Promise.resolve(); }, setMusic: function () {}, isMusicOn: function () { return false; }, setSfx: function () {}, isSfxOn: function () { return false; }, setVolume: function () {}, getVolume: function () { return 0; } };
+  var Launches = window.Launches || { isEnabled: function () { return false; }, setEnabled: function () {} };
   var Scene = window.Scene || { init: function () {}, setHue: function () {}, setReducedMotion: function () {}, setTimeOfDay: function () {} };
 
   var catBar = document.getElementById("categories");
@@ -66,6 +67,9 @@
       { id: "time", title: "Time of day", summary: "auto follows your clock",
         value: function () { return TIMES[timeIndex]; },
         change: function () { timeIndex = (timeIndex + 1) % TIMES.length; save("xmb.time", TIMES[timeIndex]); Scene.setTimeOfDay(TIMES[timeIndex]); } },
+      { id: "launches", title: "Rocket launches", summary: "Real vehicles, launching from the distant coast",
+        value: function () { return Launches.isEnabled() ? "on" : "off"; },
+        change: function () { Launches.setEnabled(!Launches.isEnabled()); save("xmb.launches", Launches.isEnabled() ? "on" : "off"); } },
       { id: "theme", title: "Accent colour", summary: "Tiles, highlights and city lights",
         value: function () { return THEMES[themeIndex].name.toLowerCase(); },
         change: function () { themeIndex = (themeIndex + 1) % THEMES.length; save("xmb.theme", THEMES[themeIndex].name); applyTheme(); } },
@@ -354,6 +358,7 @@
   Scene.setTimeOfDay(TIMES[timeIndex]);
   applyTheme();
   applyMotion();
+  Launches.setEnabled(load("xmb.launches", "on") === "on");
   Scene.init(document.getElementById("bg"));
   buildCategories();
   buildItems(false);

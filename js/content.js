@@ -259,6 +259,7 @@ window.SITE = {
           id: "tech",
           title: "Tech & Audio",
           summary: "Computers, coding, AV and sound",
+          body: ["I've worked with Dante networked sound systems for school concerts and plays."],
           tags: ["PC building", "Coding", "Robotics", "Dante AV networking", "Live sound", "Soldering"]
         },
         {

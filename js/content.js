@@ -253,6 +253,16 @@ window.SITE = {
           id: "lab",
           title: "Lab & Engineering",
           summary: "Materials testing, rocketry and fabrication",
+          body: [
+            "Most of my lab experience comes from the Materials Education Foundation's Eisenman Camp, where I was selected as 1 of 28 students from 15 states and France. Over a 60-hour week we tested materials to failure, then worked out and presented why they failed. I use the same failure-analysis mindset on rockets: test, find what broke, iterate."
+          ],
+          bullets: [
+            "Hardness and tensile testing to measure strength and find failure points",
+            "Microscopy to examine fracture surfaces and material structure",
+            "Presenting test findings and failure analysis to an audience",
+            "Hands-on work with metals, polymers and gases at Lehigh University's Material Science Camp, including welding and molding"
+          ],
+          links: [{ label: "More about the Eisenman Camp", url: "#/experience/eisenman-camp" }],
           tags: ["Hardness testing", "Tensile testing", "Microscopy", "Failure analysis", "Flight simulation", "3D printing", "Welding", "Molding"]
         },
         {

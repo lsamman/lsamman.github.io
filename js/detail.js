@@ -160,7 +160,7 @@
     var faces = window.XMB ? window.XMB.faces() : [];
     turnstiled = faces.map(function (f, i) {
       return f.animate(
-        [{ transform: "none", opacity: 1 }, { transform: "perspective(700px) rotateY(-95deg) translateX(-20px)", opacity: 0 }],
+        [{ transform: "none", opacity: 1 }, { transform: "rotateY(-95deg) translateX(-20px)", opacity: 0 }],
         { duration: 260, delay: i * 35, easing: "cubic-bezier(.5,0,.75,0)", fill: "forwards" }
       );
     });
@@ -173,7 +173,7 @@
     var faces = window.XMB ? window.XMB.faces() : [];
     faces.forEach(function (f, i) {
       f.animate(
-        [{ transform: "perspective(700px) rotateY(-95deg) translateX(-20px)", opacity: 0 }, { transform: "none", opacity: 1 }],
+        [{ transform: "rotateY(-95deg) translateX(-20px)", opacity: 0 }, { transform: "none", opacity: 1 }],
         { duration: 380, delay: i * 40, easing: "cubic-bezier(.2,.9,.25,1)", fill: "backwards" }
       );
     });
@@ -224,7 +224,7 @@
       detail.hidden = false;
       sound("swoosh");
       panel.animate([
-        { opacity: 0, transform: "perspective(1600px) translateX(140px) rotateY(70deg)" },
+        { opacity: 0, transform: "translateX(140px) rotateY(70deg)" },
         { opacity: 1, offset: 0.4 },
         { opacity: 1, transform: "none" }
       ], { duration: 560, easing: "cubic-bezier(.25,1.25,.4,1)" }).onfinish = done;
@@ -264,7 +264,7 @@
     sound("swoosh");
     var anim = panel.animate([
       { opacity: 1, transform: "none" },
-      { opacity: 0, transform: "perspective(1600px) translateX(120px) rotateY(70deg)" }
+      { opacity: 0, transform: "translateX(120px) rotateY(70deg)" }
     ], { duration: 340, easing: "cubic-bezier(.5,0,.75,0)", fill: "forwards" });
     anim.onfinish = function () { done(); anim.cancel(); };
   }

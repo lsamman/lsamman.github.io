@@ -1,6 +1,6 @@
 # My résumé site
 
-A personal résumé website styled like a 2010-era console dashboard made of liquid glass. Frosted glass tiles sit over a city skyline that lights up to match the visitor's time of day, and atmospheric jungle music is generated live in the browser.
+A personal résumé website styled like a dark, gritty 2010-era console dashboard. Flat tiles sit over a city skyline that lights up to match the visitor's time of day, and atmospheric jungle music is generated live in the browser.
 
 Live at **https://lsamman.github.io** (once published).
 
@@ -58,7 +58,6 @@ Plain HTML, CSS and JavaScript, with no frameworks or build step.
 | `js/content.js` | All your text and images |
 | `js/xmb.js` | The menu: layout, controls, settings, start screen |
 | `js/detail.js` | The detail panel, its turnstile open/close animation, and links like `#/projects/project-1` |
-| `js/glass.js` | Liquid glass drawn with WebGL: refraction at curved edges, specular rims, the springy selection droplet (falls back to CSS glass without WebGL) |
 | `js/scene.js` | The background: time-of-day sky, procedural city with lit windows, wave ribbons (canvas) |
 | `js/audio.js` | Jungle music and sound effects, synthesised with the Web Audio API (no audio files or samples) |
 | `css/style.css` | All the styling. `--hue` at the top is the default accent colour |

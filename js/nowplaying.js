@@ -20,20 +20,19 @@
   var API = "https://ws.audioscrobbler.com/2.0/?method=user.getrecenttracks&format=json&limit=1" +
     "&user=" + encodeURIComponent(cfg.user) + "&api_key=" + encodeURIComponent(cfg.apiKey);
 
-  // ---------- Styles (liquid glass, matching css/style.css; uses the --hue accent) ----
+  // ---------- Styles (flat, dark, Metro-ish; uses the site's --hue accent) ----
 
   var css = document.createElement("style");
   css.textContent = [
     "#nowplaying{position:fixed;z-index:20;left:24px;bottom:calc(env(safe-area-inset-bottom,0px) + 48px);",
-    "display:flex;align-items:center;gap:12px;width:min(320px,calc(100vw - 48px));padding:8px 16px 8px 8px;border-radius:20px;",
-    "background:linear-gradient(160deg,rgba(255,255,255,.16),rgba(255,255,255,.04) 42%,rgba(255,255,255,.07)),rgba(18,20,23,.34);",
-    "box-shadow:0 10px 30px rgba(0,0,0,.32),inset 0 1px 0 rgba(255,255,255,.28);",
-    "color:#f4f6f5;text-decoration:none;font-family:inherit;backdrop-filter:blur(14px) saturate(175%);-webkit-backdrop-filter:blur(14px) saturate(175%);",
+    "display:flex;align-items:center;gap:12px;width:min(320px,calc(100vw - 48px));padding:8px 14px 8px 8px;",
+    "background:rgba(20,22,24,.86);border:1px solid rgba(255,255,255,.08);border-left:3px solid hsl(var(--hue,120) 75% 45%);",
+    "color:#e8e8e8;text-decoration:none;font-family:inherit;backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);",
     "opacity:0;transform:translateX(-12px);transition:opacity .5s,transform .5s,border-color .3s}",
     "body.started #nowplaying.ready{opacity:1;transform:none}",
     "body.detail-open #nowplaying{opacity:0!important;pointer-events:none}",
-    "#nowplaying:hover{box-shadow:0 10px 30px rgba(0,0,0,.32),inset 0 1px 0 rgba(255,255,255,.28),0 0 24px hsl(var(--hue,120) 85% 55% / .3)}",
-    "#nowplaying .np-art{flex:none;width:52px;height:52px;object-fit:cover;border-radius:13px;background:rgba(255,255,255,.08)}",
+    "#nowplaying:hover{border-color:rgba(255,255,255,.2);border-left-color:hsl(var(--hue,120) 85% 55%)}",
+    "#nowplaying .np-art{flex:none;width:52px;height:52px;object-fit:cover;background:#2a2d30 center/60% no-repeat}",
     "#nowplaying .np-text{min-width:0;display:flex;flex-direction:column;line-height:1.25}",
     "#nowplaying .np-label{display:flex;align-items:center;gap:6px;font-size:.72rem;text-transform:lowercase;letter-spacing:.06em;color:hsl(var(--hue,120) 70% 60%)}",
     "#nowplaying .np-track{font-weight:600;font-size:.95rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}",

@@ -3,44 +3,54 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#0e1011">
   <title>Your Name · Résumé</title>
   <meta name="description" content="Résumé of Your Name">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;600;700&display=swap">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600&family=Barlow+Condensed:wght@300;500;600&display=swap">
   <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-  <!-- Animated wave + bubble background (js/waves.js) -->
+  <!-- City + waves background (js/scene.js) -->
   <canvas id="bg" aria-hidden="true"></canvas>
+
+  <!-- Gritty overlays: film grain, scanlines, vignette -->
+  <div id="grain" aria-hidden="true"></div>
+  <div id="scanlines" aria-hidden="true"></div>
 
   <!-- Boot screen: also unlocks audio, since browsers need a click/key first -->
   <div id="splash" role="button" tabindex="0" aria-label="Start">
-    <div class="splash-orb"><span></span></div>
+    <svg class="splash-ring" viewBox="0 0 100 100" aria-hidden="true">
+      <circle class="track" cx="50" cy="50" r="42"/>
+      <circle class="draw" cx="50" cy="50" r="42"/>
+    </svg>
     <h1 class="splash-name" data-site-name>Your Name</h1>
     <p class="splash-tagline" data-site-tagline></p>
-    <p class="splash-hint">Press any key or tap to start</p>
+    <p class="splash-hint">press any key. any of them.</p>
   </div>
 
   <!-- Top-right status: clock + mute -->
   <header id="status">
-    <div id="clock"><span class="clock-date"></span><span class="clock-time"></span></div>
+    <div id="clock"><span class="clock-time"></span><span class="clock-date"></span></div>
     <button id="mute" type="button" aria-label="Toggle music" title="Music on/off">
       <svg viewBox="0 0 24 24" aria-hidden="true"><path class="spk" d="M4 9h4l5-4v14l-5-4H4z"/><path class="wave1" d="M16 9a4 4 0 0 1 0 6"/><path class="wave2" d="M18.5 6.5a7.5 7.5 0 0 1 0 11"/><path class="cross" d="M16 9l6 6M22 9l-6 6"/></svg>
     </button>
   </header>
 
-  <!-- The XMB menu (js/xmb.js builds the contents) -->
+  <!-- The menu (js/xmb.js builds the contents) -->
   <main id="xmb" aria-label="Menu">
     <nav id="categories" aria-label="Categories"></nav>
+    <h2 id="cat-title" aria-live="polite"></h2>
     <ul id="items" aria-label="Items"></ul>
-    <p id="hint" class="hint">← → categories · ↑ ↓ items · Enter to open</p>
+    <p id="hint" class="hint">← → categories · ↑ ↓ items · enter to open</p>
   </main>
 
   <!-- Detail page shown when an item is opened (js/detail.js) -->
   <section id="detail" hidden aria-modal="true" role="dialog">
     <div class="panel">
-      <button class="close" type="button" aria-label="Back">✕</button>
+      <span class="stripe" aria-hidden="true"></span>
+      <button class="close" type="button" aria-label="Back">esc ✕</button>
       <div class="panel-scroll"></div>
     </div>
   </section>
@@ -57,7 +67,7 @@
   </noscript>
 
   <script src="js/content.js"></script>
-  <script src="js/waves.js"></script>
+  <script src="js/scene.js"></script>
   <script src="js/audio.js"></script>
   <script src="js/detail.js"></script>
   <script src="js/xmb.js"></script>

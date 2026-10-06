@@ -1,6 +1,6 @@
 # My résumé site
 
-A personal résumé website styled like a mid-2000s game-console menu in the glossy "Frutiger Aero" look. It has animated waves, glass panels and ambient music that's generated live in the browser.
+A personal résumé website styled like a dark, gritty 2010-era console dashboard. Flat tiles sit over a city skyline that lights up to match the visitor's time of day, and atmospheric jungle music is generated live in the browser.
 
 Live at **https://lsamman.github.io** (once published).
 
@@ -47,7 +47,7 @@ The live site updates in about a minute. (Or just ask Claude to "publish my chan
 | Open | Enter | click the highlighted item | tap the highlighted item |
 | Back | Esc | ✕ button or click outside | ✕ button |
 
-The **Settings** category has music, sound effects, volume, theme colour and reduce-motion options. Choices are remembered per visitor.
+The **Settings** category has music, sound effects, volume, time of day (preview dawn/day/dusk/night), accent colour and reduce-motion options. Choices are remembered per visitor.
 
 ## How it's built
 
@@ -57,7 +57,7 @@ Plain HTML, CSS and JavaScript, with no frameworks or build step.
 |---|---|
 | `js/content.js` | All your text and images |
 | `js/xmb.js` | The menu: layout, controls, settings, start screen |
-| `js/detail.js` | The detail panel, its open/close animation, and links like `#/projects/project-1` |
-| `js/waves.js` | The animated background (canvas) |
-| `js/audio.js` | Music and sound effects, synthesised with the Web Audio API (no audio files) |
-| `css/style.css` | All the styling. Change `--hue` at the top to set the default colour |
+| `js/detail.js` | The detail panel, its turnstile open/close animation, and links like `#/projects/project-1` |
+| `js/scene.js` | The background: time-of-day sky, procedural city with lit windows, wave ribbons (canvas) |
+| `js/audio.js` | Jungle music and sound effects, synthesised with the Web Audio API (no audio files or samples) |
+| `css/style.css` | All the styling. `--hue` at the top is the default accent colour |

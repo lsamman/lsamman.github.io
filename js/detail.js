@@ -1,12 +1,11 @@
 /*
- * Detail page: the glass panel that opens when you pick an item.
+ * Detail page: the panel that opens when you pick an item.
  *
- * The opening animation:
- *   1. The menu behind blurs and shrinks back (CSS: body.detail-open).
- *   2. A copy of the item's icon flies from the menu to the panel header.
- *   3. The panel "unfolds" from that spot: scale + 3D tilt + blur-to-sharp, with a little overshoot.
- *   4. A light sweeps across the glass, then the content fades in one piece at a time.
- * Closing plays it in reverse, back toward the item in the menu.
+ * The opening animation (see "Opening and closing" below):
+ *   1. The menu tiles turnstile out, one after another.
+ *   2. The panel swings in on a hinge from the right, with a little overshoot.
+ *   3. An accent stripe wipes down its left edge and the content slides in piece by piece.
+ * Closing plays it in reverse.
  *
  * Pages are linked with the URL hash, e.g.  #/projects/project-1  or  #/plain
  * so the browser Back button and shared links both work.
@@ -38,7 +37,7 @@
   }
 
   function tile(iconSrc) {
-    var t = el("div", "tile");
+    var t = el("div", "ico");
     var img = el("img");
     img.src = iconSrc; img.alt = "";
     t.appendChild(img);
@@ -63,7 +62,7 @@
     if (item.links && item.links.length) {
       var links = el("div", "links");
       item.links.forEach(function (l) {
-        var a = el("a", "gel", l.label);
+        var a = el("a", "btn", l.label);
         a.href = l.url;
         if (/^https?:/.test(l.url)) { a.target = "_blank"; a.rel = "noopener"; }
         links.appendChild(a);
@@ -149,53 +148,43 @@
   }
 
   // ---------- Opening and closing ----------------------------------------
+  //
+  // Open:  the menu tiles "turnstile" out (each swings away on its left edge,
+  //        one after another), then the panel swings in on a hinge from the
+  //        right and an accent stripe wipes down its edge.
+  // Close: the same thing backwards.
 
-  // Where on screen the animation should start from / return to
-  function originRect() {
-    var src = window.XMB && current && current.cat && window.XMB.tileFor(current.cat.id, current.item && current.item.id);
-    if (src) return src.getBoundingClientRect();
-    var w = window.innerWidth, h = window.innerHeight;
-    return { left: w / 2 - 30, top: h / 2 - 30, width: 60, height: 60 };
+  var turnstiled = [];   // tile animations held in their "swung out" state
+
+  function turnstileOut() {
+    var faces = window.XMB ? window.XMB.faces() : [];
+    turnstiled = faces.map(function (f, i) {
+      return f.animate(
+        [{ transform: "none", opacity: 1 }, { transform: "rotateY(-95deg) translateX(-20px)", opacity: 0 }],
+        { duration: 260, delay: i * 35, easing: "cubic-bezier(.5,0,.75,0)", fill: "forwards" }
+      );
+    });
+    return faces.length ? 260 + (faces.length - 1) * 35 : 0;
   }
 
-  function setOrigin(r) {
-    var p = panel.getBoundingClientRect();
-    var ox = r.left + r.width / 2 - p.left;
-    var oy = r.top + r.height / 2 - p.top;
-    panel.style.transformOrigin = ox + "px " + oy + "px";
+  function turnstileIn() {
+    turnstiled.forEach(function (a) { a.cancel(); });
+    turnstiled = [];
+    var faces = window.XMB ? window.XMB.faces() : [];
+    faces.forEach(function (f, i) {
+      f.animate(
+        [{ transform: "rotateY(-95deg) translateX(-20px)", opacity: 0 }, { transform: "none", opacity: 1 }],
+        { duration: 380, delay: i * 40, easing: "cubic-bezier(.2,.9,.25,1)", fill: "backwards" }
+      );
+    });
   }
 
-  // A floating copy of the icon that flies between the menu and the panel header
-  function flyIcon(fromRect, toEl, reverse, duration) {
-    var srcImg = toEl && toEl.querySelector("img");
-    if (!srcImg || !fromRect.width) return;
-    var to = toEl.getBoundingClientRect();
-    var ghost = document.createElement("img");
-    ghost.src = srcImg.src;
-    ghost.style.cssText = "position:fixed;z-index:35;pointer-events:none;left:0;top:0;" +
-      "width:" + to.width * 0.58 + "px;height:" + to.height * 0.58 + "px;" +
-      "filter:drop-shadow(0 0 12px var(--glow))";
-    document.body.appendChild(ghost);
-
-    var size = to.width * 0.58;
-    var a = { x: fromRect.left + fromRect.width / 2 - size / 2, y: fromRect.top + fromRect.height / 2 - size / 2, s: fromRect.width / to.width };
-    var b = { x: to.left + to.width / 2 - size / 2, y: to.top + to.height / 2 - size / 2, s: 1 };
-    var mid = { x: (a.x + b.x) / 2, y: Math.min(a.y, b.y) - 60, s: 1.6 };   // arc upward, grow, then settle
-    var frames = [a, mid, b].map(function (f) { return { transform: "translate(" + f.x + "px," + f.y + "px) scale(" + f.s + ")" }; });
-    frames[0].opacity = 1; frames[2].opacity = 1; frames[1].opacity = 1;
-    if (reverse) frames.reverse();
-
-    var anim = ghost.animate(frames, { duration: duration, easing: "cubic-bezier(.4,0,.2,1)" });
-    toEl.style.visibility = "hidden";
-    anim.onfinish = function () { ghost.remove(); toEl.style.visibility = ""; };
-  }
-
-  function staggerIn() {
+  function staggerIn(delay) {
     var kids = scroller.children;
     for (var i = 0; i < kids.length; i++) {
       kids[i].animate(
-        [{ opacity: 0, transform: "translateY(14px)" }, { opacity: 1, transform: "none" }],
-        { duration: 450, delay: 180 + i * 70, easing: "cubic-bezier(.2,.9,.25,1)", fill: "backwards" }
+        [{ opacity: 0, transform: "translateX(24px)" }, { opacity: 1, transform: "none" }],
+        { duration: 380, delay: delay + i * 55, easing: "cubic-bezier(.2,.9,.25,1)", fill: "backwards" }
       );
     }
   }
@@ -211,40 +200,40 @@
     var wasOpen = isOpen;
     current = target === "plain" ? null : target;
     render(target);
-    detail.hidden = false;
     isOpen = true;
-    document.body.classList.add("detail-open");
 
-    if (wasOpen) {   // switching page while already open: just crossfade the contents
-      staggerIn();
+    if (wasOpen) {   // switching page while already open: just restagger the contents
+      staggerIn(0);
       return;
     }
 
     busy = true;
     sound("open");
-    sound("swoosh");
-    var r = originRect();
+    document.body.classList.add("detail-open");
+    panel.classList.remove("opened");
 
     if (reduced()) {
-      panel.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 200 }).onfinish = done;
+      detail.hidden = false;
+      panel.classList.add("opened");
+      panel.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 150 }).onfinish = done;
       return;
     }
 
-    setOrigin(r);
-    panel.animate([
-      { opacity: 0, transform: "rotateX(22deg) rotateY(-14deg) scale(.18)", filter: "blur(14px)" },
-      { opacity: 1, offset: 0.55, filter: "blur(2px)" },
-      { opacity: 1, transform: "none", filter: "blur(0)" }
-    ], { duration: 720, easing: "cubic-bezier(.2,.9,.25,1.12)" }).onfinish = done;
-
-    flyIcon(r, scroller.querySelector(".d-head .tile"), false, 720);
-    staggerIn();
+    var wait = Math.min(turnstileOut(), 320);
+    setTimeout(function () {
+      detail.hidden = false;
+      sound("swoosh");
+      panel.animate([
+        { opacity: 0, transform: "translateX(140px) rotateY(70deg)" },
+        { opacity: 1, offset: 0.4 },
+        { opacity: 1, transform: "none" }
+      ], { duration: 560, easing: "cubic-bezier(.25,1.25,.4,1)" }).onfinish = done;
+      setTimeout(function () { panel.classList.add("opened"); }, 200);
+      staggerIn(220);
+    }, wait);
 
     function done() {
       busy = false;
-      panel.classList.remove("sheen");
-      void panel.offsetWidth;   // restart the CSS animation
-      panel.classList.add("sheen");
       closeBtn.focus({ preventScroll: true });
     }
   }
@@ -255,29 +244,28 @@
     busy = true;
     sound("close");
     closeLightbox();
-    document.body.classList.remove("detail-open");
 
     function done() {
       detail.hidden = true;
       busy = false;
-      panel.classList.remove("sheen");
       current = null;
+      panel.classList.remove("opened");
+      document.body.classList.remove("detail-open");
+      if (!reduced()) turnstileIn(); else { turnstiled.forEach(function (a) { a.cancel(); }); turnstiled = []; }
     }
 
     if (reduced()) {
-      panel.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 180, fill: "forwards" }).onfinish = function () {
+      panel.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 150, fill: "forwards" }).onfinish = function () {
         done(); panel.getAnimations().forEach(function (a) { a.cancel(); });
       };
       return;
     }
 
-    var r = originRect();
-    setOrigin(r);
-    flyIcon(r, scroller.querySelector(".d-head .tile"), true, 480);
+    sound("swoosh");
     var anim = panel.animate([
-      { opacity: 1, transform: "none", filter: "blur(0)" },
-      { opacity: 0, transform: "rotateX(-10deg) rotateY(12deg) scale(.15)", filter: "blur(12px)" }
-    ], { duration: 480, easing: "cubic-bezier(.5,0,.75,0)", fill: "forwards" });
+      { opacity: 1, transform: "none" },
+      { opacity: 0, transform: "translateX(120px) rotateY(70deg)" }
+    ], { duration: 340, easing: "cubic-bezier(.5,0,.75,0)", fill: "forwards" });
     anim.onfinish = function () { done(); anim.cancel(); };
   }
 

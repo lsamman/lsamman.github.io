@@ -1,5 +1,5 @@
 /*
- * The XMB-style menu: a row of categories and a column of items under the
+ * The menu: a row of category tiles and a column of item tiles under the
  * selected one. Handles keyboard, mouse, scroll wheel and touch swipes, the
  * built-in Settings category, the clock, the mute button and the start screen.
  *
@@ -9,9 +9,10 @@
 (function () {
   var SITE = window.SITE;
   var Sound = window.Sound || { play: function () {}, unlock: function () { return Promise.resolve(); }, setMusic: function () {}, isMusicOn: function () { return false; }, setSfx: function () {}, isSfxOn: function () { return false; }, setVolume: function () {}, getVolume: function () { return 0; } };
-  var Waves = window.Waves || { init: function () {}, setHue: function () {}, setReducedMotion: function () {} };
+  var Scene = window.Scene || { init: function () {}, setHue: function () {}, setReducedMotion: function () {}, setTimeOfDay: function () {} };
 
   var catBar = document.getElementById("categories");
+  var catTitle = document.getElementById("cat-title");
   var itemList = document.getElementById("items");
   var muteBtn = document.getElementById("mute");
   var splash = document.getElementById("splash");
@@ -22,54 +23,54 @@
   function load(key, fallback) { try { var v = localStorage.getItem(key); return v == null ? fallback : v; } catch (e) { return fallback; } }
   function save(key, val) { try { localStorage.setItem(key, val); } catch (e) {} }
 
-  // Like the PS3, the "Auto" theme changes colour with the month
-  var MONTH_HUES = [205, 285, 135, 190, 150, 175, 200, 225, 260, 25, 35, 345];
   var THEMES = [
-    { name: "Auto (by month)", hue: null },
-    { name: "Sky", hue: 205 }, { name: "Aqua", hue: 178 }, { name: "Lime", hue: 115 },
-    { name: "Violet", hue: 268 }, { name: "Rose", hue: 335 }, { name: "Amber", hue: 32 }
+    { name: "Green", hue: 95 }, { name: "Orange", hue: 26 }, { name: "Blue", hue: 205 },
+    { name: "Magenta", hue: 318 }, { name: "Red", hue: 356 }
   ];
+  var TIMES = ["auto", "dawn", "day", "dusk", "night"];
   var VOLUMES = [0, 0.25, 0.5, 0.75, 1];
 
-  var themeIndex = Math.max(0, THEMES.findIndex(function (t) { return t.name === load("xmb.theme", "Sky"); }));
+  var themeIndex = Math.max(0, THEMES.findIndex(function (t) { return t.name === load("xmb.theme", "Green"); }));
+  var timeIndex = Math.max(0, TIMES.indexOf(load("xmb.time", "auto")));
   var systemReduced = window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches;
   var reduceMotion = load("xmb.motion", systemReduced ? "on" : "off") === "on";
 
   function applyTheme() {
-    var t = THEMES[themeIndex];
-    var hue = t.hue == null ? MONTH_HUES[new Date().getMonth()] : t.hue;
+    var hue = THEMES[themeIndex].hue;
     root.style.setProperty("--hue", hue);
-    Waves.setHue(hue);
+    Scene.setHue(hue);
   }
   function applyMotion() {
     root.classList.toggle("reduce-motion", reduceMotion);
-    Waves.setReducedMotion(reduceMotion);
+    Scene.setReducedMotion(reduceMotion);
   }
 
   // ---------- The Settings category (built in) ------------------------------
 
-  var SETTINGS_ICON = "assets/icons/settings.svg";
   var settingsCat = {
-    id: "settings", label: "Settings", icon: SETTINGS_ICON, isSettings: true,
+    id: "settings", label: "Settings", icon: "assets/icons/settings.svg", isSettings: true,
     items: [
-      { id: "music", title: "Background music", summary: "Generated ambient music",
-        value: function () { return Sound.isMusicOn() ? "On" : "Off"; },
+      { id: "music", title: "Background music", summary: "Generated jungle, made live in your browser",
+        value: function () { return Sound.isMusicOn() ? "on" : "off"; },
         change: function () { Sound.setMusic(!Sound.isMusicOn()); syncMute(); } },
-      { id: "sfx", title: "Sound effects", summary: "Menu clicks and chimes",
-        value: function () { return Sound.isSfxOn() ? "On" : "Off"; },
+      { id: "sfx", title: "Sound effects", summary: "Menu clicks and blips",
+        value: function () { return Sound.isSfxOn() ? "on" : "off"; },
         change: function () { Sound.setSfx(!Sound.isSfxOn()); } },
-      { id: "volume", title: "Volume", summary: "Press again to change",
+      { id: "volume", title: "Volume", summary: "Select again to change",
         value: function () { return Math.round(Sound.getVolume() * 100) + "%"; },
         change: function () {
           var v = Sound.getVolume();
           var i = VOLUMES.findIndex(function (x) { return x > v + 0.01; });
           Sound.setVolume(i === -1 ? VOLUMES[0] : VOLUMES[i]);
         } },
-      { id: "theme", title: "Theme colour", summary: "Background colour",
-        value: function () { return THEMES[themeIndex].name; },
+      { id: "time", title: "Time of day", summary: "auto follows your clock",
+        value: function () { return TIMES[timeIndex]; },
+        change: function () { timeIndex = (timeIndex + 1) % TIMES.length; save("xmb.time", TIMES[timeIndex]); Scene.setTimeOfDay(TIMES[timeIndex]); } },
+      { id: "theme", title: "Accent colour", summary: "Tiles, highlights and city lights",
+        value: function () { return THEMES[themeIndex].name.toLowerCase(); },
         change: function () { themeIndex = (themeIndex + 1) % THEMES.length; save("xmb.theme", THEMES[themeIndex].name); applyTheme(); } },
       { id: "motion", title: "Reduce motion", summary: "Calmer animations",
-        value: function () { return reduceMotion ? "On" : "Off"; },
+        value: function () { return reduceMotion ? "on" : "off"; },
         change: function () { reduceMotion = !reduceMotion; save("xmb.motion", reduceMotion ? "on" : "off"); applyMotion(); } }
     ]
   };
@@ -91,8 +92,7 @@
       b.innerHTML = '<img alt=""><span></span>';
       b.querySelector("img").src = cat.icon;
       b.querySelector("span").textContent = cat.label;
-      b.setAttribute("aria-label", cat.label);
-      b.addEventListener("click", function () { if (i !== selCat) { setCat(i); } });
+      b.addEventListener("click", function () { setCat(i); });
       catBar.appendChild(b);
       return b;
     });
@@ -100,24 +100,27 @@
 
   function buildItems(animate) {
     var cat = cats[selCat];
+    catTitle.textContent = cat.label;
     itemList.innerHTML = "";
     itemEls = cat.items.map(function (item, i) {
       var li = document.createElement("li");
       li.className = "item" + (animate ? " enter" : "");
-      if (animate) li.style.animationDelay = Math.min(i, 6) * 40 + "ms";
-      li.innerHTML = '<div class="tile"><img alt=""></div><div class="text"><span class="title"></span><span class="sub"></span></div>';
-      li.querySelector(".tile img").src = item.icon || cat.icon;
+      li.innerHTML = '<div class="face"><div class="ico"><img alt=""></div><div class="text"><span class="title"></span><span class="sub"></span></div></div>';
+      var face = li.querySelector(".face");
+      if (animate) face.style.animationDelay = Math.min(i, 6) * 45 + "ms";
+      li.querySelector(".ico img").src = item.icon || cat.icon;
       li.querySelector(".title").textContent = item.title;
       li.querySelector(".sub").textContent = item.summary || item.subtitle || "";
       if (item.value) {
         var v = document.createElement("span");
         v.className = "value";
-        li.appendChild(v);
+        face.appendChild(v);
       }
       li.addEventListener("click", function () {
         if (i === selItem[selCat]) activate();
         else { selItem[selCat] = i; Sound.play("move"); position(); }
       });
+      addTilt(face);
       itemList.appendChild(li);
       return li;
     });
@@ -132,39 +135,80 @@
     });
   }
 
+  // Tiles tilt toward wherever you press them, like the 360 dashboard
+  function addTilt(face) {
+    face.addEventListener("pointerdown", function (e) {
+      if (reduceMotion) return;
+      var r = face.getBoundingClientRect();
+      var x = (e.clientX - r.left) / r.width - 0.5;    // -0.5 .. 0.5
+      var y = (e.clientY - r.top) / r.height - 0.5;
+      face.style.setProperty("--ry", (x * 14).toFixed(1) + "deg");
+      face.style.setProperty("--rx", (-y * 18).toFixed(1) + "deg");
+      face.style.setProperty("--press", "0.97");
+    });
+    function release() {
+      face.style.removeProperty("--ry");
+      face.style.removeProperty("--rx");
+      face.style.removeProperty("--press");
+    }
+    face.addEventListener("pointerup", release);
+    face.addEventListener("pointerleave", release);
+    face.addEventListener("pointercancel", release);
+  }
+
+  function glitch() {
+    if (reduceMotion) return;
+    [catTitle, itemList].forEach(function (el) {
+      el.classList.remove("glitch");
+      void el.offsetWidth;   // restart the animation
+      el.classList.add("glitch");
+    });
+  }
+
   // ---------- Layout: where everything sits on screen ----------------------
 
   function metrics() {
     var w = window.innerWidth, h = window.innerHeight, small = w <= 640;
+    var catSel = small ? 52 : 64;
     return {
-      anchorX: small ? 64 : Math.max(150, w * 0.22),   // x of the selected category's centre
-      barY: small ? h * 0.2 : h * 0.26,                // top of the category row
-      catGap: small ? 92 : 140,
-      selTile: small ? 56 : 70, tile: small ? 42 : 52,
-      belowBar: small ? 108 : 138,                     // distance from bar to the selected item
-      itemGap: small ? 58 : 70,
-      selItemH: small ? 84 : 100
+      small: small,
+      catTile: small ? 40 : 48, catSel: catSel,
+      catGap: small ? 6 : 8,                              // space between category tiles
+      anchorX: small ? 16 + catSel / 2 : Math.max(110, w * 0.15),   // centre of the selected category
+      barY: small ? h * 0.15 : h * 0.2,                   // top of the category row
+      titleH: small ? 52 : 70,
+      tile: small ? 48 : 54, selTile: small ? 68 : 80,
+      gap: 6
     };
   }
 
   function position() {
     var m = metrics();
+    var left = m.anchorX - m.catSel / 2;   // shared left edge for title + items
 
     catEls.forEach(function (el, i) {
-      var x = m.anchorX + (i - selCat) * m.catGap;
-      el.style.transform = "translate(" + x + "px," + m.barY + "px)";
+      var size = i === selCat ? m.catSel : m.catTile;
+      // Categories before the selected one sit to its left; after it, to the right
+      var k = Math.abs(i - selCat);
+      var offset = k === 0 ? 0 : m.catSel / 2 + m.catGap + m.catTile / 2 + (k - 1) * (m.catTile + m.catGap);
+      var x = m.anchorX + (i < selCat ? -offset : offset);
+      var y = m.barY + (m.catSel - size) / 2;
+      el.style.setProperty("--size", size + "px");
+      el.style.transform = "translate(" + (x - size / 2) + "px," + y + "px)";
       el.classList.toggle("sel", i === selCat);
-      el.style.opacity = i === selCat ? "" : Math.abs(i - selCat) > 4 ? "0" : "";
+      el.style.opacity = i < selCat - 2 ? "0" : "";
     });
 
+    catTitle.style.transform = "translate(" + left + "px," + (m.barY + m.catSel + 6) + "px)";
+
     var s = selItem[selCat];
-    var selY = m.barY + m.belowBar;
+    var selY = m.barY + m.catSel + m.titleH + 8;
     itemEls.forEach(function (el, i) {
-      var y, tileW = i === s ? m.selTile : m.tile;
+      var y;
       if (i === s) y = selY;
-      else if (i > s) y = selY + m.selItemH + (i - s - 1) * m.itemGap;
-      else y = m.barY - 16 - (s - i) * m.itemGap;          // earlier items slide up above the bar, like the PS3
-      el.style.transform = "translate(" + (m.anchorX - tileW / 2) + "px," + y + "px)";
+      else if (i > s) y = selY + m.selTile + m.gap + (i - s - 1) * (m.tile + m.gap);
+      else y = m.barY - m.gap * 2 - (s - i) * (m.tile + m.gap);   // earlier items slide up above the row
+      el.style.transform = "translate(" + left + "px," + y + "px)";
       el.classList.toggle("sel", i === s);
       el.classList.toggle("above", i < s);
       el.classList.toggle("dim", i > s);
@@ -180,6 +224,7 @@
     Sound.play("move");
     buildItems(true);
     position();
+    glitch();
   }
 
   function moveItem(d) {
@@ -245,7 +290,7 @@
     else moveItem(-Math.sign(dy) * Math.max(1, Math.round(Math.abs(dy) / 90)));
   }, { passive: true });
 
-  // ---------- Mute button, clock, start screen ----------------------------
+  // ---------- Mute button, clock, film grain, start screen ----------------
 
   function syncMute() {
     muteBtn.classList.toggle("off", !Sound.isMusicOn());
@@ -259,8 +304,25 @@
 
   function tickClock() {
     var now = new Date();
-    document.querySelector(".clock-date").textContent = now.toLocaleDateString(undefined, { day: "numeric", month: "numeric" });
     document.querySelector(".clock-time").textContent = now.toLocaleTimeString(undefined, { hour: "2-digit", minute: "2-digit" });
+    document.querySelector(".clock-date").textContent = now.toLocaleDateString(undefined, { weekday: "long", day: "numeric", month: "short" });
+  }
+
+  // A small tile of random noise, repeated across the screen as film grain
+  function makeGrain() {
+    try {
+      var c = document.createElement("canvas");
+      c.width = c.height = 160;
+      var g = c.getContext("2d");
+      var img = g.createImageData(160, 160);
+      for (var i = 0; i < img.data.length; i += 4) {
+        var v = Math.random() * 255;
+        img.data[i] = img.data[i + 1] = img.data[i + 2] = v;
+        img.data[i + 3] = 255;
+      }
+      g.putImageData(img, 0, 0);
+      document.getElementById("grain").style.backgroundImage = "url(" + c.toDataURL() + ")";
+    } catch (e) {}
   }
 
   function start() {
@@ -271,8 +333,8 @@
     document.body.classList.add("started");
     buildItems(true);
     position();
-    setTimeout(function () { splash.remove(); }, 1000);
-    setTimeout(function () { window.Detail.route(); }, 500);   // open a shared link like #/projects/project-1
+    setTimeout(function () { splash.remove(); }, 600);
+    setTimeout(function () { window.Detail.route(); }, 450);   // open a shared link like #/projects/project-1
   }
   splash.addEventListener("click", start);
   splash.addEventListener("touchend", function (e) { e.preventDefault(); start(); });
@@ -283,12 +345,16 @@
   document.querySelectorAll("[data-site-tagline]").forEach(function (n) { n.textContent = SITE.tagline || ""; });
   document.title = SITE.name + " · Résumé";
   if (window.matchMedia && matchMedia("(pointer: coarse)").matches) {
-    document.getElementById("hint").textContent = "Swipe to browse · tap twice to open";
+    document.getElementById("hint").textContent = "swipe to browse · tap twice to open";
+    splash.querySelector(".splash-hint").textContent = "tap anywhere. go on.";
   }
 
-  Waves.init(document.getElementById("bg"));
+  makeGrain();
+  // Saved choices go in before init so the first frame is already right (no tween on load)
+  Scene.setTimeOfDay(TIMES[timeIndex]);
   applyTheme();
   applyMotion();
+  Scene.init(document.getElementById("bg"));
   buildCategories();
   buildItems(false);
   position();
@@ -310,14 +376,9 @@
       if (ci !== selCat) { selCat = ci; buildItems(false); }
       position();
     },
-    // The on-screen icon tile for an item, so the detail animation can start/end there
-    tileFor: function (catId, itemId) {
-      if (cats[selCat].id === catId) {
-        var ii = cats[selCat].items.findIndex(function (it) { return it.id === itemId; });
-        if (itemEls[ii]) return itemEls[ii].querySelector(".tile");
-      }
-      var ci = cats.findIndex(function (c) { return c.id === catId; });
-      return catEls[ci] ? catEls[ci].querySelector("img") : null;
+    // The visible tile faces, for the detail page's turnstile animation
+    faces: function () {
+      return Array.prototype.map.call(itemList.querySelectorAll(".face"), function (f) { return f; });
     }
   };
 })();

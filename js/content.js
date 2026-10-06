@@ -23,6 +23,13 @@ window.SITE = {
   name: "Your Name",
   tagline: "Your Job Title · Your City",
 
+  // Last.fm "now playing" tile. Leave blank to hide it.
+  // apiKey: free from https://www.last.fm/api/account/create. Use the API key only, never the shared secret.
+  lastfm: {
+    user: "",
+    apiKey: ""
+  },
+
   categories: [
     {
       id: "about",

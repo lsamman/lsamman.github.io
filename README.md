@@ -1,6 +1,6 @@
 # My résumé site
 
-A personal résumé website styled like a dark, gritty 2010-era console dashboard. Flat tiles sit over a city skyline that lights up to match the visitor's time of day, and atmospheric jungle music is generated live in the browser.
+A personal résumé website styled like a 2010-era console dashboard made of liquid glass. Frosted glass tiles sit over a city skyline that lights up to match the visitor's time of day, and atmospheric jungle music is generated live in the browser.
 
 Live at **https://lsamman.github.io** (once published).
 

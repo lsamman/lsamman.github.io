@@ -294,7 +294,7 @@
     else moveItem(-Math.sign(dy) * Math.max(1, Math.round(Math.abs(dy) / 90)));
   }, { passive: true });
 
-  // ---------- Mute button, clock, film grain, start screen ----------------
+  // ---------- Mute button, clock, glass highlight, start screen ------------
 
   function syncMute() {
     muteBtn.classList.toggle("off", !Sound.isMusicOn());
@@ -312,22 +312,15 @@
     document.querySelector(".clock-date").textContent = now.toLocaleDateString(undefined, { weekday: "long", day: "numeric", month: "short" });
   }
 
-  // A small tile of random noise, repeated across the screen as film grain
-  function makeGrain() {
-    try {
-      var c = document.createElement("canvas");
-      c.width = c.height = 160;
-      var g = c.getContext("2d");
-      var img = g.createImageData(160, 160);
-      for (var i = 0; i < img.data.length; i += 4) {
-        var v = Math.random() * 255;
-        img.data[i] = img.data[i + 1] = img.data[i + 2] = v;
-        img.data[i + 3] = 255;
-      }
-      g.putImageData(img, 0, 0);
-      document.getElementById("grain").style.backgroundImage = "url(" + c.toDataURL() + ")";
-    } catch (e) {}
-  }
+  // Glass highlight: the soft shine on each glass surface follows the pointer.
+  var GLASS = ".cat, .face, .panel, #mute, .btn, #lightbox button";
+  document.addEventListener("pointermove", function (e) {
+    var el = e.target.closest && e.target.closest(GLASS);
+    if (!el) return;
+    var r = el.getBoundingClientRect();
+    el.style.setProperty("--mx", ((e.clientX - r.left) / r.width * 100).toFixed(1) + "%");
+    el.style.setProperty("--my", ((e.clientY - r.top) / r.height * 100).toFixed(1) + "%");
+  }, { passive: true });
 
   function start() {
     if (started) return;
@@ -337,7 +330,7 @@
     document.body.classList.add("started");
     buildItems(true);
     position();
-    setTimeout(function () { splash.remove(); }, 600);
+    setTimeout(function () { splash.remove(); }, 750);
     setTimeout(function () { window.Detail.route(); }, 450);   // open a shared link like #/projects/project-1
   }
   splash.addEventListener("click", start);
@@ -353,7 +346,6 @@
     splash.querySelector(".splash-hint").textContent = "tap anywhere. go on.";
   }
 
-  makeGrain();
   // Saved choices go in before init so the first frame is already right (no tween on load)
   Scene.setTimeOfDay(TIMES[timeIndex]);
   applyTheme();

@@ -21,7 +21,7 @@
 
 
 window.SITE = {
-  name: "Your Name",   // ← put your name here (it isn't in the Common App pages you shared)
+  name: "Dreamliner",
   tagline: "Rocketry · Materials science · Class of 2027",
 
   // Last.fm "now playing" tile. Leave blank to hide it.
@@ -39,7 +39,7 @@ window.SITE = {
       items: [
         {
           id: "me",
-          title: "Hi, I'm Your Name",
+          title: "Hi, I'm Dreamliner",
           subtitle: "High school senior · Class of 2027",
           summary: "Rockets, materials science, sound and building things",
           body: [
@@ -304,12 +304,13 @@ window.SITE = {
         {
           id: "get-in-touch",
           title: "Get in touch",
-          summary: "Discord and GitHub",
+          summary: "Email, Discord and GitHub",
           body: [
             "Interested in rocketry, materials science, or just want to talk shop? Reach out.",
             "Discord: dreamliners"
           ],
           links: [
+            { label: "Email: william_vella@icloud.com", url: "mailto:william_vella@icloud.com" },
             { label: "GitHub: lsamman", url: "https://github.com/lsamman" }
           ]
         }

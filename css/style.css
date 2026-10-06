@@ -184,20 +184,21 @@ body.detail-open #xmb { opacity: .35; filter: blur(3px); transform: scale(.98); 
   position: absolute; left: 0; top: 0;
   width: min(440px, calc(100vw - 32px));
   pointer-events: auto; cursor: pointer;
-  transition: transform .5s var(--ease-pop), opacity .3s;
-  perspective: 700px;
+  transition: transform .5s var(--ease-pop);
 }
 .face {
   display: flex; align-items: stretch; height: 54px;
   border-radius: var(--radius);
-  transform: rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg)) scale(var(--press, 1));
+  /* Press feedback: a flat 2D nudge + squish toward the finger. (No 3D transforms here:
+     they stop backdrop blur working in some browsers, Firefox especially.) */
+  transform: translate(var(--tx, 0px), var(--ty, 0px)) scale(var(--sx, 1), var(--sy, 1));
   transform-origin: center;
   transition: height .4s var(--ease-pop), transform .25s var(--ease-pop), box-shadow .3s;
 }
 .face .ico {
   position: relative; z-index: 3;
   flex: none; width: 54px; display: grid; place-items: center;
-  transition: width .4s var(--ease-pop);
+  transition: width .4s var(--ease-pop), opacity .3s;
 }
 .face .ico img { width: 46%; height: 46%; opacity: .85; }
 .face .text { position: relative; z-index: 3; display: flex; flex-direction: column; justify-content: center; min-width: 0; padding: 0 16px 0 2px; flex: 1; }
@@ -217,15 +218,18 @@ body.detail-open #xmb { opacity: .35; filter: blur(3px); transform: scale(.98); 
 .item.sel .ico img { opacity: 1; }
 .item.sel .title { font-size: 1.3rem; font-weight: 600; }
 .item.sel .sub { max-height: 1.4em; opacity: 1; }
-.item.dim { opacity: .8; }
-.item.above { opacity: .38; }
+/* Dimmed rows fade their contents, never the tile itself: opacity on a tile's
+   parent would cut it off from the city behind and switch the blur off. */
+.item.dim .ico, .item.dim .text, .item.dim .value { opacity: .8; }
+.item.above .ico, .item.above .text, .item.above .value { opacity: .38; }
+.item.above .face { background: linear-gradient(160deg, rgba(255,255,255,.07), rgba(255,255,255,.02)), rgba(18,20,23,.2); }
 
 /* A new column of items pours in: drops from slightly above with a springy settle */
 .item.enter .face { animation: pour-in .6s var(--ease-pop) both; }
 @keyframes pour-in { from { opacity: 0; transform: translateY(-14px) scale(.94); filter: blur(6px); } }
 
 /* Switching category: the header ripples into focus (replaces the old glitch) */
-.glitch { animation: settle .45s var(--ease-pop); }
+#cat-title.glitch { animation: settle .45s var(--ease-pop); }   /* header only: a filter on the item list would switch its blur off */
 @keyframes settle { from { filter: blur(8px); opacity: .3; transform: scale(.96); } }
 
 .hint {
@@ -239,7 +243,6 @@ body.detail-open #xmb { opacity: .35; filter: blur(3px); transform: scale(.98); 
   position: fixed; inset: 0; z-index: 30;
   display: flex; align-items: center; justify-content: center;
   padding: calc(env(safe-area-inset-top, 0px) + 72px) 24px calc(env(safe-area-inset-bottom, 0px) + 28px);
-  perspective: 1600px;
 }
 
 .panel {
@@ -251,7 +254,6 @@ body.detail-open #xmb { opacity: .35; filter: blur(3px); transform: scale(.98); 
   backdrop-filter: blur(26px) saturate(180%);
   box-shadow: 0 30px 80px rgba(0,0,0,.5), inset 0 1px 0 rgba(255,255,255,.3);
   transform-origin: left center;
-  will-change: transform, opacity;
 }
 .stripe { display: none; }   /* (the Metro accent stripe isn't part of the glass look) */
 

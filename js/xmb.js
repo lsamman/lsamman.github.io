@@ -139,21 +139,20 @@
     });
   }
 
-  // Tiles tilt toward wherever you press them, like the 360 dashboard
+  // Tiles squish and lean toward wherever you press them, like soft glass
   function addTilt(face) {
     face.addEventListener("pointerdown", function (e) {
       if (reduceMotion) return;
       var r = face.getBoundingClientRect();
       var x = (e.clientX - r.left) / r.width - 0.5;    // -0.5 .. 0.5
       var y = (e.clientY - r.top) / r.height - 0.5;
-      face.style.setProperty("--ry", (x * 14).toFixed(1) + "deg");
-      face.style.setProperty("--rx", (-y * 18).toFixed(1) + "deg");
-      face.style.setProperty("--press", "0.97");
+      face.style.setProperty("--tx", (x * 6).toFixed(1) + "px");
+      face.style.setProperty("--ty", (y * 4).toFixed(1) + "px");
+      face.style.setProperty("--sx", "0.975");
+      face.style.setProperty("--sy", "0.94");
     });
     function release() {
-      face.style.removeProperty("--ry");
-      face.style.removeProperty("--rx");
-      face.style.removeProperty("--press");
+      ["--tx", "--ty", "--sx", "--sy"].forEach(function (p) { face.style.removeProperty(p); });
     }
     face.addEventListener("pointerup", release);
     face.addEventListener("pointerleave", release);

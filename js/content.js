@@ -169,13 +169,18 @@ window.SITE = {
       items: [
         {
           id: "ksp-mod",
-          title: "Kerbal Space Program Educational Mod",
-          subtitle: "Creator · Grades 9–12",
+          title: "Dreamliner's KSRSS Site Expansion",
+          subtitle: "Kerbal Space Program mod · Creator · 2024 – present",
           summary: "A popular mod that recreates 40+ real launch sites",
           body: [
-            "I created an educational mod for Kerbal Space Program, a rocket simulation game that runs on real algebra, calculus and physics. My mod recreates more than 40 real-world launch sites so players can practise rocket concepts in realistic settings."
+            "An educational mod for Kerbal Space Program, a rocket simulation game that runs on real algebra, calculus and physics. It recreates more than 40 real-world launch sites for KSRSS (a Kerbal-sized version of our real solar system), so players can practise rocket concepts in realistic settings.",
+            "Built on Kerbal Konstructs and integrated with a long list of other community mods. I've maintained it through multiple updates since March 2024, with European spaceports planned next. Released under CC BY-NC-SA."
           ],
-          tags: ["Game modding", "Rocket simulation", "Physics"]
+          tags: ["Game modding", "Kerbal Konstructs", "Rocket simulation", "Physics", "Open source"],
+          links: [
+            { label: "Forum thread", url: "https://forum.kerbalspaceprogram.com/topic/224317-dreamliners-site-expansion-for-ksrss/" },
+            { label: "Source on GitHub", url: "https://github.com/lsamman/Dreamliners-Site-Expansion" }
+          ]
         },
         {
           id: "guitars",
@@ -299,10 +304,12 @@ window.SITE = {
         {
           id: "get-in-touch",
           title: "Get in touch",
-          summary: "Email, GitHub and LinkedIn",
-          body: ["Interested in rocketry, materials science, or just want to talk shop? Reach out."],
+          summary: "Discord and GitHub",
+          body: [
+            "Interested in rocketry, materials science, or just want to talk shop? Reach out.",
+            "Discord: dreamliners"
+          ],
           links: [
-            { label: "Email: you@example.com", url: "mailto:you@example.com" },
             { label: "GitHub: lsamman", url: "https://github.com/lsamman" }
           ]
         }

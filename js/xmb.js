@@ -112,7 +112,8 @@
       li.innerHTML = '<div class="face"><div class="ico"><img alt=""></div><div class="text"><span class="title"></span><span class="sub"></span></div></div>';
       var face = li.querySelector(".face");
       if (animate) face.style.animationDelay = Math.min(i, 6) * 45 + "ms";
-      li.querySelector(".ico img").src = item.icon || cat.icon;
+      li.querySelector(".ico img").src = item.photo || item.icon || cat.icon;
+      if (item.photo) li.querySelector(".ico").classList.add("photo");
       li.querySelector(".title").textContent = item.title;
       li.querySelector(".sub").textContent = item.summary || item.subtitle || "";
       if (item.value) {

@@ -14,6 +14,7 @@
  *   bullets    list of bullet points
  *   tags       list of short labels (skills, tools…)
  *   images     list of { src: "assets/images/your-photo.jpg", caption: "…" }
+ *   photo      a square picture shown in place of the icon, e.g. "assets/images/avatar.png"
  *   links      list of { label: "Visit site", url: "https://…" }
  *
  * Any of these except title can be left out.
@@ -40,6 +41,7 @@ window.SITE = {
         {
           id: "me",
           title: "Hi, I'm Dreamliner",
+          photo: "assets/images/avatar.png",   // made with nikonautic's Picrew maker
           subtitle: "High school senior · Class of 2027",
           summary: "Rockets, materials science, sound and building things",
           body: [

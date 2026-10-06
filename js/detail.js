@@ -108,7 +108,13 @@
   function buildItem(cat, item) {
     var parts = [];
     var head = el("div", "d-head");
-    head.appendChild(tile(item.icon || cat.icon));
+    if (item.photo) {   // a portrait instead of the category icon
+      var ph = el("img", "d-photo");
+      ph.src = item.photo; ph.alt = item.title;
+      head.appendChild(ph);
+    } else {
+      head.appendChild(tile(item.icon || cat.icon));
+    }
     var titles = el("div");
     titles.appendChild(el("h2", null, item.title));
     if (item.subtitle) titles.appendChild(el("p", null, item.subtitle));

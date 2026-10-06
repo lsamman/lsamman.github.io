@@ -372,3 +372,26 @@ html.reduce-motion .item, html.reduce-motion .cat, html.reduce-motion .face { tr
   .panel { background: rgba(20, 23, 27, .95); }
   #splash { background: rgba(8, 10, 12, .92); }
 }
+
+/* ---------- WebGL liquid glass (js/glass.js) ------------------------------------
+   When the WebGL renderer is running it draws the glass itself (with real
+   refraction), so these elements drop their CSS glass and keep only their
+   contents. Without WebGL, none of this applies and the CSS glass above is used. */
+
+html.webgl-glass .cat, html.webgl-glass .face, html.webgl-glass #mute,
+html.webgl-glass .panel, html.webgl-glass #nowplaying,
+html.webgl-glass .item.sel .face, html.webgl-glass .cat.sel {
+  background: none !important;
+  -webkit-backdrop-filter: none !important;
+  backdrop-filter: none !important;
+  box-shadow: none !important;
+}
+html.webgl-glass .cat::before, html.webgl-glass .cat::after,
+html.webgl-glass .face::before, html.webgl-glass .face::after,
+html.webgl-glass #mute::before, html.webgl-glass #mute::after,
+html.webgl-glass .panel::before, html.webgl-glass .panel::after { display: none; }
+
+/* The glass is clearer now, so text gets a little more shadow to stay crisp */
+html.webgl-glass .item .title, html.webgl-glass .item .sub, html.webgl-glass #cat-title,
+html.webgl-glass .panel-scroll { text-shadow: 0 1px 3px rgba(0,0,0,.55), 0 0 14px rgba(0,0,0,.3); }
+html.webgl-glass .cat img, html.webgl-glass .face .ico img { filter: drop-shadow(0 1px 3px rgba(0,0,0,.5)); }

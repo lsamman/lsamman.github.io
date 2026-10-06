@@ -58,6 +58,7 @@ Plain HTML, CSS and JavaScript, with no frameworks or build step.
 | `js/content.js` | All your text and images |
 | `js/xmb.js` | The menu: layout, controls, settings, start screen |
 | `js/detail.js` | The detail panel, its turnstile open/close animation, and links like `#/projects/project-1` |
+| `js/glass.js` | Liquid glass drawn with WebGL: refraction at curved edges, specular rims, the springy selection droplet (falls back to CSS glass without WebGL) |
 | `js/scene.js` | The background: time-of-day sky, procedural city with lit windows, wave ribbons (canvas) |
 | `js/audio.js` | Jungle music and sound effects, synthesised with the Web Audio API (no audio files or samples) |
 | `css/style.css` | All the styling. `--hue` at the top is the default accent colour |

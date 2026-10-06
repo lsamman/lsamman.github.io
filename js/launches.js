@@ -108,32 +108,47 @@
 
   // ---------------------------------------------------------------------------
   // Vehicles. Each returns a list of "bodies" (things that can burn).
-  //   burns  [[start, end], ...] in seconds after liftoff
-  //   bright flame brightness multiplier
-  //   sep    time it separates from the stack (then falls ballistically)
-  //   boost  [start, end] of a boostback burn after separation (recoverable boosters)
-  //   lat    sideways drift after separation, km/s (side boosters, SRBs)
-  //   flash  hot-staging flash at this time
+  //   burns    [[start, end, power?], ...] seconds after liftoff; power scales
+  //            brightness for that window (e.g. 3 of 33 engines = 0.12)
+  //   bright   flame brightness multiplier
+  //   sep      time it separates from the stack (then flies ballistically)
+  //   boost    [start, end] of a boostback burn (back toward the coast)
+  //   entry    { alt, dur, power } entry burn, lit when it falls back to `alt` km
+  //   landing  { power } landing burn, lit a few km up (usually hidden below
+  //            the horizon from this far away, just like in real life)
+  //   lat      sideways drift after separation, km/s (side boosters, SRBs)
+  //   flash    staging flash at this time
+  //   hotStage Starship: ship lights while still attached and vents through the interstage
   // ---------------------------------------------------------------------------
+  var F9_ENTRY = { alt: 64, dur: 20, power: 0.85 };    // 3 engines at full throttle: a bright "star" relighting
+  var F9_LANDING = { power: 0.2 };                      // 1 engine
+
   var VEHICLES = {
     'Falcon 9': { weight: 40, build: function (rng) {
       return [
-        { fuel: 'kero', bright: 1.1, burns: [[0, 155]], sep: 158, boost: rng() < 0.6 ? [170, 206] : null },
+        // ~60% return to the coast (boostback); the rest land on a droneship downrange
+        { fuel: 'kero', bright: 1.1, burns: [[0, 155]], sep: 158, boost: rng() < 0.6 ? [170, 206] : null,
+          entry: F9_ENTRY, landing: F9_LANDING },
         { fuel: 'mvac', bright: 1, burns: [[166, 520]] }
       ];
     } },
-    'Falcon Heavy': { weight: 10, build: function () {
+    'Falcon Heavy': { weight: 10, build: function (rng) {
+      var coreRecovered = rng() < 0.5;
       return [
-        { fuel: 'kero', bright: 1.1, burns: [[0, 150]], sep: 152, lat: -0.012, boost: [163, 197] },
-        { fuel: 'kero', bright: 1.1, burns: [[0, 150]], sep: 152, lat: 0.012, boost: [163, 197] },
-        { fuel: 'kero', bright: 1.1, burns: [[0, 185]], sep: 188 },
+        { fuel: 'kero', bright: 1.1, burns: [[0, 150]], sep: 152, lat: -0.012, boost: [163, 197], entry: F9_ENTRY, landing: F9_LANDING },
+        { fuel: 'kero', bright: 1.1, burns: [[0, 150]], sep: 152, lat: 0.012, boost: [163, 197], entry: F9_ENTRY, landing: F9_LANDING },
+        { fuel: 'kero', bright: 1.1, burns: [[0, 185]], sep: 188,
+          entry: coreRecovered ? { alt: 70, dur: 26, power: 0.85 } : null, landing: coreRecovered ? F9_LANDING : null },
         { fuel: 'mvac', bright: 1, burns: [[196, 520]] }
       ];
     } },
     'Starship': { weight: 15, build: function () {
       return [
-        { fuel: 'methalox', bright: 2.4, burns: [[0, 160]], sep: 161, boost: [168, 214], boostBright: 1.3 },
-        { fuel: 'methalox', bright: 0.95, burns: [[160, 520]], flash: 160 }
+        // Super Heavy: 33 engines, down to the 3 centre engines for hot staging.
+        // The ship's exhaust hitting the booster's dome lights it up briefly.
+        { fuel: 'methalox', bright: 2.4, burns: [[0, 158], [158, 159, 0.12], [159, 162, 0.45], [162, 166, 0.12]],
+          sep: 162, boost: [169, 214], boostBright: 1.3, landing: { power: 0.5 } },   // no entry burn; caught by the tower
+        { fuel: 'methalox', bright: 0.95, burns: [[159, 520]], flash: 159, hotStage: true }
       ];
     } },
     'Atlas V': { weight: 12, build: function (rng) {
@@ -156,7 +171,9 @@
     } },
     'New Glenn': { weight: 13, build: function () {
       return [
-        { fuel: 'methalox', bright: 1.7, burns: [[0, 190]], sep: 193 },   // lands far downrange: no boostback
+        // Lands on a ship far downrange: no boostback, but entry + landing burns.
+        { fuel: 'methalox', bright: 1.7, burns: [[0, 190]], sep: 193,
+          entry: { alt: 60, dur: 24, power: 0.7 }, landing: { power: 0.25 } },
         { fuel: 'hydrolox', bright: 1, burns: [[200, 900]] }
       ];
     } }
@@ -224,15 +241,90 @@
       b.tail = [];
       b.tailT = 0;
       b.flashDone = false;
+      b.dyn = [];              // burns that start in flight (entry, landing): [start, end, power]
+      b.entryDone = false;
+      b.landingOn = false;
       launch.bodies.push(b);
     }
   }
 
-  function burningAt(b, t) {
-    for (var i = 0; i < b.burns.length; i++) {
-      if (t >= b.burns[i][0] && t < b.burns[i][1]) return true;
+  // Flame power right now (0 = off): window power x body brightness.
+  function burnPower(b, t) {
+    var i, w;
+    for (i = 0; i < b.burns.length; i++) {
+      w = b.burns[i];
+      if (t >= w[0] && t < w[1]) return b.bright * (w.length > 2 ? w[2] : 1);
     }
-    return !!(b.boost && t >= b.boost[0] && t < b.boost[1]);
+    if (b.boost && t >= b.boost[0] && t < b.boost[1]) return b.boostBright || b.bright;
+    for (i = 0; i < b.dyn.length; i++) {
+      w = b.dyn[i];
+      if (t >= w[0] && t < w[1]) return b.bright * w[2];
+    }
+    return 0;
+  }
+
+  var DRAG_K = 0.11;   // gives a booster a terminal speed of ~0.3 km/s at sea level
+
+  // Free flight after separation: gravity, drag in thick air, and burns.
+  function flyFree(b, t, dt) {
+    b.vAlt -= G * dt;
+
+    if (b.boost && t >= b.boost[0] && t < b.boost[1]) {
+      b.vS -= b.boostDecel * dt;     // flip and burn back toward the coast
+      b.vAlt += 0.004 * dt;          // a little lofting
+    }
+
+    var speed = Math.sqrt(b.vAlt * b.vAlt + b.vS * b.vS + b.vLat * b.vLat) || 1e-6;
+    var decel = DRAG_K * Math.exp(-Math.max(0, b.alt) / 7.2) * speed * speed;   // air drag
+
+    // Entry burn: on the way down, back into the upper atmosphere.
+    if (b.entry && !b.entryDone && b.vAlt < 0 && b.alt <= b.entry.alt) {
+      b.entryDone = true;
+      b.dyn.push([t, t + b.entry.dur, b.entry.power]);
+    }
+    for (var i = 0; i < b.dyn.length; i++) {
+      if (t >= b.dyn[i][0] && t < b.dyn[i][1]) decel += 0.035;   // retro thrust
+    }
+
+    // Landing burn: a "hoverslam" sized to stop right at the surface.
+    if (b.landing && !b.landingOn && b.vAlt < 0 && b.alt <= 2.6) {
+      b.landingOn = true;
+      b.dyn.push([t, t + 60, b.landing.power]);
+    }
+    if (b.landingOn) decel = Math.max(decel, speed * speed / (2 * Math.max(0.05, b.alt)) + G);
+
+    var f = Math.min(1, decel * dt / speed);   // never reverse the velocity
+    b.vAlt -= b.vAlt * f;
+    b.vS -= b.vS * f;
+    b.vLat -= b.vLat * f;
+
+    b.alt += b.vAlt * dt;
+    b.s += b.vS * dt;
+    b.lat += b.vLat * dt;
+    if (b.alt <= 0.02) {
+      b.dead = true;   // touchdown (or splashdown for expendable stages)
+      b.level = 0;
+    }
+  }
+
+  // Starship hot staging: the ship lights while still attached, and its
+  // exhaust blasts out sideways through the vented interstage: a ring of
+  // glowing gas that's left behind as the stack climbs away.
+  function hotStagingRing(b, t) {
+    // Direction of travel (in the altitude/downrange plane) and its perpendicular.
+    var dA = altAt(t + 0.5) - altAt(t - 0.5), dS = rangeAt(t + 0.5) - rangeAt(t - 0.5);
+    var m = Math.sqrt(dA * dA + dS * dS) || 1;
+    var pA = dS / m, pS = -dA / m;
+    for (var k = 0; k < 12; k++) {
+      var th = (k / 12) * Math.PI * 2 + rng() * 0.4;
+      var v = 0.35 + rng() * 0.35;                    // km/s outward
+      launch.puffs.push({
+        alt: b.alt, s: b.s, lat: b.lat, age: 0, fuel: 'methalox', grow: 2.2, soft: 0.45,
+        tint: PLUME_TINTS[(rng() * PLUME_TINTS.length) | 0], drift: 0,
+        va: Math.sin(th) * pA * v, vs: Math.sin(th) * pS * v, vl: Math.cos(th) * v,
+        glow: 2.4                                      // hot: glows by itself for a moment
+      });
+    }
   }
 
   // ---------------------------------------------------------------------------
@@ -246,7 +338,7 @@
       b.alt = altAt(t);
       b.s = rangeAt(t);
       if (b.sep && t >= b.sep) {
-        // Separation: keep the current velocity, then fall ballistically.
+        // Separation: keep the current velocity, then fly freely.
         b.free = true;
         b.vAlt = (altAt(t + 0.5) - altAt(t - 0.5));
         b.vS = (rangeAt(t + 0.5) - rangeAt(t - 0.5));
@@ -254,39 +346,40 @@
         if (b.boost) b.boostDecel = (b.vS * 1.35) / (b.boost[1] - b.boost[0]);
       }
     } else {
-      b.vAlt -= G * dt;
-      if (b.boost && t >= b.boost[0] && t < b.boost[1]) {
-        b.vS -= b.boostDecel * dt;     // flip and burn back toward the coast
-        b.vAlt += 0.004 * dt;          // a little lofting
-      }
-      b.alt += b.vAlt * dt;
-      b.s += b.vS * dt;
-      b.lat += b.vLat * dt;
-      if (b.alt < 0) b.dead = true;
+      flyFree(b, t, dt);
+      if (b.dead) return;
     }
 
     // Flame fades on/off quickly instead of popping.
-    var on = burningAt(b, t) && !b.dead;
-    b.level = clamp(b.level + (on ? 4 : -2.5) * dt, 0, 1);
+    var power = burnPower(b, t);
+    b.power = power > 0 ? power : (b.power || 0);
+    b.level = clamp(b.level + (power > 0 ? 4 : -2.5) * dt, 0, 1);
 
-    // Hot-staging flash (Starship).
+    // Staging flash, and Starship's hot-staging ring (three pulses as it vents).
     if (b.flash && !b.flashDone && t >= b.flash) {
       b.flashDone = true;
+      b.ringPulses = b.hotStage ? 3 : 0;
+      b.ringT = 0;
       launch.flashes.push({ alt: b.alt, s: b.s, lat: b.lat, age: 0, life: 1.6 });
+    }
+    if (b.ringPulses > 0) {
+      b.ringT -= dt;
+      if (b.ringT <= 0) { hotStagingRing(b, t); b.ringPulses--; b.ringT = 0.9; }
     }
 
     // Exhaust puffs while burning.
     if (b.level > 0.3 && b.alt > 0.6) {
       b.puffT -= dt;
       if (b.puffT <= 0) {
-        var boosting = b.boost && t >= b.boost[0];
-        // Boostback boosters almost hover while turning around, so puffs would
-        // pile up in one spot; emit them less often.
-        b.puffT = boosting ? PUFF_EVERY * 2.6 : PUFF_EVERY;
+        var turning = b.free && b.boost && t >= b.boost[0] && t < b.boost[1] + 2;
+        var retro = b.free && !turning;    // entry/landing burn: exhaust thrown forward, fans out
+        // Boosters almost hover while turning around, so puffs would pile up
+        // in one spot; emit them less often.
+        b.puffT = turning ? PUFF_EVERY * 2.6 : retro ? PUFF_EVERY * 1.5 : PUFF_EVERY;
         launch.puffs.push({
           alt: b.alt, s: b.s, lat: b.lat, age: 0,
           fuel: b.fuel,
-          grow: boosting ? 1.35 : 1,   // boostback exhaust fans out wider
+          grow: turning ? 1.35 : retro ? 1.6 : 1,
           tint: PLUME_TINTS[(rng() * PLUME_TINTS.length) | 0],
           drift: (rng() - 0.5) * 0.004
         });
@@ -321,7 +414,8 @@
       // Gone below the horizon (Earth's curvature): nothing more to see.
       if (!b.dead && t > 200 && elevation(L, b) < -0.01) b.dead = true;
       var lastBurn = b.boost ? b.boost[1] : b.burns[b.burns.length - 1][1];
-      if (!b.dead && (t < lastBurn + 5 || b.level > 0)) anyAlive = true;
+      var awaitingBurns = b.free && (b.entry || b.landing);   // still to come down and land
+      if (!b.dead && (t < lastBurn + 5 || b.level > 0 || awaitingBurns)) anyAlive = true;
     }
 
     // Age the puffs and flashes; wind drifts them slowly sideways.
@@ -329,6 +423,11 @@
       var q = L.puffs[p];
       q.age += dt;
       q.lat += q.drift * dt;
+      if (q.va !== undefined) {           // hot-staging gas: thrown outward, then slows
+        q.alt += q.va * dt; q.s += q.vs * dt; q.lat += q.vl * dt;
+        var damp = Math.exp(-dt / 3);
+        q.va *= damp; q.vs *= damp; q.vl *= damp;
+      }
       if (q.age > PLUME_LIFE) L.puffs.splice(p, 1);
     }
     for (var f = L.flashes.length - 1; f >= 0; f--) {
@@ -426,7 +525,7 @@
         var rp = rk / c.d * V.k;
         var edge = smoothstep(shadowH, shadowH + 6, q.alt);   // soft edge at the shadow line
         var life = 1 - q.age / PLUME_LIFE;
-        var ap = (hi > 0.05 ? 0.045 * F2.plume : 0.07 * (0.4 + 0.6 * F2.smoke)) *
+        var ap = (q.soft || 1) * (hi > 0.05 ? 0.045 * F2.plume : 0.07 * (0.4 + 0.6 * F2.smoke)) *
                  twilight * dim * edge * life / (1 + rp / (hi > 0.05 ? 10 : 5));
         if (ap < 0.003) continue;
         // Colour: warm sunset light on the low trail, blue-white ice up high.
@@ -438,14 +537,31 @@
       }
     }
 
+    // 2b) Hot gas from Starship's hot staging glows orange on its own for a
+    //     couple of seconds, at any time of day (faint in daylight).
+    for (i = 0; i < L.puffs.length; i++) {
+      q = L.puffs[i];
+      if (!q.glow || q.age > q.glow) continue;
+      c = project(V, L, q.alt, q.s, q.lat);
+      if (c.el < -0.01) continue;
+      var gl = 1 - q.age / q.glow;
+      var rg = (0.4 + q.age * 1.6) / c.d * V.k;
+      var ag = 0.32 * gl * gl * (1 - 0.7 * dayness);
+      ctx.fillStyle = rgba([255, 168, 96], ag);
+      ctx.beginPath();
+      ctx.arc(c.x, c.y, Math.max(1, rg), 0, Math.PI * 2);
+      ctx.fill();
+    }
+
     // 3) Flames: a short glowing tail plus a bright point with a halo.
     var pointDim = 1 - 0.8 * dayness;
     for (i = 0; i < L.bodies.length; i++) {
       b = L.bodies[i];
       if (b.level <= 0.01 || b.dead) continue;
       var F = FUEL[b.fuel];
-      var bright = (b.boost && b.free ? (b.boostBright || 0.9) : b.bright);
+      var bright = b.power || b.bright;
       c = project(V, L, b.alt, b.s, b.lat);
+      b.sx = c.x; b.sy = c.y;   // remembered for Launches.current()
       if (c.el < -0.01) continue;
       var x = c.x, y = c.y;
       var distF = clamp(300 / c.d, 0.3, 1.3);
@@ -518,7 +634,24 @@
       else if (!launch) nextIn = Math.min(nextIn, 10 + Math.random() * 10);
     },
     isEnabled: function () { return enabled; },
-    current: function () { return launch ? { vehicle: launch.vehicle, t: launch.t } : null; },
+    current: function () {
+      if (!launch) return null;
+      return {
+        vehicle: launch.vehicle, t: launch.t,
+        bodies: launch.bodies.map(function (b) {
+          return { fuel: b.fuel, alt: +b.alt.toFixed(1), level: +b.level.toFixed(2), power: +(b.power || 0).toFixed(2),
+                   x: Math.round(b.sx || 0), y: Math.round(b.sy || 0), dead: b.dead };
+        })
+      };
+    },
+    // Fast-forward the current flight until test(body) is true for some body (testing aid).
+    advanceUntil: function (test, maxSeconds) {
+      for (var n = 0; launch && n < (maxSeconds || 900) / 0.2; n++) {
+        for (var i = 0; i < launch.bodies.length; i++) if (test(launch.bodies[i], launch.t)) return true;
+        update(0.2);
+      }
+      return false;
+    },
     vehicles: function () { return Object.keys(VEHICLES); }
   };
 })();

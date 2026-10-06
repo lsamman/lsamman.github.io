@@ -7,15 +7,18 @@
  * from a long way off.
  *
  * How it works:
- *   - Each vehicle follows a typical ascent profile (altitude + downrange
- *     distance over time). Its 3D position is projected onto the screen,
+ *   - Each flight integrates a smooth gravity turn: speed builds up while the
+ *     flight-path angle eases over from vertical. Its 3D position is projected onto the screen,
  *     including Earth's curvature, so it rises from behind the skyline, arcs
  *     over and sinks back toward the horizon as it heads downrange.
- *   - What you see depends on the light:
- *       night        engine flames are bright points, the exhaust stays dark
- *       day          a faint point plus a grey smoke trail low down
- *       dawn / dusk  exhaust above Earth's shadow is lit by the sun and
- *                    balloons out into the glowing "jellyfish" plume
+ *   - What the exhaust does depends on altitude, like the real atmosphere:
+ *       below ~35 km    thick air: a narrow smoke/condensation trail that spreads slowly
+ *       above ~40 km    near vacuum: exhaust balloons out tens of km wide
+ *     ...and what you can SEE depends on the light (real sun position, js/sun.js):
+ *       night        engine flames are points; exhaust stays dark
+ *       day          a faint point plus the low smoke trail (upper stages: no trail)
+ *       dawn / dusk  exhaust above Earth's shadow is sunlit: a warm contrail
+ *                    low down, and the glowing "jellyfish" plume up high
  *   - Staging is modelled per vehicle: SRB jettison, Falcon boostback burns,
  *     Starship hot staging, the near-invisible hydrogen Centaur upper stage...
  *
@@ -35,21 +38,57 @@
   var G = 0.0098;            // gravity, km/s²
   var FOV = 1.25;            // radians shown across the screen width (~72°)
   var HORIZON = 0.74;        // horizon height, fraction of screen height (matches the sun in scene.js)
-  var SUNRISE = 6.6, SUNSET = 18.7;   // hours (rocket lighting only)
   var DEG = Math.PI / 180;
 
   var PUFF_EVERY = 0.6;      // seconds between exhaust "puffs" from a burning engine
   var MAX_PUFFS = 800;
   var PLUME_LIFE = 260;      // seconds a sunlit plume puff lingers
   var SMOKE_LIFE = 160;      // seconds a daytime smoke puff lingers
-  var TAIL_SAMPLES = 18;     // recent positions kept for the short glowing tail
+  var TAIL_SAMPLES = 10;     // recent positions kept for the short glowing tail (thick air only)
 
-  // Typical ascent profile: time (s) -> altitude (km) and downrange distance (km).
-  // Roughly a Falcon 9 to low Earth orbit; the other vehicles are close enough
-  // at this distance. Beyond the end it keeps going at orbital speed.
-  var PT = [0, 20, 40, 60, 80, 100, 120, 150, 180, 220, 270, 330, 400, 470, 540];
-  var PA = [0, 1.5, 5, 11, 20, 31, 43, 65, 85, 110, 135, 160, 180, 195, 205];
-  var PS = [0, 0.1, 0.8, 3, 8, 16, 28, 60, 100, 170, 280, 450, 680, 950, 1250];
+  // Ascent model (a smooth gravity turn), tuned to a typical Falcon 9 to low
+  // Earth orbit: ~70 km up and ~80 km downrange at staging (T+2:30), orbit
+  // insertion around 200 km at T+8:40. The other vehicles are close enough
+  // at this distance.
+  //   speed  builds up during the first-stage burn, holds through staging,
+  //          then the upper stage accelerates to orbital speed
+  //   angle  stays vertical for 8 s, then eases over (no sudden pitch kick)
+  //          and flattens out exponentially toward horizontal
+  var TRAJ_DT = 0.5;         // seconds per precomputed step
+  var TRAJ_END = 1200;       // seconds of trajectory to precompute
+
+  function speedAt(t) {      // km/s
+    if (t <= 155) return 2.2 * Math.pow(t / 155, 1.8);
+    if (t <= 166) return 2.2;
+    return Math.min(7.8, 2.2 + 5.4 * Math.pow((t - 166) / 354, 1.2));
+  }
+
+  function buildTrajectory(tau) {
+    var n = Math.ceil(TRAJ_END / TRAJ_DT) + 1;
+    var A = new Float32Array(n), S = new Float32Array(n);
+    var alt = 0, rng = 0;
+    for (var i = 0; i < n; i++) {
+      A[i] = alt; S[i] = rng;
+      var t = (i + 0.5) * TRAJ_DT;
+      var u = t < 8 ? 0 : (t - 8) * (t - 8) / (t - 8 + 30);   // eases in from 0
+      var gamma = 90 * Math.exp(-u / tau) * DEG;              // flight-path angle
+      var v = speedAt(t);
+      alt += v * Math.sin(gamma) * TRAJ_DT;
+      rng += v * Math.cos(gamma) * TRAJ_DT;
+    }
+    return { A: A, S: S };
+  }
+
+  var traj = buildTrajectory(95);
+
+  function sample(arr, t) {
+    if (t <= 0) return 0;
+    var x = t / TRAJ_DT, i = Math.floor(x);
+    if (i >= arr.length - 1) return arr[arr.length - 1];
+    return arr[i] + (arr[i + 1] - arr[i]) * (x - i);
+  }
+  function altAt(t) { return sample(traj.A, t); }
+  function rangeAt(t) { return sample(traj.S, t); }
 
   // How each propellant looks.
   //   core/glow   colours of the flame point and its halo
@@ -140,40 +179,12 @@
   function clamp(v, a, b) { return v < a ? a : v > b ? b : v; }
   function smoothstep(a, b, v) { var t = clamp((v - a) / (b - a), 0, 1); return t * t * (3 - 2 * t); }
 
-  // Linear interpolation in the ascent profile; extrapolates past the end.
-  function prof(t, ys, extrapolate) {
-    if (t <= 0) return 0;
-    var n = PT.length;
-    if (t >= PT[n - 1]) {
-      if (!extrapolate) return ys[n - 1];
-      var slope = (ys[n - 1] - ys[n - 2]) / (PT[n - 1] - PT[n - 2]);
-      return ys[n - 1] + slope * (t - PT[n - 1]);
-    }
-    for (var i = 1; i < n; i++) {
-      if (t <= PT[i]) {
-        var f = (t - PT[i - 1]) / (PT[i] - PT[i - 1]);
-        return ys[i - 1] + (ys[i] - ys[i - 1]) * f;
-      }
-    }
-    return ys[n - 1];
-  }
-  function altAt(t) { return prof(t, PA, false) + Math.max(0, t - 540) * 0.01; }
-  function rangeAt(t) { return prof(t, PS, true); }
-
   function pickVehicle() {
     var total = 0, k;
     for (k in VEHICLES) total += VEHICLES[k].weight;
     var r = rng() * total;
     for (k in VEHICLES) { r -= VEHICLES[k].weight; if (r <= 0) return k; }
     return 'Falcon 9';
-  }
-
-  // Degrees the sun is below the horizon (negative = sun is up).
-  function sunDepression(h) {
-    if (h >= SUNRISE && h <= SUNSET) return -Math.min(h - SUNRISE, SUNSET - h) * 14;
-    var hrs = h < SUNRISE ? SUNRISE - h : h - SUNSET;
-    if (hrs > 12) hrs = 24 - hrs;
-    return hrs * 14;
   }
 
   // Altitude (km) of Earth's shadow overhead for a given sun depression.
@@ -189,6 +200,7 @@
     if (!VEHICLES[name]) name = pickVehicle();
     var dir = rng() < 0.65 ? 1 : -1;         // heads right (more often) or left across the view
     var heading = (40 + rng() * 32) * DEG;   // angle between our line of sight and its ground track
+    traj = buildTrajectory(90 + rng() * 12);   // each flight's turn is a little different
     launch = {
       vehicle: name,
       t: 0,
@@ -366,23 +378,25 @@
     var W = view.W, H = view.H, P = view.P;
     var V = { W: W, H: H, k: Math.max(W, H * 1.2) / FOV, horizon: H * HORIZON };
 
-    var dep = sunDepression(view.hour);
+    var dep = -view.sunElev;                                   // degrees the sun is below the horizon
     var shadowH = shadowHeight(dep);
     var twilight = dep > 0 ? smoothstep(0.6, 4, dep) : 0;      // sky dark enough to see lit plumes
     var dayness = clamp(P.day, 0, 1);
     var smokeVis = smoothstep(0.35, 0.85, dayness);
     var i, b, q, c;
 
-    // 1) Daytime smoke trail (low altitude only), drawn normally.
+    // 1) Daytime smoke trail. Only forms in thick air (below ~35 km), so
+    //    upper stages, which light up near vacuum, never leave one.
     if (smokeVis > 0.01) {
       for (i = 0; i < L.puffs.length; i++) {
         q = L.puffs[i];
         var fs = FUEL[q.fuel].smoke;
-        if (!fs || q.alt > 32 || q.age > SMOKE_LIFE) continue;
+        if (!fs || q.alt > 35 || q.age > SMOKE_LIFE) continue;
         c = project(V, L, q.alt, q.s, q.lat);
         if (c.el < -0.02) continue;
         var rs = (0.14 + q.age * 0.006 * (q.fuel === 'srb' ? 1.6 : 1)) / c.d * V.k;
-        var as = 0.2 * fs * smokeVis * (1 - q.age / SMOKE_LIFE) / (1 + rs / 6);
+        var thin = 1 - smoothstep(22, 35, q.alt);            // thins out with altitude
+        var as = 0.2 * fs * smokeVis * thin * (1 - q.age / SMOKE_LIFE) / (1 + rs / 6);
         if (as < 0.004) continue;
         ctx.fillStyle = rgba([226, 229, 234], as);
         ctx.beginPath();
@@ -393,24 +407,31 @@
 
     ctx.globalCompositeOperation = 'lighter';
 
-    // 2) Twilight "jellyfish": exhaust above Earth's shadow catches the sun.
+    // 2) Twilight: exhaust above Earth's shadow catches the sun (we're in the dark).
+    //    Low down it's a narrow trail lit by reddened, low sunlight; above
+    //    ~40 km the exhaust balloons out into the blue-white "jellyfish".
     if (twilight > 0.01) {
       var dim = 1 - 0.55 * dayness;
       for (i = 0; i < L.puffs.length; i++) {
         q = L.puffs[i];
         if (q.alt < shadowH) continue;            // still in Earth's shadow: dark
-        var fp = FUEL[q.fuel].plume;
-        // Exhaust expands far more in thin air: tens of km wide up high.
-        var growth = 0.003 + Math.max(0, q.alt - 28) * 0.0024 * q.grow;
-        var rk = Math.min(40, 0.2 + q.age * growth);
+        var F2 = FUEL[q.fuel];
+        var hi = smoothstep(32, 85, q.alt);       // 0 = thick air, 1 = near vacuum
+        if (hi < 0.05 && !F2.smoke) continue;     // clean upper-stage exhaust makes no low trail
+        var r0 = 0.15 + 5 * hi;                   // plume size right behind the engine
+        var growth = 0.004 + 0.085 * hi * q.grow; // how fast it spreads (thin air: fast)
+        var rk = Math.min(40, r0 + q.age * growth);
         c = project(V, L, q.alt, q.s, q.lat);
         if (c.el < -0.01) continue;
         var rp = rk / c.d * V.k;
-        // Fade in just above the shadow line, fade out with age and size.
-        var edge = smoothstep(shadowH, shadowH + 6, q.alt);
-        var ap = 0.045 * fp * twilight * dim * edge * (1 - q.age / PLUME_LIFE) / (1 + rp / 10);
+        var edge = smoothstep(shadowH, shadowH + 6, q.alt);   // soft edge at the shadow line
+        var life = 1 - q.age / PLUME_LIFE;
+        var ap = (hi > 0.05 ? 0.045 * F2.plume : 0.07 * (0.4 + 0.6 * F2.smoke)) *
+                 twilight * dim * edge * life / (1 + rp / (hi > 0.05 ? 10 : 5));
         if (ap < 0.003) continue;
-        ctx.fillStyle = rgba(q.tint, ap);
+        // Colour: warm sunset light on the low trail, blue-white ice up high.
+        var tint = hi > 0.5 ? q.tint : [255, 196 + 40 * hi * 2, 160 + 90 * hi * 2];
+        ctx.fillStyle = rgba([Math.round(tint[0]), Math.round(tint[1]), Math.round(tint[2])], ap);
         ctx.beginPath();
         ctx.arc(c.x, c.y, Math.max(1, rp), 0, Math.PI * 2);
         ctx.fill();
@@ -432,10 +453,10 @@
       var a = F.point * bright * b.level * distF * ext * pointDim;
       if (a < 0.01) continue;
 
-      // Tail
-      if (b.tail.length >= 6) {
+      // Tail: the long afterburning flame you only get in thick air.
+      if (b.tail.length >= 6 && b.alt < 40) {
         ctx.lineWidth = 1.2;
-        ctx.strokeStyle = rgba(F.glow, Math.min(0.5, a * 0.35));
+        ctx.strokeStyle = rgba(F.glow, Math.min(0.5, a * 0.35) * (1 - smoothstep(25, 40, b.alt)));
         ctx.beginPath();
         for (var k = 0; k < b.tail.length; k += 3) {
           var tp = project(V, L, b.tail[k], b.tail[k + 1], b.tail[k + 2]);

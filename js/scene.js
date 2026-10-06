@@ -50,7 +50,7 @@
   var GLOW_PAD = 1;              // size (CSS px) of the glow around lit windows
 
   // Representative hour used for each forced time-of-day mode.
-  var FORCED_HOURS = { dawn: 6.3, day: 13, dusk: 19, night: 23 };
+  var FORCED_HOURS = { dawn: 5.7, day: 13, dusk: 19.3, night: 23 };   // dawn/dusk = sun ~4° below the horizon
 
   // ---------------------------------------------------------------------------
   // Colour palettes (keyframes). Colours are [r, g, b], 0-255.
@@ -283,7 +283,55 @@
   }
 
   function targetHour() {
-    return todMode === 'auto' ? localHour() : FORCED_HOURS[todMode];
+    return todMode === 'auto' ? sunHour() : FORCED_HOURS[todMode];
+  }
+
+  // ---------------------------------------------------------------------------
+  // Real sun -> "scene hour"
+  // The palettes above are laid out on a clock (dawn at 6, dusk at 19...).
+  // Real sunrise and sunset move with the seasons and with where the visitor
+  // is, so in 'auto' mode we place the sky on that clock using the sun's real
+  // elevation (js/sun.js), not the wall clock.
+  // ---------------------------------------------------------------------------
+  var MORNING_E = [-18, -6, 0, 6, 15], MORNING_H = [4.5, 5.5, 6.2, 7.0, 8.5];
+  var EVENING_E = [15, 6, 0, -6, -18], EVENING_H = [16.5, 18.0, 18.8, 19.6, 21];
+
+  // Piecewise-linear lookup; xs may be increasing or decreasing.
+  function table(x, xs, ys) {
+    var up = xs[xs.length - 1] > xs[0];
+    if (up ? x <= xs[0] : x >= xs[0]) return ys[0];
+    for (var i = 1; i < xs.length; i++) {
+      if (up ? x <= xs[i] : x >= xs[i]) {
+        return ys[i - 1] + (ys[i] - ys[i - 1]) * (x - xs[i - 1]) / (xs[i] - xs[i - 1]);
+      }
+    }
+    return ys[ys.length - 1];
+  }
+
+  function sunHour() {
+    if (!window.Sun) return localHour();
+    var p = window.Sun.position();
+    if (p.elev >= 15) {
+      var ha15 = window.Sun.hourAngleAt(15) || 1;
+      return 12.5 + clamp(p.ha / ha15, -1, 1) * 4;          // daytime: 8.5 .. 16.5
+    }
+    if (p.elev > -18) {
+      return p.ha < 0 ? table(p.elev, MORNING_E, MORNING_H) : table(p.elev, EVENING_E, EVENING_H);
+    }
+    var h = localHour();                                   // full night
+    if (h > 4.5 && h < 12) return 4.5;
+    if (h >= 12 && h < 21) return 21;
+    return h;
+  }
+
+  // The reverse: sun elevation (degrees) implied by a scene hour. Used for the
+  // sun disc and rocket-plume lighting, so forced previews behave too.
+  function sunElevAtHour(h) {
+    h = ((h % 24) + 24) % 24;
+    if (h >= 8.5 && h <= 16.5) return 15 + 40 * Math.sin(Math.PI * (h - 8.5) / 8);
+    if (h > 4.5 && h < 8.5) return table(h, MORNING_H, MORNING_E);
+    if (h > 16.5 && h < 21) return table(h, EVENING_H, EVENING_E);
+    return -25;
   }
 
   // Blend two palettes: arrays are colours, numbers are plain values.
@@ -921,9 +969,10 @@
 
   function drawSun(P) {
     if (P.sunA < 0.01) return;
-    // Elevation: ~0 at 5.6h and 19.4h, 1 around midday.
-    var e = Math.sin(Math.PI * (hour - 5.6) / 13.8);
-    if (hour < 5 || hour > 20.5 || e < -0.08) return;
+    // Elevation from the scene hour (see sunElevAtHour): 0 at the horizon, 1 high up.
+    var elev = sunElevAtHour(hour);
+    if (elev < -3) return;
+    var e = clamp(elev / 45, -0.08, 1);
     var x = W * clamp(0.15 + (hour - 6) / 13 * 0.7, 0.05, 0.95);  // left at dawn, right at dusk
     var horizonY = H * 0.74;
     var y = horizonY - Math.max(e, 0) * (horizonY - H * 0.12);
@@ -1083,9 +1132,9 @@
     if (todMode === 'auto' && Date.now() - lastClockCheck >= CLOCK_CHECK_MS) {
       lastClockCheck = Date.now();
       if (hourProgress >= 1) {
-        hour = hourFrom = hourTo = localHour();
+        hour = hourFrom = hourTo = sunHour();
       } else {
-        hourTo = localHour();
+        hourTo = sunHour();
       }
     }
 
@@ -1118,7 +1167,7 @@
     drawStars(P);
     drawMoon(P);
     drawSun(P);
-    if (window.Launches) window.Launches.draw(ctx, { W: W, H: H, P: P, hour: hour });   // behind the city
+    if (window.Launches) window.Launches.draw(ctx, { W: W, H: H, P: P, sunElev: sunElevAtHour(hour) });   // behind the city
     ctx.drawImage(farLayer.canvas, 0, 0, W, H);
     drawHaze(P);
     ctx.drawImage(nearLayer.canvas, 0, 0, W, H);

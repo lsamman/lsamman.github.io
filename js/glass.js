@@ -68,7 +68,7 @@
     '    else if (d < dS) { dS = d; Ps = uP[i]; Qs = uQ[i]; }',
     '  }',
     '  float h = clamp(0.5 + 0.5 * (dD - dS) / kD, 0.0, 1.0);',   // weight of the tile
-    '  dropW = 1.0 - h;',
+    '  dropW = 1.0 - smoothstep(-2.0, 2.5, dD);',   // green follows the droplet's own rounded outline
     '  return mix(dD, dS, h) - kD * h * (1.0 - h);',
     '}',
     'float fieldOnly(vec2 p) { vec4 a; vec4 b; vec4 c; float w; return field(p, a, b, c, w); }',
@@ -248,10 +248,10 @@
   function popScale(el) {
     if (!seen || reduced()) return 1;
     var t0 = seen.get(el);
-    if (t0 === undefined) { seen.set(el, firstFrame ? -10 : clock); return firstFrame ? 1 : 0.8; }
+    if (t0 === undefined) { seen.set(el, firstFrame ? -10 : clock); return firstFrame ? 1 : 0.87; }
     var age = clock - t0;
     if (age > 1.5) return 1;
-    return 1 - 0.2 * Math.exp(-age * 6.5) * Math.cos(age * 17);
+    return 1 - 0.13 * Math.exp(-age * 8) * Math.cos(age * 15);
   }
 
   function addShape(L, n, x, y, w, h, radius, alpha, isDrop, goo, bevel, frost, veil, solid) {
@@ -264,6 +264,13 @@
     return n + 1;
   }
 
+  // Motion warp: tiles that are moving (scrolling through a list, switching
+  // category) stretch along their direction of travel, lag slightly behind
+  // themselves, bend the city harder at their edges, and their contents get a
+  // little motion blur. All of it eases off as they come to rest.
+  var motion = typeof WeakMap === 'function' ? new WeakMap() : null;
+  var blurWrites = [];   // applied after drawing, so we never mix layout reads and writes
+
   function addElement(L, n, el, opts) {
     var r = el.getBoundingClientRect();
     if (!r.width || !r.height) return n;
@@ -272,8 +279,41 @@
     var w = r.width * s, h = r.height * s;
     var x = r.left + (r.width - w) / 2, y = r.top + (r.height - h) / 2;
     var rad = radiusOf(el, r) * s;
+    var bevel = opts.bevel || Math.min(14, Math.max(8, rad));
+
+    if (opts.motion && motion && !reduced()) {
+      var cx = r.left + r.width / 2, cy = r.top + r.height / 2;
+      var m = motion.get(el);
+      if (!m) { m = { x: cx, y: cy, vx: 0, vy: 0, blur: 0 }; motion.set(el, m); }
+      if (frameDt > 0) {
+        m.vx = m.vx * 0.6 + ((cx - m.x) / frameDt) * 0.4;   // smoothed px/s
+        m.vy = m.vy * 0.6 + ((cy - m.y) / frameDt) * 0.4;
+      }
+      m.x = cx; m.y = cy;
+      var ax = Math.abs(m.vx), ay = Math.abs(m.vy), speed = Math.sqrt(ax * ax + ay * ay);
+      if (speed > 8) {
+        var sx = Math.min(ax * 0.006, w * 0.06), sy = Math.min(ay * 0.012, 7);   // capped so neighbours never touch
+        var nw = w + sx - sy * 0.3, nh = h + sy - sx * 0.3;
+        x += (w - nw) / 2 - Math.max(-4, Math.min(4, m.vx * 0.004));   // stretch, and trail a little behind
+        y += (h - nh) / 2 - Math.max(-4, Math.min(4, m.vy * 0.004));
+        w = nw; h = nh;
+        bevel *= 1 + Math.min(0.8, speed / 900);
+      }
+      var blur = Math.min(1.4, speed * 0.0018);
+      if (Math.abs(blur - m.blur) > 0.08) { m.blur = blur; blurWrites.push(el, blur); }
+    }
+
     return addShape(L, n, x, y, w, h, rad, a, false, 0,
-      opts.bevel || Math.min(14, Math.max(8, rad)), opts.frost || 0, opts.veil === undefined ? 0.16 : opts.veil, opts.solid || 0);
+      bevel, opts.frost || 0, opts.veil === undefined ? 0.16 : opts.veil, opts.solid || 0);
+  }
+
+  function applyBlurs() {
+    for (var i = 0; i < blurWrites.length; i += 2) {
+      var el = blurWrites[i], b = blurWrites[i + 1];
+      var f = b > 0.15 ? 'blur(' + b.toFixed(2) + 'px)' : '';
+      for (var c = el.firstElementChild; c; c = c.nextElementSibling) c.style.filter = f;
+    }
+    blurWrites.length = 0;
   }
 
   // ---------------------------------------------------------------------------
@@ -299,7 +339,7 @@
       return;
     }
     // Underdamped spring: overshoots a little and wobbles into place.
-    var k = 190, c = 16, steps = Math.ceil(dt / 0.008), h = dt / steps;
+    var k = 175, c = 21, steps = Math.ceil(dt / 0.008), h = dt / steps;
     for (var i = 0; i < steps; i++) {
       this.vx += (k * (r.left - this.x) - c * this.vx) * h;
       this.vy += (k * (r.top - this.y) - c * this.vy) * h;
@@ -316,7 +356,11 @@
     var w = this.w + sx - sy * 0.25, h = this.h + sy - sx * 0.25;
     var x = this.x + (this.w - w) / 2, y = this.y + (this.h - h) / 2;
     var speed = Math.sqrt(this.vx * this.vx + this.vy * this.vy);
-    var goo = 5 + Math.min(40, speed * 0.04);    // at rest it keeps to itself; moving, it melts into neighbours
+    // While travelling it straddles the gaps between tiles, where their rounded
+    // corners leave notches; tuck its sides in so it doesn't poke out of them.
+    var tuck = Math.min(7, speed * 0.012);
+    if (this.axis === 'y') { x += tuck; w -= tuck * 2; } else { y += tuck; h -= tuck * 2; }
+    var goo = 5 + Math.min(11, speed * 0.02);    // at rest it keeps to itself; moving, it melts into neighbours
     return addShape(L, n, x, y, w, h, this.r, this.a, true, goo, 12, 0, 0, 0);
   };
 
@@ -380,11 +424,13 @@
   }
 
   var last = 0;
+  var frameDt = 0;
   function draw(now) {
     if (document.hidden) return;
     var dt = last ? Math.min(0.05, (now - last) / 1000) : 0;
     last = now;
     clock += dt;
+    frameDt = dt;
 
     W = window.innerWidth; H = window.innerHeight;
     var scale = Math.min(window.devicePixelRatio || 1, 1.5);
@@ -401,11 +447,11 @@
     // Back layer: menu tiles, the selection droplets, status button, Last.fm tile.
     var n = 0, i, els;
     els = document.querySelectorAll('#categories .cat');
-    for (i = 0; i < els.length; i++) n = addElement(back, n, els[i], { veil: 0.18 });
+    for (i = 0; i < els.length; i++) n = addElement(back, n, els[i], { veil: 0.18, motion: true });
     els = document.querySelectorAll('#items .face');
     for (i = 0; i < els.length; i++) {
       var above = els[i].parentNode.classList.contains('above');
-      n = addElement(back, n, els[i], { veil: 0.16, alpha: above ? 0.55 : 1 });
+      n = addElement(back, n, els[i], { veil: 0.16, alpha: above ? 0.55 : 1, motion: true });
     }
     var mute = document.getElementById('mute');
     if (mute) n = addElement(back, n, mute, { veil: 0.18 });
@@ -424,6 +470,7 @@
     var accent = accentRGB();
     drawLayer(back, n, scale, accent);
     drawLayer(front, m, scale, accent);
+    applyBlurs();
     firstFrame = false;
   }
 

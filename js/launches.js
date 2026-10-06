@@ -183,8 +183,14 @@
   // State
   // ---------------------------------------------------------------------------
   var enabled = true;
-  var launch = null;          // the flight in progress
-  var nextIn = 12 + Math.random() * 14;   // seconds until the next liftoff
+  // Several flights can be in the sky at once. `launch` is the one currently
+  // being simulated or drawn (the helper functions below work on it).
+  var flights = [];
+  var launch = null;
+  var MAX_ASCENDING = 3;      // at most this many rockets climbing at the same time
+  var ASCENT_END = 420;       // seconds: after this a flight is just plumes and landing boosters
+  var nextIn = 6 + Math.random() * 8;   // seconds until the next liftoff
+  function nextGap() { return 80 + rng() * 90; }   // ~1.5-3 minutes between liftoffs
   var rng = Math.random;
 
   // Scratch object for projections (avoids garbage every frame).
@@ -219,6 +225,7 @@
     var heading = (40 + rng() * 32) * DEG;   // angle between our line of sight and its ground track
     traj = buildTrajectory(90 + rng() * 12);   // each flight's turn is a little different
     launch = {
+      traj: traj,
       vehicle: name,
       t: 0,
       az0: (-6 + rng() * 30) * DEG * (dir > 0 ? 1 : 0.6),   // where the pad is (right of the menu, mostly)
@@ -246,7 +253,11 @@
       b.landingOn = false;
       launch.bodies.push(b);
     }
+    flights.push(launch);
   }
+
+  // Point the shared helpers at one flight.
+  function use(L) { launch = L; traj = L.traj; }
 
   // Flame power right now (0 = off): window power x body brightness.
   function burnPower(b, t) {
@@ -397,13 +408,20 @@
   }
 
   function update(dt) {
-    if (!launch) {
-      if (!enabled) return;
+    if (enabled) {
       nextIn -= dt;
-      if (nextIn <= 0) start();
-      return;
+      var ascending = 0;
+      for (var k = 0; k < flights.length; k++) if (flights[k].t < ASCENT_END) ascending++;
+      if (nextIn <= 0 && ascending < MAX_ASCENDING) { start(); nextIn = nextGap(); }
     }
-    var L = launch;
+    for (var j = flights.length - 1; j >= 0; j--) {
+      use(flights[j]);
+      if (updateFlight(flights[j], dt)) flights.splice(j, 1);
+    }
+  }
+
+  // Advance one flight; returns true when it's completely finished.
+  function updateFlight(L, dt) {
     L.t += dt;
     var t = L.t;
 
@@ -436,10 +454,7 @@
     }
 
     if (!anyAlive) L.done = true;
-    if (L.done && !L.puffs.length) {
-      launch = null;
-      nextIn = 45 + rng() * 110;   // a minute or two between launches
-    }
+    return L.done && !L.puffs.length;
   }
 
   // Angle of a body above the horizon as seen by us (radians).
@@ -472,8 +487,13 @@
   }
 
   function draw(ctx, view) {
-    var L = launch;
-    if (!L) return;
+    for (var j = 0; j < flights.length; j++) {
+      use(flights[j]);
+      drawFlight(ctx, view, flights[j]);
+    }
+  }
+
+  function drawFlight(ctx, view, L) {
     var W = view.W, H = view.H, P = view.P;
     var V = { W: W, H: H, k: Math.max(W, H * 1.2) / FOV, horizon: H * HORIZON };
 
@@ -617,7 +637,7 @@
   // ---------------------------------------------------------------------------
   window.Launches = {
     update: function (dt) {
-      try { update(dt); } catch (e) { launch = null; }
+      try { update(dt); } catch (e) { flights = []; launch = null; }
     },
     draw: function (ctx, view) {
       try { draw(ctx, view); } catch (e) { ctx.globalCompositeOperation = 'source-over'; }
@@ -625,17 +645,20 @@
     // Start a launch now. `skip` fast-forwards that many seconds (for testing).
     launchNow: function (name, skip) {
       start(name);
-      var n = Math.round((skip || 0) / 0.2);
-      for (var i = 0; i < n && launch; i++) update(0.2);
+      var mine = launch, n = Math.round((skip || 0) / 0.2);
+      for (var i = 0; i < n && flights.indexOf(mine) >= 0; i++) update(0.2);
+      if (flights.indexOf(mine) >= 0) use(mine);
     },
     setEnabled: function (on) {
       enabled = !!on;
-      if (!enabled) launch = null;
-      else if (!launch) nextIn = Math.min(nextIn, 10 + Math.random() * 10);
+      if (!enabled) { flights = []; launch = null; }
+      else nextIn = Math.min(nextIn, 6 + Math.random() * 8);
     },
     isEnabled: function () { return enabled; },
+    // The most recent flight (for testing/debugging).
     current: function () {
-      if (!launch) return null;
+      if (!flights.length) return null;
+      use(flights[flights.length - 1]);
       return {
         vehicle: launch.vehicle, t: launch.t,
         bodies: launch.bodies.map(function (b) {
@@ -646,8 +669,9 @@
     },
     // Fast-forward the current flight until test(body) is true for some body (testing aid).
     advanceUntil: function (test, maxSeconds) {
-      for (var n = 0; launch && n < (maxSeconds || 900) / 0.2; n++) {
-        for (var i = 0; i < launch.bodies.length; i++) if (test(launch.bodies[i], launch.t)) return true;
+      var mine = flights[flights.length - 1];
+      for (var n = 0; mine && flights.indexOf(mine) >= 0 && n < (maxSeconds || 900) / 0.2; n++) {
+        for (var i = 0; i < mine.bodies.length; i++) if (test(mine.bodies[i], mine.t)) return true;
         update(0.2);
       }
       return false;

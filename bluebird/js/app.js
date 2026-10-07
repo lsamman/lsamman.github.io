@@ -2,7 +2,7 @@
 // from The Legend Of Chris. No character limit, no auto-correct, never update.
 // X's API isn't open to a plain web page, so Bluebird posts through X's own share page (one tab per part),
 // shows tweets and profiles through X's embeds, and keeps favorites, drafts and saved tweets on this device.
-import { ACCOUNTS, CANON, TRENDS, BOOT_LINES } from "./canon.js?v=20261007165958";
+import { ACCOUNTS, CANON, TRENDS, BOOT_LINES } from "./canon.js?v=20261007170436";
 
 const view = document.getElementById("view");
 const $ = (sel, root = document) => root.querySelector(sel);

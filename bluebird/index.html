@@ -11,30 +11,62 @@
 <link rel="apple-touch-icon" href="img/apple-touch-icon.png">
 <script>try { var t = localStorage.getItem("bluebird.theme"); if (t === '"light"' || t === '"dark"') document.documentElement.dataset.theme = JSON.parse(t); } catch (e) {}</script>
 <meta http-equiv="Cache-Control" content="no-cache">
-<!-- Self-update: if a newer version of the site is published, clear caches and reload it.
+<!-- Self-update: always run the latest published version, even in a tab left open for days or restored with Back.
+     Checks ../version.json on load, when the tab comes back into view, when it's restored from the back/forward cache,
+     and every 5 minutes. A newer version found on load reloads at once; one found later waits for a moment that
+     won't lose anything (a page change, or coming back to the tab) and never interrupts typing or a playing video.
      SITE_VERSION and the ?v= tags are kept in sync by ../bump-version.sh -->
 <script>
   (function () {
-    var SITE_VERSION = "20261007165958";
+    var SITE_VERSION = "20261007170436";
     if (!window.fetch) return;
-    fetch("../version.json?t=" + Date.now(), { cache: "no-store" })
-      .then(function (r) { return r.ok ? r.json() : null; })
-      .then(function (d) {
-        if (!d || !d.v || d.v === SITE_VERSION) return;
-        var key = "bluebird.reloaded." + d.v;
-        try { if (sessionStorage.getItem(key)) return; sessionStorage.setItem(key, "1"); } catch (e) {}
-        function go() { var u = new URL(location.href); u.searchParams.set("v", d.v); location.replace(u.toString()); }
-        var clears = [];
-        if (window.caches && caches.keys) clears.push(caches.keys().then(function (ks) { return Promise.all(ks.map(function (k) { return caches.delete(k); })); }));
-        Promise.all(clears).catch(function () {}).then(go, go);
-      })
-      .catch(function () {});
+    var newer = null, last = 0;
+    function busy() {
+      var a = document.activeElement, m = document.querySelectorAll("video, audio");
+      if (a && /^(TEXTAREA|INPUT)$/.test(a.tagName) && a.value) return true;
+      for (var i = 0; i < m.length; i++) if (!m[i].paused && !m[i].ended) return true;
+      return false;
+    }
+    function reload() {
+      if (!newer || busy()) return;
+      var key = "bluebird.reloaded." + newer;   // reload at most once per new version
+      try { if (sessionStorage.getItem(key)) return; sessionStorage.setItem(key, "1"); } catch (e) {}
+      var v = newer;
+      function go() {
+        var u = new URL(location.href);
+        u.searchParams.set("v", v);          // a new URL, so the browser fetches fresh HTML
+        location.replace(u.toString());
+      }
+      var clears = [];
+      if (window.caches && caches.keys) clears.push(caches.keys().then(function (ks) { return Promise.all(ks.map(function (k) { return caches.delete(k); })); }));
+      if (navigator.serviceWorker && navigator.serviceWorker.getRegistrations) clears.push(navigator.serviceWorker.getRegistrations().then(function (rs) { return Promise.all(rs.map(function (r) { return r.unregister(); })); }));
+      Promise.all(clears).catch(function () {}).then(go, go);
+    }
+    function check(now) {
+      if (newer) { if (now) reload(); return; }
+      if (Date.now() - last < 10000) return;  // at most every 10 seconds
+      last = Date.now();
+      fetch("../version.json?t=" + last, { cache: "no-store" })
+        .then(function (r) { return r.ok ? r.json() : null; })
+        .then(function (d) {
+          if (!d || !d.v || d.v === SITE_VERSION) return;
+          newer = d.v;
+          if (now) reload();
+        })
+        .catch(function () {});
+    }
+    check(true);
+    addEventListener("pageshow", function (e) { if (e.persisted) { last = 0; check(true); } });
+    addEventListener("hashchange", function () { check(true); });
+    addEventListener("focus", function () { check(true); });
+    document.addEventListener("visibilitychange", function () { if (document.visibilityState === "visible") check(true); });
+    setInterval(function () { check(false); }, 5 * 60 * 1000);
   })();
 </script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Varela+Round&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/app.css?v=20261007165958">
+<link rel="stylesheet" href="css/app.css?v=20261007170436">
 </head>
 <body>
 <!-- Boot: Club Shadowban's giant rotating X, suspended by Elon's tears, shatters and the bird flies out -->
@@ -99,6 +131,6 @@
 
 <a class="fab" href="#/compose" aria-label="New tweet" title="What's happening?"><svg viewBox="0 0 24 24"><path d="M4 17.2V21h3.8L19 9.8 15.2 6zM21 7.8a1 1 0 0 0 0-1.4L18.6 4a1 1 0 0 0-1.4 0l-1.6 1.6 3.8 3.8z"/></svg></a>
 <div id="toast" class="toast" role="status" hidden></div>
-<script type="module" src="js/app.js?v=20261007165958"></script>
+<script type="module" src="js/app.js?v=20261007170436"></script>
 </body>
 </html>

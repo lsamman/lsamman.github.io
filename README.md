@@ -30,7 +30,7 @@ Then open http://localhost:8000. Refresh the page after each change.
 
 ## Publishing changes
 
-The site updates itself for visitors. On load it checks `version.json`, and if a newer version has been published it clears the browser's caches and reloads the new one. To mark a new version, run `./bump-version.sh` before committing:
+The site updates itself for visitors, including people who left a tab open or come back with the Back button. Every page (the résumé, MySpace and Bluebird) checks `version.json` when it loads, when its tab comes back into view, when it's restored with Back, and every 5 minutes. If a newer version has been published, it clears the browser's caches and reloads it, at once on load, or otherwise at the next moment that won't lose anything (a page change, or coming back to the tab), never in the middle of typing or a playing video. To mark a new version, run `./bump-version.sh` before committing:
 
 ```
 ./bump-version.sh

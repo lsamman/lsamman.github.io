@@ -1,7 +1,7 @@
 // The official YouTube Data API, signed in with Google (read-only), for your subscriptions.
-import { GOOGLE_CLIENT_ID } from "./config.js";
-import { get, set, del } from "./store.js";
-import { isoDuration } from "./util.js";
+import { GOOGLE_CLIENT_ID } from "./config.js?v=20261007140823";
+import { get, set, del } from "./store.js?v=20261007140823";
+import { isoDuration } from "./util.js?v=20261007140823";
 
 const API = "https://www.googleapis.com/youtube/v3";
 const SCOPE = "https://www.googleapis.com/auth/youtube.readonly";

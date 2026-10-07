@@ -7,7 +7,28 @@
 <meta name="description" content="Dreamliner's Better YouTube Client: YouTube without the ads or Shorts.">
 <meta name="theme-color" content="#0e1011">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%23107c10'/%3E%3Cpath d='M12 9v14l11-7z' fill='%23fff'/%3E%3C/svg%3E">
-<link rel="stylesheet" href="css/app.css">
+<meta http-equiv="Cache-Control" content="no-cache">
+<!-- Self-update: if a newer version of the site is published, clear caches and reload it.
+     SITE_VERSION and the ?v= tags are kept in sync by ../bump-version.sh -->
+<script>
+  (function () {
+    var SITE_VERSION = "20261007140823";
+    if (!window.fetch) return;
+    fetch("../version.json?t=" + Date.now(), { cache: "no-store" })
+      .then(function (r) { return r.ok ? r.json() : null; })
+      .then(function (d) {
+        if (!d || !d.v || d.v === SITE_VERSION) return;
+        var key = "dbyc.reloaded." + d.v;
+        try { if (sessionStorage.getItem(key)) return; sessionStorage.setItem(key, "1"); } catch (e) {}
+        function go() { var u = new URL(location.href); u.searchParams.set("v", d.v); location.replace(u.toString()); }
+        var clears = [];
+        if (window.caches && caches.keys) clears.push(caches.keys().then(function (ks) { return Promise.all(ks.map(function (k) { return caches.delete(k); })); }));
+        Promise.all(clears).catch(function () {}).then(go, go);
+      })
+      .catch(function () {});
+  })();
+</script>
+<link rel="stylesheet" href="css/app.css?v=20261007140823">
 </head>
 <body>
 <header class="top">
@@ -23,6 +44,6 @@
 </header>
 <main id="view" class="view" tabindex="-1"></main>
 <div id="toast" class="toast" role="status" hidden></div>
-<script type="module" src="js/app.js"></script>
+<script type="module" src="js/app.js?v=20261007140823"></script>
 </body>
 </html>

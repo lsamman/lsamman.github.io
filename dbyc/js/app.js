@@ -1,10 +1,10 @@
 // DBYC: Dreamliner's Better YouTube Client. YouTube without the ads or the Shorts.
-import * as piped from "./piped.js";
-import * as yt from "./youtube.js";
-import * as player from "./player.js";
-import { settings, get } from "./store.js";
-import { PIPED_INSTANCES } from "./config.js";
-import { esc, duration, views, ago, thumb, noShorts, linkify, htmlToText } from "./util.js";
+import * as piped from "./piped.js?v=20261007140823";
+import * as yt from "./youtube.js?v=20261007140823";
+import * as player from "./player.js?v=20261007140823";
+import { settings, get } from "./store.js?v=20261007140823";
+import { PIPED_INSTANCES } from "./config.js?v=20261007140823";
+import { esc, duration, views, ago, thumb, noShorts, linkify, htmlToText } from "./util.js?v=20261007140823";
 
 const view = document.getElementById("view");
 const $ = (sel, root = document) => root.querySelector(sel);

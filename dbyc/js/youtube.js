@@ -1,10 +1,11 @@
-// The official YouTube Data API, signed in with Google (read-only), for your subscriptions.
-import { GOOGLE_CLIENT_ID } from "./config.js?v=20261007140823";
-import { get, set, del } from "./store.js?v=20261007140823";
-import { isoDuration } from "./util.js?v=20261007140823";
+// The official YouTube Data API, signed in with Google: subscriptions, playlists, likes and saving.
+import { GOOGLE_CLIENT_ID } from "./config.js?v=20261007142443";
+import { get, set, del } from "./store.js?v=20261007142443";
+import { isoDuration, isShort } from "./util.js?v=20261007142443";
 
 const API = "https://www.googleapis.com/youtube/v3";
-const SCOPE = "https://www.googleapis.com/auth/youtube.readonly";
+// Full YouTube access, so DBYC can like videos and save them to playlists (it never posts or deletes).
+const SCOPE = "https://www.googleapis.com/auth/youtube";
 const GIS = "https://accounts.google.com/gsi/client";
 
 export const canSignIn = Boolean(GOOGLE_CLIENT_ID);
@@ -19,6 +20,8 @@ function token() {
   return t && t.expires > Date.now() + 60000 ? t.value : null;
 }
 export const signedIn = () => Boolean(token());
+// Signed in before likes and playlists existed (read-only): those need one more "Allow".
+export const canWrite = () => { const t = get("token", null); return Boolean(t && t.value && String(t.scope || "").split(" ").includes(SCOPE)); };
 export const wasSignedIn = () => Boolean(get("profile", null));
 export const profile = () => get("profile", null);
 
@@ -42,7 +45,7 @@ export async function signIn() {
       callback: resp => {
         const p = pending; pending = null;
         if (resp.error) { p && p.reject(new Error(resp.error_description || resp.error)); return; }
-        set("token", { value: resp.access_token, expires: Date.now() + (resp.expires_in || 3600) * 1000 });
+        set("token", { value: resp.access_token, expires: Date.now() + (resp.expires_in || 3600) * 1000, scope: resp.scope || "" });
         p && p.resolve();
       },
       error_callback: err => { const p = pending; pending = null; p && p.reject(new Error(err.message || err.type || "Sign-in cancelled")); }
@@ -50,7 +53,7 @@ export async function signIn() {
   }
   await new Promise((resolve, reject) => {
     pending = { resolve, reject };
-    tokenClient.requestAccessToken({ prompt: wasSignedIn() ? "" : "consent" });
+    tokenClient.requestAccessToken({ prompt: wasSignedIn() && canWrite() ? "" : "consent" });
   });
   const me = await call("/channels", { part: "snippet", mine: "true" });
   const c = me.items && me.items[0];
@@ -65,17 +68,23 @@ export function signOut() {
   changed();
 }
 
-async function call(path, params) {
+async function call(path, params, { method = "GET", body } = {}) {
   const t = token();
   if (!t) { const e = new Error("Sign in again to load this."); e.code = "auth"; throw e; }
   const url = API + path + "?" + new URLSearchParams(params);
-  const res = await fetch(url, { headers: { Authorization: "Bearer " + t } });
+  const headers = { Authorization: "Bearer " + t };
+  if (body) headers["Content-Type"] = "application/json";
+  const res = await fetch(url, { method, headers, body: body ? JSON.stringify(body) : undefined });
+  if (res.status === 204) return {};
   if (res.status === 401) { del("token"); changed(); const e = new Error("Your Google sign-in expired. Sign in again."); e.code = "auth"; throw e; }
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {
     const reason = data.error?.errors?.[0]?.reason;
+    const scope = res.status === 403 && /insufficient|scope/i.test((reason || "") + " " + (data.error?.message || ""));
     const e = new Error(reason === "quotaExceeded" ? "Today's YouTube API allowance is used up. It resets at midnight Pacific time."
+      : scope ? "DBYC needs permission to like and save videos. Sign in again and press Allow."
       : data.error?.message || `YouTube API error ${res.status}`);
+    if (scope) { e.code = "scope"; throw e; }
     e.code = reason; throw e;
   }
   return data;
@@ -122,7 +131,7 @@ export async function subscriptions() {
 // Newest uploads from everyone you subscribe to. Cached for 10 minutes to save API allowance.
 export async function feed({ force = false } = {}) {
   const cached = get("feed", null);
-  if (!force && cached && cached.at > Date.now() - 10 * 60000) return cached;
+  if (!force && cached && cached.v === 2 && cached.at > Date.now() - 10 * 60000) return cached;
   const subs = await subscriptions();
   const avatars = Object.fromEntries(subs.map(s => [s.id, s.avatar]));
   const lists = await pool(subs, 8, s => call("/playlistItems", { part: "contentDetails", playlistId: "UU" + s.id.slice(2), maxResults: 8 }));
@@ -131,7 +140,17 @@ export async function feed({ force = false } = {}) {
   const items = (await videos(recent.map(v => v.id)))
     .map(v => ({ ...v, channelAvatar: avatars[v.channelId] }))
     .sort((a, b) => b.published - a.published);
-  const result = { at: Date.now(), subs, items };
+  // Each channel's newest upload that isn't a Short (for the "new this week" ring).
+  const newest = {}, covered = new Set(items.map(v => v.channelId));
+  for (const v of items) if (!isShort(v) && !(newest[v.channelId] > v.published)) newest[v.channelId] = v.published;
+  lists.forEach((l, i) => {
+    const id = subs[i].id;
+    if (covered.has(id)) return;   // its recent uploads were checked above
+    const at = Math.max(0, ...(l?.items || []).map(x => Date.parse(x.contentDetails.videoPublishedAt || 0) || 0));
+    if (at) newest[id] = at;
+  });
+  subs.forEach(s => { s.latest = newest[s.id] || null; });
+  const result = { v: 2, at: Date.now(), subs, items };
   set("feed", result);
   return result;
 }
@@ -150,4 +169,51 @@ export async function channel(id) {
     description: c?.snippet?.description, subscribers: +c?.statistics?.subscriberCount || null,
     items: items.map(v => ({ ...v, channelAvatar: c?.snippet?.thumbnails?.default?.url })), nextpage: null
   };
+}
+
+// ---------- playlists ----------
+export async function playlists() {
+  const out = []; let pageToken = "";
+  const me = await call("/channels", { part: "contentDetails", mine: "true" });
+  const liked = me.items?.[0]?.contentDetails?.relatedPlaylists?.likes;
+  for (let page = 0; page < 4; page++) {
+    const data = await call("/playlists", { part: "snippet,contentDetails,status", mine: "true", maxResults: 50, ...(pageToken && { pageToken }) });
+    for (const p of data.items || []) out.push({
+      id: p.id, title: p.snippet.title, count: p.contentDetails?.itemCount ?? null, privacy: p.status?.privacyStatus,
+      thumb: p.snippet.thumbnails?.medium?.url || p.snippet.thumbnails?.default?.url
+    });
+    pageToken = data.nextPageToken;
+    if (!pageToken) break;
+  }
+  return { liked, items: out };
+}
+
+export async function playlist(id, { max = 200 } = {}) {
+  const [info] = (await call("/playlists", { part: "snippet,contentDetails,status", id })).items || [];
+  const ids = []; let pageToken = "";
+  while (ids.length < max) {
+    const data = await call("/playlistItems", { part: "contentDetails", playlistId: id, maxResults: 50, ...(pageToken && { pageToken }) });
+    ids.push(...(data.items || []).map(i => i.contentDetails.videoId));
+    pageToken = data.nextPageToken;
+    if (!pageToken) break;
+  }
+  return { id, title: info?.snippet?.title, privacy: info?.status?.privacyStatus, count: info?.contentDetails?.itemCount ?? ids.length, items: await videos(ids) };
+}
+
+export async function addToPlaylist(playlistId, videoId) {
+  return call("/playlistItems", { part: "snippet" }, { method: "POST", body: { snippet: { playlistId, resourceId: { kind: "youtube#video", videoId } } } });
+}
+
+export async function createPlaylist(title, privacyStatus = "private") {
+  const p = await call("/playlists", { part: "snippet,status" }, { method: "POST", body: { snippet: { title }, status: { privacyStatus } } });
+  return { id: p.id, title: p.snippet?.title || title };
+}
+
+// ---------- likes ----------
+export async function rating(id) {
+  const data = await call("/videos/getRating", { id });
+  return data.items?.[0]?.rating || "none";
+}
+export async function rate(id, value) {   // "like" | "dislike" | "none"
+  await call("/videos/rate", { id, rating: value }, { method: "POST" });
 }

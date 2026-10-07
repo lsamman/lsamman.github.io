@@ -5,6 +5,11 @@
 - **No ads.** Videos play through [Piped](https://github.com/TeamPiped/Piped), an open-source, ad-free way to watch YouTube. If Piped can't play a video, DBYC falls back to YouTube's own player (which may show ads) and tells you so. You can change this in **Settings → Playback**.
 - **No Shorts.** They're filtered out of every list: subscriptions, search, trending, channels and Up next.
 - **Your subscriptions.** Sign in with Google (read-only) and Home shows the newest videos from the channels you follow.
+- **Subscriptions page.** Every channel you follow. A green ring marks channels that posted a regular video (not a Short) in the last week; they're listed first.
+- **Playlists.** Your YouTube playlists and Liked videos.
+- **Like, dislike, save, share.** Buttons under every video. Save adds to any of your playlists or makes a new one. Share uses your phone's share sheet or copies the link.
+- **Up next** shows a mix of new videos from your subscriptions when you're signed in.
+- **Discover.** Videos from channels you don't follow yet, picked from what YouTube recommends alongside videos you've watched, liked and subscribed to. YouTube's API doesn't share your personal home-page recommendations, so this is built from YouTube's related-video suggestions. Your watch history for this stays on your device and can be cleared in Settings.
 - **Paste a link.** Paste any YouTube link (including a Shorts link) into the search box to open it in DBYC.
 
 It's a plain web app: HTML, CSS and JavaScript with no build step and no server.
@@ -33,7 +38,7 @@ This takes about 15 minutes, once.
    - Click **Create** and copy the **Client ID**.
 5. Paste the client ID into `GOOGLE_CLIENT_ID` in `js/config.js`.
 
-DBYC only asks for read-only YouTube access. The client ID isn't secret; Google only accepts it from the origins you listed.
+DBYC asks for YouTube access so it can like videos and save them to playlists. It only changes things when you press those buttons, and never posts, comments or deletes. Under **Data access** in the Google Cloud console you can add the `.../auth/youtube` scope so the consent screen lists it. The client ID isn't secret; Google only accepts it from the origins you listed.
 
 Two limits to know about:
 - **Daily allowance:** the YouTube API gives 10,000 units a day. Loading your feed costs about one unit per subscribed channel, and DBYC caches it for 10 minutes. Search uses Piped, so it doesn't spend your allowance unless Piped is down.

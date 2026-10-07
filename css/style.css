@@ -154,6 +154,9 @@ body.detail-open #xmb { opacity: .3; filter: blur(2px) grayscale(.6); pointer-ev
   transition: transform .45s var(--ease-pop), width .3s var(--ease-out), height .3s var(--ease-out), background .2s, opacity .3s;
 }
 .cat img { width: 52%; height: 52%; display: block; opacity: .75; transition: opacity .2s; }
+/* full-colour app logos (MySpace) show bigger and brighter than the line icons */
+.cat img[src$=".png"] { width: 74%; height: 74%; opacity: .95; }
+.cat.sel img[src$=".png"] { opacity: 1; }
 .cat span { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }   /* screen readers only */
 .cat:hover { background: var(--tile-hi); }
 .cat.sel { background: var(--accent); border-color: var(--accent-hi); }

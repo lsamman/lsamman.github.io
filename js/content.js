@@ -46,7 +46,7 @@ window.SITE = {
       id: "resume",
       label: "Résumé",
       icon: "assets/icons/resume.svg",
-      members: ["experience", "projects", "websites", "honors", "skills", "education"]
+      members: ["experience", "projects", "honors", "skills", "education"]
     }
   ],
 

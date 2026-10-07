@@ -37,6 +37,12 @@ window.SITE = {
   // listed stays on the main row.
   groups: [
     {
+      id: "systems",
+      label: "My Systems",
+      icon: "assets/icons/systems.svg",
+      members: ["desktop", "laptop", "handhelds", "misc"]
+    },
+    {
       id: "resume",
       label: "Résumé",
       icon: "assets/icons/resume.svg",
@@ -730,6 +736,123 @@ window.SITE = {
             "Undertale",
             "Yakuza 0"
           ]
+        }
+      ]
+    },
+
+    {
+      id: "desktop",
+      label: "Desktop",
+      icon: "assets/icons/desktop.svg",
+      items: [
+        {
+          id: "main-pc",
+          title: "Main PC",
+          subtitle: "Arch Linux · Ryzen 7 5800XT · RTX 4060",
+          summary: "My desktop, where most of my gaming and building happens",
+          bullets: [
+            "OS: Arch Linux",
+            "CPU: AMD Ryzen 7 5800XT (8 cores, 16 threads)",
+            "GPU: NVIDIA GeForce RTX 4060",
+            "RAM: 46 GiB",
+            "Motherboard: ASUS TUF Gaming B550-Plus WiFi II",
+            "Storage: 1 TB WD Green SN350 NVMe + 500 GB Crucial MX500 SSD",
+            "Display: 2560×1440"
+          ]
+        }
+      ]
+    },
+
+    {
+      id: "laptop",
+      label: "Laptop",
+      icon: "assets/icons/laptop.svg",
+      items: [
+        {
+          id: "macbook",
+          title: "13-inch MacBook",
+          subtitle: "Apple M2",
+          summary: "My laptop for school and on the go",
+          bullets: [
+            "Size: 13-inch",
+            "Chip: Apple M2"
+          ]
+        }
+      ]
+    },
+
+    {
+      id: "handhelds",
+      label: "Handhelds",
+      icon: "assets/icons/handhelds.svg",
+      items: [
+        {
+          id: "steam-deck",
+          title: "Steam Deck",
+          subtitle: "LCD · 256 GB",
+          summary: "PC games on the couch"
+        },
+        {
+          id: "switch-oled",
+          title: "Nintendo Switch OLED",
+          subtitle: "Nintendo",
+          summary: "Nintendo's OLED Switch"
+        },
+        {
+          id: "2ds-xl",
+          title: "New Nintendo 2DS XL",
+          subtitle: "Poké Ball Edition",
+          summary: "The Poké Ball edition"
+        },
+        {
+          id: "iphone",
+          title: "iPhone 14",
+          subtitle: "Apple",
+          summary: "My phone"
+        }
+      ]
+    },
+
+    {
+      id: "misc",
+      label: "Misc",
+      icon: "assets/icons/misc.svg",
+      items: [
+        {
+          id: "k2",
+          title: "Keychron K2",
+          subtitle: "Keyboard",
+          summary: "Wireless mechanical keyboard"
+        },
+        {
+          id: "naga",
+          title: "Razer Naga V2 HyperSpeed",
+          subtitle: "Mouse",
+          summary: "Wireless MMO mouse"
+        },
+        {
+          id: "steam-controller",
+          title: "Steam Controller (2026)",
+          subtitle: "Controller",
+          summary: "Valve's new Steam Controller"
+        },
+        {
+          id: "8bitdo",
+          title: "8BitDo Ultimate Wireless V2",
+          subtitle: "Controller",
+          summary: "Wireless gamepad"
+        },
+        {
+          id: "airpods",
+          title: "AirPods Pro 3",
+          subtitle: "Earbuds",
+          summary: "Apple earbuds"
+        },
+        {
+          id: "nothing",
+          title: "Nothing Headphone (1)",
+          subtitle: "Headphones",
+          summary: "Over-ear headphones"
         }
       ]
     },

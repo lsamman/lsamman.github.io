@@ -217,6 +217,42 @@ window.SITE = {
     },
 
     {
+      id: "websites",
+      label: "Websites",
+      icon: "assets/icons/websites.svg",
+      items: [
+        {
+          id: "legend-of-chris-wiki",
+          photo: "assets/images/legend-of-chris-wiki.jpg",
+          title: "The Legend Of Chris Wiki",
+          subtitle: "lsamman.github.io/legend-of-chris-wiki · 2026",
+          summary: "A full fan wiki for a book my friends and I wrote",
+          body: [
+            "A fan wiki for The Legend Of Chris, an absurdist comedy book written with friends. It has over 300 articles covering every character, place, planet, item and event, with search, categories and backlinks. It's styled to look like the original document.",
+            "The site is generated from the article text by a small Python script and deployed automatically with GitHub Pages."
+          ],
+          tags: ["Static site generator", "Python", "HTML", "CSS", "JavaScript", "GitHub Pages"],
+          links: [
+            { label: "Visit site", url: "https://lsamman.github.io/legend-of-chris-wiki/" },
+            { label: "Source on GitHub", url: "https://github.com/lsamman/legend-of-chris-wiki" }
+          ]
+        },
+        {
+          id: "resume-site",
+          photo: "assets/images/this-site.jpg",
+          title: "This Résumé Site",
+          subtitle: "lsamman.github.io · 2026",
+          summary: "The console-dashboard résumé you're looking at",
+          body: ["My personal résumé site, styled like a 2010-era console dashboard. More details are under Projects."],
+          links: [
+            { label: "More about this site", url: "#/projects/this-site" },
+            { label: "Source on GitHub", url: "https://github.com/lsamman/lsamman.github.io" }
+          ]
+        }
+      ]
+    },
+
+    {
       id: "honors",
       label: "Honors",
       icon: "assets/icons/honors.svg",
@@ -350,7 +386,7 @@ window.SITE = {
           id: "photo-credits",
           title: "Photo credits",
           summary: "Where the pictures on this site come from",
-          body: ["Apart from my profile picture, my school's crest and the screenshot of this site, the pictures here are illustrative photos from Wikimedia Commons, used under their free licenses. Thanks to their photographers. Each line links to the original file and its license."],
+          body: ["Apart from my profile picture, my school's crest, the screenshot of this site and the Legend Of Chris cover art, the pictures here are illustrative photos from Wikimedia Commons, used under their free licenses. Thanks to their photographers. Each line links to the original file and its license."],
           bullets: [
             { text: "Eisenman Camp: \"Kunststoffzugprobe Dauerfestigkeit 02\" by Hb tuw, CC BY-SA 4.0", url: "https://commons.wikimedia.org/wiki/File:Kunststoffzugprobe_Dauerfestigkeit_02.jpg" },
             { text: "Lehigh camp: \"Welding Student\" by Tstc, CC BY-SA 4.0", url: "https://commons.wikimedia.org/wiki/File:Welding_Student.jpg" },

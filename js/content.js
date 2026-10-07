@@ -693,6 +693,46 @@ window.SITE = {
     },
 
     {
+      id: "games",
+      label: "What I'm Playing",
+      icon: "assets/icons/games.svg",
+      items: [
+        {
+          id: "steam",
+          title: "Steam library",
+          subtitle: "23 games I'm playing",
+          summary: "What's installed and in rotation",
+          body: ["The games I'm playing right now, mostly on Linux."],
+          bullets: [
+            "Celeste",
+            "DEATH STRANDING DIRECTOR'S CUT",
+            "DELTARUNE",
+            "Easy Delivery Co.",
+            "The Elder Scrolls V: Skyrim",
+            "Electoral Carnage",
+            "F1 2020",
+            "Forza Horizon 6",
+            "Grandpa High On Retro",
+            "Half-Life 2",
+            "Halo Infinite",
+            "Halo: The Master Chief Collection",
+            "Kerbal Space Program",
+            "Marvel's Spider-Man: Miles Morales",
+            "OneShot: World Machine Edition",
+            "Persona 3 Reload",
+            "Persona 5 Royal",
+            "Portal",
+            "Portal 2",
+            "Rocket League",
+            "Super Money Ring Demo",
+            "Team Fortress 2",
+            "Yakuza 0"
+          ]
+        }
+      ]
+    },
+
+    {
       id: "contact",
       label: "Contact",
       icon: "assets/icons/contact.svg",

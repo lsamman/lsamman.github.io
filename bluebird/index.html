@@ -4,9 +4,11 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Twitter: Bluebird Variant</title>
-<meta name="description" content="Twitter: Bluebird Variant (with no limits), the Sacred App from The Legend Of Chris. An X client with no character limit and no auto-correct.">
-<meta name="theme-color" content="#c0deed" media="(prefers-color-scheme: light)">
-<meta name="theme-color" content="#0a1a2a" media="(prefers-color-scheme: dark)">
+<meta name="description" content="Twitter: Bluebird Variant (with no limits), the Sacred App from The Legend Of Chris. An X client for a sideways, cracked iPhone 3G: no character limit, no auto-correct, never update.">
+<meta name="theme-color" content="#6d84a2" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
 <link rel="icon" type="image/svg+xml" href="img/bird.svg">
 <link rel="apple-touch-icon" href="img/apple-touch-icon.png">
 <script>try { var t = localStorage.getItem("bluebird.theme"); if (t === '"light"' || t === '"dark"') document.documentElement.dataset.theme = JSON.parse(t); } catch (e) {}</script>
@@ -18,7 +20,7 @@
      SITE_VERSION and the ?v= tags are kept in sync by ../bump-version.sh -->
 <script>
   (function () {
-    var SITE_VERSION = "20261007170436";
+    var SITE_VERSION = "20261007171649";
     if (!window.fetch) return;
     var newer = null, last = 0;
     function busy() {
@@ -63,74 +65,58 @@
     setInterval(function () { check(false); }, 5 * 60 * 1000);
   })();
 </script>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Varela+Round&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/app.css?v=20261007170436">
+<link rel="stylesheet" href="css/app.css?v=20261007171649">
 </head>
 <body>
-<!-- Boot: Club Shadowban's giant rotating X, suspended by Elon's tears, shatters and the bird flies out -->
-<div id="boot" class="boot" role="button" tabindex="0" aria-label="Skip intro" hidden>
-  <div class="boot-stage">
-    <svg class="boot-x" viewBox="0 0 100 100" aria-hidden="true">
-      <path class="xa" d="M18 14h18l46 72H64z"/><path class="xb" d="M82 14H70L18 86h12z"/>
+<!-- On a computer, Bluebird runs on a virtual iPhone 3G: sideways, cracked, as Steve Jobs presented it.
+     On a phone, your phone is the iPhone 3G. -->
+<div class="device">
+  <span class="earpiece" aria-hidden="true"></span>
+  <a class="homebtn" href="#/" aria-label="Home"><i></i></a>
+  <div class="screen">
+    <div class="statusbar" aria-hidden="true">
+      <span class="sig"><i></i><i></i><i></i><i></i><i></i></span><span class="carrier">God's router</span><span class="g3">3G</span>
+      <span class="clock" id="clock"></span>
+      <span class="np" title="Plays U2 on loop">▶ U2</span><span class="batt"><span class="lvl"></span></span>
+    </div>
+
+    <header class="navbar">
+      <span class="nb-left" id="nb-left"></span>
+      <h1 id="nav-title">Bluebird</h1>
+      <span class="nb-right" id="nb-right"></span>
+    </header>
+
+    <main id="view" class="view" tabindex="-1"></main>
+
+    <nav class="tabbar" aria-label="Tabs">
+      <a href="#/" data-nav="home"><svg viewBox="0 0 64 64"><path d="M8 30c5 2 9 2 12 1-5-3-8-8-8-15 6 6 13 10 21 10 0-8 6-14 14-14 4 0 7 2 9 4 3 0 6-2 8-3-1 3-3 5-5 7 2 0 5-1 7-2-2 3-4 5-6 6 0 18-13 34-34 34-7 0-13-2-18-5 6 1 12-1 17-4-6 0-10-4-12-9 2 0 4 0 5-1-6-1-10-6-10-11"/></svg><span>Timeline</span></a>
+      <a href="#/lookup" data-nav="lookup"><svg viewBox="0 0 30 30"><path d="M12 3a9 9 0 1 1 0 18 9 9 0 0 1 0-18zm0 3.2a5.8 5.8 0 1 0 0 11.6 5.8 5.8 0 0 0 0-11.6zM18.5 19.7l2.3-2.3 6.4 6.4-2.3 2.3z"/></svg><span>Look up</span></a>
+      <a href="#/nest" data-nav="nest"><svg viewBox="0 0 30 30"><path d="M15 3l3.6 7.4 8.1 1.1-5.9 5.7 1.4 8L15 21.4l-7.2 3.8 1.4-8-5.9-5.7 8.1-1.1z"/></svg><span>Nest</span></a>
+      <a href="#/settings" data-nav="settings"><svg viewBox="0 0 30 30"><path d="M24 16.3a9 9 0 0 0 0-2.6l2.6-2-2.5-4.4-3.1 1.2a9 9 0 0 0-2.2-1.3L18.4 4h-5l-.5 3.2a9 9 0 0 0-2.2 1.3L7.6 7.3l-2.5 4.4 2.6 2a9 9 0 0 0 0 2.6l-2.6 2 2.5 4.4 3.1-1.2c.7.5 1.4 1 2.2 1.3l.5 3.2h5l.5-3.2a9 9 0 0 0 2.2-1.3l3.1 1.2 2.5-4.4zM15.9 19a4 4 0 1 1 0-8 4 4 0 0 1 0 8z"/></svg><span>Settings</span></a>
+    </nav>
+
+    <!-- The crack. It's cracked. -->
+    <svg class="crack" viewBox="0 0 600 400" preserveAspectRatio="none" aria-hidden="true">
+      <g><path d="M548 372l-38-52-61-21-48-46"/><path d="M510 320l-19-71-37-40"/><path d="M510 320l-64 18-58-8"/><path d="M548 372l-8-47 21-60"/><path d="M548 372l30-38"/><path d="M449 299l-30 31"/><path d="M491 249l23-29"/></g>
     </svg>
-    <div class="tears" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div>
-    <img class="boot-bird" src="img/bird.svg" alt="">
+
+    <!-- Boot: Club Shadowban's giant rotating X, suspended by Elon's tears, shatters and the bird flies out -->
+    <div id="boot" class="boot" role="button" tabindex="0" aria-label="Skip intro" hidden>
+      <div class="boot-stage">
+        <svg class="boot-x" viewBox="0 0 100 100" aria-hidden="true">
+          <path class="xa" d="M18 14h18l46 72H64z"/><path class="xb" d="M82 14H70L18 86h12z"/>
+        </svg>
+        <div class="tears" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div>
+        <img class="boot-bird" src="img/bird.svg" alt="">
+      </div>
+      <p class="boot-line" id="boot-line">Rolling back from X…</p>
+      <p class="boot-hint">tap to skip</p>
+    </div>
+
+    <div id="toast" class="hud" role="status" hidden></div>
   </div>
-  <p class="boot-line" id="boot-line">Rolling back from X…</p>
-  <p class="boot-hint">tap to skip</p>
 </div>
-
-<div class="clouds" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i></div>
-
-<!-- iPhone 3G status bar -->
-<div class="statusbar" aria-hidden="true">
-  <span class="sig"><i></i><i></i><i></i><i></i><i></i></span><span class="carrier">God's router</span><span class="g3">3G</span>
-  <span class="clock" id="clock"></span>
-  <span class="batt"><span class="lvl"></span></span>
-</div>
-
-<header class="top">
-  <a class="brand" href="#/" aria-label="Bluebird home"><img src="img/bird.svg" alt=""><span class="word">twitter</span><span class="variant" title="As named by Steve Jobs at the iPhone 3G Keynote">Bluebird Variant <em>(with no limits)</em></span></a>
-  <nav class="top-nav" aria-label="Main">
-    <a href="#/" data-nav="home">Home</a>
-    <a href="#/lookup" data-nav="lookup">Look up</a>
-    <a href="#/nest" data-nav="nest">Nest</a>
-    <a href="#/settings" data-nav="settings">Settings</a>
-  </nav>
-</header>
-
-<div class="layout">
-  <main id="view" class="view" tabindex="-1"></main>
-  <aside class="side" aria-label="Sidebar">
-    <section class="box me">
-      <img src="img/bird.svg" alt="">
-      <div><b>You</b><span>@baller · not verified</span></div>
-      <dl><div><dt id="n-posts">0</dt><dd>drafts</dd></div><div><dt id="n-favs">0</dt><dd>favorites</dd></div><div><dt>97</dt><dd>followers</dd></div></dl>
-    </section>
-    <section class="box">
-      <h3>Trending Topics</h3>
-      <ol class="trends" id="trends"></ol>
-    </section>
-    <section class="box small">
-      <h3>About this phone</h3>
-      <p>Firmware: <b>Never update</b><br>Auto-Correct: <b>Off</b> <span class="muted">(you are forced to mean what you say)</span><br>Front camera: <b>None</b> <span class="muted">(to avoid self-reflection)</span></p>
-    </section>
-  </aside>
-</div>
-
-<!-- Tweetie-style tab bar on phones -->
-<nav class="tabbar" aria-label="Tabs">
-  <a href="#/" data-nav="home"><svg viewBox="0 0 24 24"><path d="M3 11l9-7 9 7v9h-6v-6H9v6H3z"/></svg><span>Home</span></a>
-  <a href="#/lookup" data-nav="lookup"><svg viewBox="0 0 24 24"><path d="M10 3a7 7 0 1 1 0 14 7 7 0 0 1 0-14zm0 2.5a4.5 4.5 0 1 0 0 9 4.5 4.5 0 0 0 0-9zM15 16l1.8-1.8 5 5L20 21z"/></svg><span>Look up</span></a>
-  <a href="#/compose" data-nav="compose" class="tweet-tab"><svg viewBox="0 0 24 24"><path d="M4 17.2V21h3.8L19 9.8 15.2 6zM21 7.8a1 1 0 0 0 0-1.4L18.6 4a1 1 0 0 0-1.4 0l-1.6 1.6 3.8 3.8z"/></svg><span>Tweet</span></a>
-  <a href="#/nest" data-nav="nest"><svg viewBox="0 0 24 24"><path d="M12 3l2.8 5.8 6.2.9-4.5 4.4 1 6.3L12 17.5l-5.5 2.9 1-6.3L3 9.7l6.2-.9z"/></svg><span>Nest</span></a>
-  <a href="#/settings" data-nav="settings"><svg viewBox="0 0 24 24"><path d="M19.4 13a7.6 7.6 0 0 0 0-2l2.1-1.6-2-3.5-2.5 1a7.4 7.4 0 0 0-1.7-1L15 3h-4l-.4 2.9a7.4 7.4 0 0 0-1.7 1l-2.5-1-2 3.5L6.6 11a7.6 7.6 0 0 0 0 2l-2.1 1.6 2 3.5 2.5-1a7.4 7.4 0 0 0 1.7 1L11 21h4l.4-2.9a7.4 7.4 0 0 0 1.7-1l2.5 1 2-3.5zM13 15.5a3.5 3.5 0 1 1 0-7 3.5 3.5 0 0 1 0 7z"/></svg><span>Settings</span></a>
-</nav>
-
-<a class="fab" href="#/compose" aria-label="New tweet" title="What's happening?"><svg viewBox="0 0 24 24"><path d="M4 17.2V21h3.8L19 9.8 15.2 6zM21 7.8a1 1 0 0 0 0-1.4L18.6 4a1 1 0 0 0-1.4 0l-1.6 1.6 3.8 3.8z"/></svg></a>
-<div id="toast" class="toast" role="status" hidden></div>
-<script type="module" src="js/app.js?v=20261007170436"></script>
+<p class="caption">Twitter: Bluebird Variant <em>(with no limits)</em> · running on a virtual iPhone 3G · sideways, cracked, never updated</p>
+<script type="module" src="js/app.js?v=20261007171649"></script>
 </body>
 </html>

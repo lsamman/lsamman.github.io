@@ -887,10 +887,10 @@ window.SITE = {
           subtitle: "(with no limits)",
           summary: "An X client from before the X",
           body: [
-            "Steve Jobs names Twitter Bluebird Variant (with no limits) as one of the Sacred Apps at the iPhone 3G Keynote. This is my take on it: the 2009 sky-and-clouds Twitter, booting up as Club Shadowban's giant X shatters.",
-            "There's no character limit (long tweets go up as a numbered thread) and no auto-correct. You can look up tweets and profiles, save them, favorite with a star, and scroll The Canon, a timeline of tweets from the book's characters."
+            "Steve Jobs names Twitter Bluebird Variant (with no limits) as one of the Sacred Apps at the iPhone 3G Keynote. This is my take on it: an iPhone OS 3 app running on a sideways, cracked iPhone 3G, booting up as Club Shadowban's giant X shatters.",
+            "It's an X client: follow real accounts, look up tweets and post with no character limit (long tweets go up as a numbered thread) and no auto-correct. Between them, the book's characters tweet on the Timeline at random times through the day."
           ],
-          tags: ["No limits", "No auto-correct", "Never update", "2009"],
+          tags: ["No limits", "No auto-correct", "Never update", "iPhone OS 3"],
           links: [{ label: "Open Bluebird", url: "bluebird/" }]
         }
       ]

@@ -1,6 +1,6 @@
 // Plays a video ad-free through Piped, or with YouTube's own player, depending on the
 // Playback setting. In "auto" mode a Piped failure falls back to YouTube's player.
-import { streamsFor } from "./piped.js?v=20261007142440";
+import { streamsFor } from "./piped.js?v=20261007143201";
 
 const HLS_JS = "https://cdn.jsdelivr.net/npm/hls.js@1.7.3/dist/hls.min.js";
 const START_TIMEOUT = 12000;
@@ -14,6 +14,13 @@ function loadHlsJs() {
     document.head.append(s);
   });
 }
+
+// Browsers without built-in HLS (everything but Safari) need hls.js; fetch it early, off the critical path.
+export function warmUp() {
+  if (window.Hls || document.createElement("video").canPlayType("application/vnd.apple.mpegurl")) return;
+  loadHlsJs().catch(() => {});
+}
+if ("requestIdleCallback" in window) requestIdleCallback(() => warmUp(), { timeout: 4000 }); else setTimeout(warmUp, 2500);
 
 export function stop() {
   if (hlsInstance) { hlsInstance.destroy(); hlsInstance = null; }

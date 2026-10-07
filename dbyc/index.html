@@ -12,7 +12,7 @@
      SITE_VERSION and the ?v= tags are kept in sync by ../bump-version.sh -->
 <script>
   (function () {
-    var SITE_VERSION = "20261007142440";
+    var SITE_VERSION = "20261007143201";
     if (!window.fetch) return;
     fetch("../version.json?t=" + Date.now(), { cache: "no-store" })
       .then(function (r) { return r.ok ? r.json() : null; })
@@ -28,7 +28,7 @@
       .catch(function () {});
   })();
 </script>
-<link rel="stylesheet" href="css/app.css?v=20261007142440">
+<link rel="stylesheet" href="css/app.css?v=20261007143201">
 </head>
 <body>
 <header class="top">
@@ -48,6 +48,6 @@
 <main id="view" class="view" tabindex="-1"></main>
 <dialog id="dlg" class="dlg"><div class="dlg-head"><h2 id="dlg-title"></h2><form method="dialog"><button class="dlg-x" aria-label="Close">✕</button></form></div><div id="dlg-body"></div></dialog>
 <div id="toast" class="toast" role="status" hidden></div>
-<script type="module" src="js/app.js?v=20261007142440"></script>
+<script type="module" src="js/app.js?v=20261007143201"></script>
 </body>
 </html>

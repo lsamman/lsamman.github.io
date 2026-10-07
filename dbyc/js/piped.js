@@ -1,14 +1,16 @@
 // Piped (https://github.com/TeamPiped/Piped): an open-source, ad-free front door to YouTube.
 // Public servers come and go, so every request tries several and remembers the one that worked.
-import { PIPED_INSTANCES, PIPED_INSTANCE_LIST } from "./config.js?v=20261007142440";
-import { get, set, settings } from "./store.js?v=20261007142440";
+import { PIPED_INSTANCES, PIPED_INSTANCE_LIST } from "./config.js?v=20261007143201";
+import { get, set, settings } from "./store.js?v=20261007143201";
 
-const TIMEOUT = 7000;
+const TIMEOUT = 8000;   // give up on one server after this long
+const HEDGE = 1500;     // ask the next server too if the current one is this slow
 let listLoaded = false;
 
-async function fetchJSON(url, timeout = TIMEOUT) {
+async function fetchJSON(url, timeout = TIMEOUT, outer) {
   const ctrl = new AbortController();
   const t = setTimeout(() => ctrl.abort(), timeout);
+  if (outer) outer.addEventListener("abort", () => ctrl.abort());
   try {
     const res = await fetch(url, { signal: ctrl.signal });
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
@@ -33,16 +35,42 @@ async function candidates() {
   return [...new Set([last, ...list].filter(Boolean))];
 }
 
-export async function api(path) {
-  let lastErr;
-  for (const base of (await candidates()).slice(0, 5)) {
-    try {
-      const data = await fetchJSON(base + path);
-      set("pipedLast", base);
-      return { data, instance: base };
-    } catch (e) { lastErr = e; }
-  }
-  throw new Error("No Piped server answered" + (lastErr ? ` (${lastErr.message})` : ""));
+// Ask the server that worked last time; if it's slow or fails, ask the next one as well
+// (and the next…). Whichever answers first wins and the others are cancelled.
+function race(list, path) {
+  return new Promise((resolve, reject) => {
+    let next = 0, failed = 0, done = false, lastErr = null;
+    const ctrls = [];
+    const finish = () => { done = true; clearInterval(hedge); ctrls.forEach(c => c.abort()); };
+    const launch = () => {
+      if (done || next >= list.length) return;
+      const base = list[next++], ctrl = new AbortController();
+      ctrls.push(ctrl);
+      fetchJSON(base + path, TIMEOUT, ctrl.signal).then(data => {
+        if (done) return;
+        finish(); set("pipedLast", base);
+        resolve({ data, instance: base });
+      }, e => {
+        if (done) return;
+        lastErr = e; failed++;
+        if (failed >= list.length) { finish(); reject(new Error("No Piped server answered" + (lastErr ? ` (${lastErr.message})` : ""))); }
+        else launch();
+      });
+    };
+    const hedge = setInterval(launch, HEDGE);
+    launch();
+  });
+}
+
+// Answers are kept for a few minutes, so going back and forth between pages is instant.
+const memo = new Map();
+export async function api(path, ttl = 5 * 60000) {
+  const hit = memo.get(path);
+  if (hit && hit.until > Date.now()) return hit.promise;
+  const promise = candidates().then(list => race(list.slice(0, 6), path));
+  memo.set(path, { promise, until: Date.now() + ttl });
+  promise.catch(() => memo.delete(path));
+  return promise;
 }
 
 const idFrom = url => (/[?&]v=([\w-]{11})/.exec(url || "") || [])[1] || (/^\/?([\w-]{11})$/.exec(url || "") || [])[1];
@@ -75,8 +103,14 @@ export async function search(q, nextpage) {
 }
 
 export async function trending(region) {
-  const { data } = await api(`/trending?region=${encodeURIComponent(region || "US")}`);
-  return streams(data);
+  const { data } = await api(`/trending?region=${encodeURIComponent(region || "US")}`, 30 * 60000);
+  const items = streams(data);
+  set("trending", { at: Date.now(), region, items });
+  return items;
+}
+export function cachedTrending(region) {
+  const t = get("trending", null);
+  return t && t.region === region && t.at > Date.now() - 12 * 3600000 ? t : null;
 }
 
 export async function channel(id, nextpage) {
@@ -108,8 +142,7 @@ export async function streamsFor(id) {
 }
 
 // YouTube's own "related videos" for a video (what YouTube thinks goes with it).
-const relatedCache = new Map();
 export async function related(id) {
-  if (!relatedCache.has(id)) relatedCache.set(id, api(`/streams/${encodeURIComponent(id)}`).then(r => streams(r.data.relatedStreams)));
-  try { return await relatedCache.get(id); } catch (e) { relatedCache.delete(id); throw e; }
+  const { data } = await api(`/streams/${encodeURIComponent(id)}`);
+  return streams(data.relatedStreams);
 }

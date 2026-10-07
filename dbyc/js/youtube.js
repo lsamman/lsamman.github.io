@@ -1,7 +1,7 @@
 // The official YouTube Data API, signed in with Google: subscriptions, playlists, likes and saving.
-import { GOOGLE_CLIENT_ID } from "./config.js?v=20261007142440";
-import { get, set, del } from "./store.js?v=20261007142440";
-import { isoDuration, isShort } from "./util.js?v=20261007142440";
+import { GOOGLE_CLIENT_ID } from "./config.js?v=20261007143201";
+import { get, set, del } from "./store.js?v=20261007143201";
+import { isoDuration, isShort } from "./util.js?v=20261007143201";
 
 const API = "https://www.googleapis.com/youtube/v3";
 // Full YouTube access, so DBYC can like videos and save them to playlists (it never posts or deletes).
@@ -64,7 +64,7 @@ export async function signIn() {
 export function signOut() {
   const t = token();
   if (t && window.google?.accounts?.oauth2) google.accounts.oauth2.revoke(t, () => {});
-  del("token"); del("profile"); del("feed");
+  del("token"); del("profile"); del("feed"); del("playlists");
   changed();
 }
 
@@ -100,9 +100,11 @@ async function pool(items, n, fn) {
 
 // Full details for up to any number of ids (50 per request), in DBYC's video shape.
 export async function videos(ids) {
-  const out = [];
-  for (let i = 0; i < ids.length; i += 50) {
-    const data = await call("/videos", { part: "snippet,contentDetails,statistics,player", id: ids.slice(i, i + 50).join(","), maxHeight: 360 });
+  const out = [], batches = [];
+  for (let i = 0; i < ids.length; i += 50) batches.push(ids.slice(i, i + 50));
+  const answers = await Promise.all(batches.map(b => call("/videos", { part: "snippet,contentDetails,statistics,player", id: b.join(","), maxHeight: 360 })));
+  const order = new Map(ids.map((id, i) => [id, i]));
+  for (const data of answers) {
     for (const v of data.items || []) {
       const w = +v.player?.embedWidth || 0, h = +v.player?.embedHeight || 0;
       out.push({
@@ -114,7 +116,7 @@ export async function videos(ids) {
       });
     }
   }
-  return out;
+  return out.sort((a, b) => order.get(a.id) - order.get(b.id));
 }
 
 export async function subscriptions() {
@@ -129,12 +131,23 @@ export async function subscriptions() {
 }
 
 // Newest uploads from everyone you subscribe to. Cached for 10 minutes to save API allowance.
-export async function feed({ force = false } = {}) {
-  const cached = get("feed", null);
-  if (!force && cached && cached.v === 2 && cached.at > Date.now() - 10 * 60000) return cached;
+// cachedFeed() returns the last one (up to a day old) instantly, for showing while refreshing.
+export const FEED_FRESH = 10 * 60000;
+export function cachedFeed() {
+  const c = get("feed", null);
+  return c && c.v === 2 && c.at > Date.now() - 24 * 3600000 ? c : null;
+}
+let feedInFlight = null;
+export function feed({ force = false } = {}) {
+  const cached = cachedFeed();
+  if (!force && cached && cached.at > Date.now() - FEED_FRESH) return Promise.resolve(cached);
+  if (!feedInFlight) feedInFlight = loadFeed().finally(() => { feedInFlight = null; });
+  return feedInFlight;
+}
+async function loadFeed() {
   const subs = await subscriptions();
   const avatars = Object.fromEntries(subs.map(s => [s.id, s.avatar]));
-  const lists = await pool(subs, 8, s => call("/playlistItems", { part: "contentDetails", playlistId: "UU" + s.id.slice(2), maxResults: 8 }));
+  const lists = await pool(subs, 16, s => call("/playlistItems", { part: "contentDetails", playlistId: "UU" + s.id.slice(2), maxResults: 8 }));
   const recent = lists.flatMap(l => (l?.items || []).map(i => ({ id: i.contentDetails.videoId, at: Date.parse(i.contentDetails.videoPublishedAt || 0) })))
     .filter(v => v.at).sort((a, b) => b.at - a.at).slice(0, 150);
   const items = (await videos(recent.map(v => v.id)))
@@ -172,6 +185,7 @@ export async function channel(id) {
 }
 
 // ---------- playlists ----------
+export function cachedPlaylists() { return get("playlists", null); }
 export async function playlists() {
   const out = []; let pageToken = "";
   const me = await call("/channels", { part: "contentDetails", mine: "true" });
@@ -185,7 +199,9 @@ export async function playlists() {
     pageToken = data.nextPageToken;
     if (!pageToken) break;
   }
-  return { liked, items: out };
+  const result = { liked, items: out, at: Date.now() };
+  set("playlists", result);
+  return result;
 }
 
 export async function playlist(id, { max = 200 } = {}) {

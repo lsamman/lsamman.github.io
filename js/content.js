@@ -705,6 +705,7 @@ window.SITE = {
       items: [
         {
           id: "steam",
+          icon: "assets/icons/steam.svg",   // Steam logo (Simple Icons, CC0)
           title: "Steam library",
           subtitle: "25 games I'm playing",
           summary: "What's installed and in rotation",

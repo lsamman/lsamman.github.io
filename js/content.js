@@ -226,7 +226,7 @@ window.SITE = {
           photo: "assets/images/legend-of-chris-wiki.jpg",
           title: "The Legend Of Chris Wiki",
           subtitle: "lsamman.github.io/legend-of-chris-wiki · 2026",
-          summary: "A full fan wiki for a book my friends and I wrote",
+          summary: "The Chris Files",
           body: [
             "A fan wiki for The Legend Of Chris, an absurdist comedy book written with friends. It has over 300 articles covering every character, place, planet, item and event, with search, categories and backlinks. It's styled to look like the original document.",
             "The site is generated from the article text by a small Python script and deployed automatically with GitHub Pages."

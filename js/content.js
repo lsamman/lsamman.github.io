@@ -877,7 +877,7 @@ window.SITE = {
             "Discord: dreamliners"
           ],
           links: [
-            { label: "Email: william_vella@icloud.com", url: "mailto:william_vella@icloud.com" },
+            { label: "Email: willow_vella@icloud.com", url: "mailto:willow_vella@icloud.com" },
             { label: "GitHub: lsamman", url: "https://github.com/lsamman" }
           ]
         },

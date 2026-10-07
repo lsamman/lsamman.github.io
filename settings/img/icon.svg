@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+<defs>
+  <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#9aa3ad"/><stop offset="1" stop-color="#3f464f"/></linearGradient>
+  <radialGradient id="sheen" cx=".5" cy=".1" r=".9"><stop offset="0" stop-color="#fff" stop-opacity=".35"/><stop offset=".6" stop-color="#fff" stop-opacity="0"/></radialGradient>
+  <linearGradient id="steel" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ffffff"/><stop offset=".45" stop-color="#c9ced4"/><stop offset=".55" stop-color="#9ea6af"/><stop offset="1" stop-color="#e3e6ea"/></linearGradient>
+  <radialGradient id="hub" cx=".4" cy=".35" r=".7"><stop offset="0" stop-color="#9fe0ff"/><stop offset=".6" stop-color="#1f7fd6"/><stop offset="1" stop-color="#0b3f86"/></radialGradient>
+</defs>
+<rect width="64" height="64" rx="14" fill="url(#bg)"/>
+<rect width="64" height="64" rx="14" fill="url(#sheen)"/>
+<g transform="translate(32 33) scale(.86) translate(-32 -32)">
+  <path d="M53.2 28.5 L58.9 29.3 L58.9 34.7 L53.2 35.5 L52.1 39.6 L56.6 43.1 L53.9 47.8 L48.6 45.6 L45.6 48.6 L47.8 53.9 L43.1 56.6 L39.6 52.1 L35.5 53.2 L34.7 58.9 L29.3 58.9 L28.5 53.2 L24.4 52.1 L20.9 56.6 L16.2 53.9 L18.4 48.6 L15.4 45.6 L10.1 47.8 L7.4 43.1 L11.9 39.6 L10.8 35.5 L5.1 34.7 L5.1 29.3 L10.8 28.5 L11.9 24.4 L7.4 20.9 L10.1 16.2 L15.4 18.4 L18.4 15.4 L16.2 10.1 L20.9 7.4 L24.4 11.9 L28.5 10.8 L29.3 5.1 L34.7 5.1 L35.5 10.8 L39.6 11.9 L43.1 7.4 L47.8 10.1 L45.6 15.4 L48.6 18.4 L53.9 16.2 L56.6 20.9 L52.1 24.4Z M40 32 A8 8 0 1 0 24 32 A8 8 0 1 0 40 32Z" fill="#20252b" opacity=".45" transform="translate(0 1.6)"/>
+  <path d="M53.2 28.5 L58.9 29.3 L58.9 34.7 L53.2 35.5 L52.1 39.6 L56.6 43.1 L53.9 47.8 L48.6 45.6 L45.6 48.6 L47.8 53.9 L43.1 56.6 L39.6 52.1 L35.5 53.2 L34.7 58.9 L29.3 58.9 L28.5 53.2 L24.4 52.1 L20.9 56.6 L16.2 53.9 L18.4 48.6 L15.4 45.6 L10.1 47.8 L7.4 43.1 L11.9 39.6 L10.8 35.5 L5.1 34.7 L5.1 29.3 L10.8 28.5 L11.9 24.4 L7.4 20.9 L10.1 16.2 L15.4 18.4 L18.4 15.4 L16.2 10.1 L20.9 7.4 L24.4 11.9 L28.5 10.8 L29.3 5.1 L34.7 5.1 L35.5 10.8 L39.6 11.9 L43.1 7.4 L47.8 10.1 L45.6 15.4 L48.6 18.4 L53.9 16.2 L56.6 20.9 L52.1 24.4Z M40 32 A8 8 0 1 0 24 32 A8 8 0 1 0 40 32Z" fill="url(#steel)" fill-rule="evenodd" stroke="#5b636c" stroke-width=".8"/>
+  <circle cx="32" cy="32" r="16.5" fill="none" stroke="#7d858f" stroke-width="1.2" opacity=".7"/>
+  <circle cx="32" cy="32" r="7.6" fill="url(#hub)"/>
+  <ellipse cx="30.5" cy="29.3" rx="4" ry="2.2" fill="#fff" opacity=".55"/>
+</g>
+</svg>

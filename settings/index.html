@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Settings (Full access)</title>
+<meta name="description" content="Settings (Full access), the Sacred App from The Legend Of Chris. The control panel for the whole iPhone 3G: one theme for every app, the home-screen wallpaper, storage, backups, a touch-grass timer and Software Update locked to Never.">
+<meta name="theme-color" content="#d6d6d6" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#3a3c40" media="(prefers-color-scheme: dark)">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Settings">
+<link rel="icon" type="image/svg+xml" href="img/icon.svg">
+<link rel="apple-touch-icon" href="img/apple-touch-icon.png">
+<script>try { var t = localStorage.getItem("settings.theme"); if (t === '"light"' || t === '"dark"') document.documentElement.dataset.theme = JSON.parse(t); } catch (e) {}</script>
+<meta http-equiv="Cache-Control" content="no-cache">
+<!-- Self-update: always run the latest published version, even in a tab left open for days or restored with Back.
+     Checks ../version.json on load, when the tab comes back into view, when it's restored from the back/forward cache,
+     and every 5 minutes. A newer version found on load reloads at once; one found later waits for a moment that
+     won't lose anything (a page change, or coming back to the tab) and never interrupts typing or a playing video.
+     SITE_VERSION and the ?v= tags are kept in sync by ../bump-version.sh -->
+<script>
+  (function () {
+    var SITE_VERSION = "20261007172844";
+    if (!window.fetch) return;
+    var newer = null, last = 0;
+    function busy() {
+      var a = document.activeElement, m = document.querySelectorAll("video, audio");
+      if (a && /^(TEXTAREA|INPUT)$/.test(a.tagName) && a.value) return true;
+      for (var i = 0; i < m.length; i++) if (!m[i].paused && !m[i].ended) return true;
+      return false;
+    }
+    function reload() {
+      if (!newer || busy()) return;
+      var key = "settings.reloaded." + newer;   // reload at most once per new version
+      try { if (sessionStorage.getItem(key)) return; sessionStorage.setItem(key, "1"); } catch (e) {}
+      var v = newer;
+      function go() {
+        var u = new URL(location.href);
+        u.searchParams.set("v", v);          // a new URL, so the browser fetches fresh HTML
+        location.replace(u.toString());
+      }
+      var clears = [];
+      if (window.caches && caches.keys) clears.push(caches.keys().then(function (ks) { return Promise.all(ks.map(function (k) { return caches.delete(k); })); }));
+      if (navigator.serviceWorker && navigator.serviceWorker.getRegistrations) clears.push(navigator.serviceWorker.getRegistrations().then(function (rs) { return Promise.all(rs.map(function (r) { return r.unregister(); })); }));
+      Promise.all(clears).catch(function () {}).then(go, go);
+    }
+    function check(now) {
+      if (newer) { if (now) reload(); return; }
+      if (Date.now() - last < 10000) return;  // at most every 10 seconds
+      last = Date.now();
+      fetch("../version.json?t=" + last, { cache: "no-store" })
+        .then(function (r) { return r.ok ? r.json() : null; })
+        .then(function (d) {
+          if (!d || !d.v || d.v === SITE_VERSION) return;
+          newer = d.v;
+          if (now) reload();
+        })
+        .catch(function () {});
+    }
+    check(true);
+    addEventListener("pageshow", function (e) { if (e.persisted) { last = 0; check(true); } });
+    addEventListener("hashchange", function () { check(true); });
+    addEventListener("focus", function () { check(true); });
+    document.addEventListener("visibilitychange", function () { if (document.visibilityState === "visible") check(true); });
+    setInterval(function () { check(false); }, 5 * 60 * 1000);
+  })();
+</script>
+<link rel="stylesheet" href="css/app.css?v=20261007172844">
+</head>
+<body>
+<!-- On a computer: a preferences window over an aurora desktop. On a phone: full screen, panes slide in. -->
+<div class="menubar" aria-hidden="true">
+  <span class="menu-gear"></span><b>Settings</b><span>File</span><span>Edit</span><span>View</span><span>Window</span><span>Help</span>
+  <span class="menu-right"><span class="menu-3g">God's router 3G</span><span id="menu-clock"></span></span>
+</div>
+
+<main class="window" id="window">
+  <header class="titlebar">
+    <span class="lights" aria-hidden="true"><i class="l-close"></i><i class="l-min"></i><i class="l-zoom"></i></span>
+    <h1 id="title">Settings (Full access)</h1>
+  </header>
+  <nav class="toolbar" aria-label="Settings toolbar">
+    <span class="arrows">
+      <button type="button" class="arrow" id="go-back" aria-label="Back"><svg viewBox="0 0 10 10" aria-hidden="true"><path d="M7 1L2 5l5 4z"/></svg></button><button type="button" class="arrow" id="go-fwd" aria-label="Forward"><svg viewBox="0 0 10 10" aria-hidden="true"><path d="M3 1l5 4-5 4z"/></svg></button>
+    </span>
+    <a class="showall" id="showall" href="#">Show All</a>
+    <label class="search"><span class="sr">Search Settings</span><input type="search" id="search" placeholder="Search" autocomplete="off" spellcheck="false"></label>
+  </nav>
+  <div class="content" id="content">
+    <section class="view grid" id="grid" aria-label="All settings"></section>
+    <section class="view pane" id="pane" aria-live="polite"></section>
+  </div>
+</main>
+
+<div class="sheet-wrap" id="sheet" hidden><div class="sheet" role="alertdialog" aria-modal="true" aria-labelledby="sheet-title"></div></div>
+
+<div class="nudge" id="nudge" role="alertdialog" aria-modal="true" aria-labelledby="nudge-title" hidden>
+  <div class="nudge-sky"><span class="nudge-sun"></span></div>
+  <div class="nudge-card">
+    <h2 id="nudge-title">Go outside.</h2>
+    <p id="nudge-text">Your Anti-Social time is up.</p>
+    <div class="buttons"><button type="button" class="aqua" id="nudge-more">5 more minutes</button><button type="button" class="aqua default" id="nudge-done">I touched grass</button></div>
+  </div>
+  <div class="nudge-grass"></div>
+</div>
+
+<script type="module" src="js/app.js?v=20261007172844"></script>
+</body>
+</html>

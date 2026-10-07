@@ -1,0 +1,282 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Snapchat: Ghost Protocol Edition</title>
+<meta name="description" content="Snapchat: Ghost Protocol Edition, the Sacred App from The Legend Of Chris. Take snaps with captions and doodles, and send self-destructing messages encrypted in your browser. Should you choose to accept it.">
+<meta name="theme-color" content="#0b0b0c">
+<meta name="color-scheme" content="dark">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<meta name="apple-mobile-web-app-title" content="Ghost Protocol">
+<meta name="referrer" content="no-referrer">
+<link rel="icon" type="image/svg+xml" href="img/icon.svg">
+<link rel="apple-touch-icon" href="img/apple-touch-icon.png">
+<meta http-equiv="Cache-Control" content="no-cache">
+<!-- Self-update: always run the latest published version, even in a tab left open for days or restored with Back.
+     Checks ../version.json on load, when the tab comes back into view, when it's restored from the back/forward cache,
+     and every 5 minutes. A newer version found on load reloads at once; one found later waits for a moment that
+     won't lose anything (a page change, or coming back to the tab) and never interrupts typing or a playing video.
+     SITE_VERSION and the ?v= tags are kept in sync by ../bump-version.sh -->
+<script>
+  (function () {
+    var SITE_VERSION = "20261007172844";
+    if (!window.fetch) return;
+    var newer = null, last = 0;
+    function busy() {
+      var a = document.activeElement, m = document.querySelectorAll("video, audio");
+      if (a && /^(TEXTAREA|INPUT)$/.test(a.tagName) && a.value) return true;
+      for (var i = 0; i < m.length; i++) if (!m[i].paused && !m[i].ended) return true;
+      return false;
+    }
+    function reload() {
+      if (!newer || busy()) return;
+      var key = "ghost.reloaded." + newer;   // reload at most once per new version
+      try { if (sessionStorage.getItem(key)) return; sessionStorage.setItem(key, "1"); } catch (e) {}
+      var v = newer;
+      function go() {
+        var u = new URL(location.href);
+        u.searchParams.set("v", v);          // a new URL, so the browser fetches fresh HTML
+        location.replace(u.toString());
+      }
+      var clears = [];
+      if (window.caches && caches.keys) clears.push(caches.keys().then(function (ks) { return Promise.all(ks.map(function (k) { return caches.delete(k); })); }));
+      if (navigator.serviceWorker && navigator.serviceWorker.getRegistrations) clears.push(navigator.serviceWorker.getRegistrations().then(function (rs) { return Promise.all(rs.map(function (r) { return r.unregister(); })); }));
+      Promise.all(clears).catch(function () {}).then(go, go);
+    }
+    function check(now) {
+      if (newer) { if (now) reload(); return; }
+      if (Date.now() - last < 10000) return;  // at most every 10 seconds
+      last = Date.now();
+      fetch("../version.json?t=" + last, { cache: "no-store" })
+        .then(function (r) { return r.ok ? r.json() : null; })
+        .then(function (d) {
+          if (!d || !d.v || d.v === SITE_VERSION) return;
+          newer = d.v;
+          if (now) reload();
+        })
+        .catch(function () {});
+    }
+    check(true);
+    addEventListener("pageshow", function (e) { if (e.persisted) { last = 0; check(true); } });
+    addEventListener("hashchange", function () { check(true); });
+    addEventListener("focus", function () { check(true); });
+    document.addEventListener("visibilitychange", function () { if (document.visibilityState === "visible") check(true); });
+    setInterval(function () { check(false); }, 5 * 60 * 1000);
+  })();
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Special+Elite&family=IBM+Plex+Mono:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/app.css?v=20261007172844">
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <symbol id="i-ghost" viewBox="0 0 100 100">
+      <path class="g-body" d="M50 12C33 12 25 25 25 40v9c-4 0-8 1-8 4s5 4 8 5c-2 7-8 12-14 14 2 4 8 4 12 5 1 3 2 6 6 5 6-1 10 3 21 3s15-4 21-3c4 1 5-2 6-5 4-1 10-1 12-5-6-2-12-7-14-14 3-1 8-2 8-5s-4-4-8-4v-9c0-15-8-28-25-28z"/>
+      <path class="g-mask" d="M27 36c8-3 15-3 23 0 8-3 15-3 23 0v9c-8 3-15 2-23-1-8 3-15 4-23 1z"/>
+      <path class="g-eye" d="M33 40c3-2 7-2 10 0-3 2-7 2-10 0zM57 40c3-2 7-2 10 0-3 2-7 2-10 0z"/>
+    </symbol>
+    <symbol id="i-cam" viewBox="0 0 24 24"><path d="M9 4h6l1.6 2.2H20a2 2 0 0 1 2 2V18a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V8.2a2 2 0 0 1 2-2h3.4zM12 9a4 4 0 1 0 0 8 4 4 0 0 0 0-8z"/></symbol>
+    <symbol id="i-folder" viewBox="0 0 24 24"><path d="M2 6a2 2 0 0 1 2-2h5l2 2.4h9a2 2 0 0 1 2 2V18a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2zm3 5v1.6h14V11z"/></symbol>
+    <symbol id="i-lib" viewBox="0 0 24 24"><path d="M4 4h16a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2zm0 13.5h16l-5.2-7-3.6 4.6-2.4-2.9zM8 7.5a1.8 1.8 0 1 0 0 3.6 1.8 1.8 0 0 0 0-3.6z"/></symbol>
+    <symbol id="i-flip" viewBox="0 0 24 24"><path d="M12 4a8 8 0 0 1 7.7 5.8H22l-3.5 4-3.5-4h2.5A5.7 5.7 0 0 0 7.4 8.3L5.7 6.8A8 8 0 0 1 12 4zM5.5 10.2l3.5 4H6.5a5.7 5.7 0 0 0 10.1 1.5l1.7 1.5A8 8 0 0 1 4.3 14.2H2z"/></symbol>
+    <symbol id="i-x" viewBox="0 0 24 24"><path d="M6.3 4.9 12 10.6l5.7-5.7 1.4 1.4-5.7 5.7 5.7 5.7-1.4 1.4-5.7-5.7-5.7 5.7-1.4-1.4 5.7-5.7-5.7-5.7z"/></symbol>
+    <symbol id="i-pen" viewBox="0 0 24 24"><path d="M15.4 3.6a2 2 0 0 1 2.8 0l2.2 2.2a2 2 0 0 1 0 2.8L9 20H4v-5z"/></symbol>
+    <symbol id="i-undo" viewBox="0 0 24 24"><path d="M9 5v3.6c6-.6 11 2.4 12 9.4-2.6-3.6-6.4-5-12-4.6V17l-7-6z"/></symbol>
+    <symbol id="i-save" viewBox="0 0 24 24"><path d="M11 3h2v9.2l3.3-3.3 1.4 1.4L12 16l-5.7-5.7 1.4-1.4 3.3 3.3zM4 18h16v3H4z"/></symbol>
+    <symbol id="i-send" viewBox="0 0 24 24"><path d="M3 20.5 22 12 3 3.5 3 10l12 2-12 2z"/></symbol>
+    <symbol id="i-timer" viewBox="0 0 24 24"><path d="M9 1h6v2H9zm3 3a9 9 0 1 1 0 18 9 9 0 0 1 0-18zm-1 4v6l5 3 1-1.6-4-2.4V8z"/></symbol>
+  </defs>
+</svg>
+
+<div class="desk">
+  <!-- On wide screens: the mission briefing sits beside the app -->
+  <aside class="briefing" aria-label="About this app">
+    <p class="brief-tag">Sacred App 2 of 4 · Eyes only</p>
+    <h2>Snapchat: Ghost Protocol Edition</h2>
+    <p class="brief-sub">Should you choose to accept it.</p>
+    <blockquote>“No Front Camera: To avoid self-reflection. Literally.”<cite>Steve Jobs, at the iPhone 3G Keynote</cite></blockquote>
+    <blockquote>“Name’s FS Martin Genius. I used to beta test Snapchat in the nether dimension.”<cite>FS Martin Genius, App Whisperer</cite></blockquote>
+    <ul class="brief-list">
+      <li><b>Snaps.</b> Take a photo with the back camera, add a caption and a doodle, then share it or save it.</li>
+      <li><b>Ghosts.</b> Write a message that burns after reading. It is locked in your browser and the key lives in the link, so no server ever sees it.</li>
+      <li><b>Dossier.</b> Your Snapstreak, the missions you sent and the field notes.</li>
+    </ul>
+    <p class="brief-foot">One of the Sacred Apps from <a href="https://lsamman.github.io/legend-of-chris-wiki/#snapchat-ghost-protocol">The Legend Of Chris</a>. Made by Will.</p>
+  </aside>
+
+  <div class="app" id="app">
+    <header class="topbar">
+      <a class="brand" href="#/snap" aria-label="Ghost Protocol, home">
+        <svg class="ghost" aria-hidden="true"><use href="#i-ghost"/></svg>
+        <span class="word">Ghost<b>Protocol</b></span>
+      </a>
+      <a class="streak" id="streak" href="#/dossier" title="Snapstreak: days in a row you sent something"><span class="flame" aria-hidden="true">🔥</span><span id="streakN">0</span></a>
+    </header>
+
+    <main class="views">
+      <!-- SNAPS -->
+      <section class="view" id="v-snap" data-view="snap" hidden>
+        <div class="lens" id="lens">
+          <video id="cam" playsinline muted autoplay></video>
+          <div class="reticle" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
+          <div class="rec" id="rec" hidden><span></span>LIVE · REAR LENS</div>
+          <div class="lens-msg" id="lensMsg"></div>
+          <div class="cam-ctrl">
+            <button class="round" id="libBtn" type="button" aria-label="Pick a photo from your library"><svg><use href="#i-lib"/></svg></button>
+            <button class="shutter" id="shutter" type="button" aria-label="Take a snap" disabled><span></span></button>
+            <button class="round" id="flipBtn" type="button" aria-label="Switch camera" hidden><svg><use href="#i-flip"/></svg></button>
+          </div>
+          <input type="file" id="libInput" accept="image/*" hidden>
+        </div>
+
+        <div class="editor" id="editor" hidden>
+          <div class="stage-wrap" id="stageWrap">
+            <div class="stage" id="stage">
+              <canvas id="photo"></canvas>
+              <canvas id="ink"></canvas>
+              <div class="caption" id="caption" hidden><input id="capInput" type="text" maxlength="80" autocomplete="off" autocorrect="off" spellcheck="false" enterkeyhint="done" aria-label="Caption"></div>
+            </div>
+          </div>
+          <div class="ed-top">
+            <button class="ed-btn" id="edClose" type="button" aria-label="Discard snap"><svg><use href="#i-x"/></svg></button>
+            <div class="ed-right">
+              <button class="ed-btn" id="edUndo" type="button" aria-label="Undo doodle" hidden><svg><use href="#i-undo"/></svg></button>
+              <button class="ed-btn txt" id="edText" type="button" aria-label="Add a caption">T</button>
+              <button class="ed-btn" id="edPen" type="button" aria-label="Doodle" aria-pressed="false"><svg><use href="#i-pen"/></svg></button>
+            </div>
+          </div>
+          <div class="palette" id="palette" hidden></div>
+          <div class="timer-pick" id="timerPick" hidden></div>
+          <div class="ed-bottom">
+            <button class="ed-btn timer" id="edTimer" type="button" aria-label="Timer"><svg><use href="#i-timer"/></svg><b id="timerN">3</b></button>
+            <button class="ed-btn" id="edSave" type="button" aria-label="Save to device"><svg><use href="#i-save"/></svg></button>
+            <button class="ed-btn ghostlink" id="edGhost" type="button"><svg aria-hidden="true"><use href="#i-ghost"/></svg><span>Ghost link</span></button>
+            <button class="send" id="edSend" type="button">Send <svg aria-hidden="true"><use href="#i-send"/></svg></button>
+          </div>
+        </div>
+      </section>
+
+      <!-- GHOSTS -->
+      <section class="view scroll" id="v-ghost" data-view="ghost" hidden>
+        <form class="dossier" id="gForm" autocomplete="off">
+          <div class="clip" aria-hidden="true"></div>
+          <span class="stamp red">Top secret</span>
+          <p class="file-no" id="gFileNo">File no. ——</p>
+          <h1 class="d-title">New mission</h1>
+          <label class="d-label" for="gText">Briefing</label>
+          <textarea id="gText" rows="6" maxlength="4000" placeholder="Write your message. It burns after reading." spellcheck="false" autocorrect="off" autocapitalize="sentences"></textarea>
+          <div class="attach">
+            <button type="button" class="chip" id="gAttach">+ Attach a photo</button>
+            <div class="thumb" id="gThumb" hidden><img id="gThumbImg" alt="Attached photo"><button type="button" id="gUnattach" aria-label="Remove photo"><svg><use href="#i-x"/></svg></button></div>
+            <input type="file" id="gFile" accept="image/*" hidden>
+          </div>
+          <div class="d-label">Link expires in</div>
+          <div class="chips" id="gExpiry" role="radiogroup" aria-label="Link expires in"></div>
+          <div class="d-label">Burns after opening</div>
+          <div class="chips" id="gBurn" role="radiogroup" aria-label="Burns after opening"></div>
+          <p class="from">From: <b id="gFrom">Agent</b> <a href="#/dossier">change</a></p>
+          <button class="primary" id="gMake" type="submit">Seal the dossier</button>
+          <p class="fieldnote"><b>Field note.</b> No server is involved. The message is locked in this browser and the key rides in the link. Anyone who has the link can open it until it expires. Burning only happens on the device that opened it.</p>
+        </form>
+
+        <div class="dossier result" id="gResult" hidden>
+          <div class="clip" aria-hidden="true"></div>
+          <span class="stamp red" id="gResStamp">Sealed</span>
+          <p class="file-no" id="gResNo"></p>
+          <h1 class="d-title" id="gResName">Operation</h1>
+          <p class="res-meta" id="gResMeta"></p>
+          <label class="d-label" for="gLink">Your link</label>
+          <div class="linkbox"><input id="gLink" type="text" readonly><button type="button" class="chip dark" id="gCopy">Copy</button></div>
+          <div class="res-actions">
+            <button type="button" class="primary" id="gShare">Share link</button>
+            <button type="button" class="ghostbtn" id="gNew">New mission</button>
+          </div>
+          <p class="fieldnote" id="gResNote"></p>
+        </div>
+      </section>
+
+      <!-- DOSSIER -->
+      <section class="view scroll" id="v-dossier" data-view="dossier" hidden>
+        <div class="dossier">
+          <div class="clip" aria-hidden="true"></div>
+          <span class="stamp red">Classified</span>
+          <p class="file-no">Agent file</p>
+          <h1 class="d-title">Dossier</h1>
+          <div class="stats">
+            <div><b id="sStreak">0</b><span>day Snapstreak</span></div>
+            <div><b id="sSnaps">0</b><span>snaps sent</span></div>
+            <div><b id="sGhosts">0</b><span>ghosts sealed</span></div>
+            <div><b id="sBurned">0</b><span>burned here</span></div>
+          </div>
+          <label class="d-label" for="agentName">Your agent name</label>
+          <input id="agentName" type="text" maxlength="40" placeholder="Agent" autocomplete="off" spellcheck="false">
+          <div class="d-label">Protocols</div>
+          <label class="toggle"><input type="checkbox" id="tGhostMode"><span class="sw"></span><span class="tl"><b>Ghost mode</b>Don’t keep a list of the missions you send.</span></label>
+          <label class="toggle"><input type="checkbox" id="tSelf"><span class="sw"></span><span class="tl"><b>I accept self-reflection</b>Let the front camera work. The iPhone 3G would never.</span></label>
+          <label class="toggle"><input type="checkbox" id="tIntro"><span class="sw"></span><span class="tl"><b>Play the intro</b>Once each time you open the app.</span></label>
+        </div>
+
+        <div class="dossier">
+          <div class="d-label first">Missions sent from this device</div>
+          <ul class="sent" id="sentList"></ul>
+        </div>
+
+        <div class="dossier notes">
+          <div class="d-label first">Field notes, read before use</div>
+          <ul>
+            <li>There is no server. Ghost messages are locked with AES-GCM in your browser, and the key is in the part of the link after the #, which browsers never send to a website.</li>
+            <li>That means anyone who has the link can read the message until it expires. Send it only to the person it is for.</li>
+            <li>“Burned” is remembered on the device that opened the link. Another phone or browser can still open it.</li>
+            <li>The expiry is checked by this app, not by a server. Someone who knows how could still unlock an old link.</li>
+            <li>Screenshots exist. So does a second phone pointed at the screen.</li>
+            <li>The timer on a shared snap is just for show. Use “Ghost link” if you want it to burn.</li>
+            <li>Snaps and photos never leave your device unless you share them.</li>
+          </ul>
+          <button type="button" class="ghostbtn danger" id="wipeBtn">Wipe everything on this device</button>
+        </div>
+        <p class="colophon">Snapchat: Ghost Protocol Edition is a Sacred App from <a href="https://lsamman.github.io/legend-of-chris-wiki/#snapchat-ghost-protocol">The Legend Of Chris</a>. Not affiliated with Snap Inc. Never update. Made by Will.</p>
+      </section>
+    </main>
+
+    <nav class="tabbar" aria-label="Tabs">
+      <a href="#/snap" data-nav="snap"><svg><use href="#i-cam"/></svg><span>Snap</span></a>
+      <a href="#/ghost" data-nav="ghost"><svg class="tg"><use href="#i-ghost"/></svg><span>Ghost</span></a>
+      <a href="#/dossier" data-nav="dossier"><svg><use href="#i-folder"/></svg><span>Dossier</span></a>
+    </nav>
+
+    <!-- Send sheet for ghost links made from a snap -->
+    <div class="sheet-back" id="sheet" hidden>
+      <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="sheetTitle">
+        <h2 id="sheetTitle">Send as a ghost link</h2>
+        <p>The snap goes into a self-destructing link. It burns <b id="sheetSecs">3 seconds</b> after it’s opened.</p>
+        <div class="d-label">Link expires in</div>
+        <div class="chips" id="sheetExpiry"></div>
+        <div class="sheet-actions">
+          <button type="button" class="ghostbtn" id="sheetCancel">Cancel</button>
+          <button type="button" class="primary" id="sheetGo">Seal it</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Opening a ghost link -->
+    <div class="mission" id="mission" hidden>
+      <div class="m-inner" id="mInner"></div>
+    </div>
+
+    <div class="splash" id="splash" hidden aria-hidden="true">
+      <svg class="ghost"><use href="#i-ghost"/></svg>
+      <p class="sp-l1">This app will self-destruct</p>
+      <p class="sp-l2">just kidding. Never update.</p>
+    </div>
+
+    <div class="toast" id="toast" role="status" hidden></div>
+  </div>
+</div>
+<script type="module" src="js/app.js?v=20261007172844"></script>
+</body>
+</html>

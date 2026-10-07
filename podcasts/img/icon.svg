@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 180 180">
+<defs>
+<radialGradient id="bg" cx="50%" cy="35%" r="75%"><stop offset="0" stop-color="#c77dff"/><stop offset=".55" stop-color="#8a2be2"/><stop offset="1" stop-color="#4b0f8a"/></radialGradient>
+<radialGradient id="glass" cx="50%" cy="40%" r="60%"><stop offset="0" stop-color="#fff" stop-opacity=".45"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></radialGradient>
+<linearGradient id="core" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffffff"/><stop offset="1" stop-color="#e6d6ff"/></linearGradient>
+<linearGradient id="gloss" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".55"/><stop offset="1" stop-color="#fff" stop-opacity=".05"/></linearGradient>
+</defs>
+<rect width="180" height="180" rx="40" fill="url(#bg)"/>
+<circle cx="90" cy="90" r="70" fill="#2a0b4a"/>
+<path d="M64.7 29.0A66 66 0 0 1 115.3 29.0L103.8 56.7A36 36 0 0 0 76.2 56.7Z" fill="#e94bd0"/><path d="M115.3 29.0A66 66 0 0 1 151.0 64.7L123.3 76.2A36 36 0 0 0 103.8 56.7Z" fill="#3f8cff"/><path d="M151.0 64.7A66 66 0 0 1 151.0 115.3L123.3 103.8A36 36 0 0 0 123.3 76.2Z" fill="#ffc93c"/><path d="M151.0 115.3A66 66 0 0 1 115.3 151.0L103.8 123.3A36 36 0 0 0 123.3 103.8Z" fill="#25c2b0"/><path d="M115.3 151.0A66 66 0 0 1 64.7 151.0L76.2 123.3A36 36 0 0 0 103.8 123.3Z" fill="#ff6b6b"/><path d="M64.7 151.0A66 66 0 0 1 29.0 115.3L56.7 103.8A36 36 0 0 0 76.2 123.3Z" fill="#7a5cff"/><path d="M29.0 115.3A66 66 0 0 1 29.0 64.7L56.7 76.2A36 36 0 0 0 56.7 103.8Z" fill="#9be15d"/><path d="M29.0 64.7A66 66 0 0 1 64.7 29.0L76.2 56.7A36 36 0 0 0 56.7 76.2Z" fill="#ff9f2e"/>
+<g stroke="#2a0b4a" stroke-width="3.2" fill="none">
+<circle cx="90" cy="90" r="51"/>
+<line x1="76.2" y1="56.7" x2="64.7" y2="29.0"/><line x1="103.8" y1="56.7" x2="115.3" y2="29.0"/><line x1="123.3" y1="76.2" x2="151.0" y2="64.7"/><line x1="123.3" y1="103.8" x2="151.0" y2="115.3"/><line x1="103.8" y1="123.3" x2="115.3" y2="151.0"/><line x1="76.2" y1="123.3" x2="64.7" y2="151.0"/><line x1="56.7" y1="103.8" x2="29.0" y2="115.3"/><line x1="56.7" y1="76.2" x2="29.0" y2="64.7"/>
+</g>
+<circle cx="90" cy="90" r="66" fill="url(#glass)"/>
+<circle cx="90" cy="90" r="34" fill="url(#core)" stroke="#2a0b4a" stroke-width="3.5"/>
+<text x="90" y="107" text-anchor="middle" font-family="Helvetica Neue, Helvetica, Arial, sans-serif" font-weight="700" font-size="48" fill="#6a1fc2">2</text>
+<path d="M0 40a40 40 0 0 1 40-40H140a40 40 0 0 1 40 40V78C130 66 50 66 0 78Z" fill="url(#gloss)"/>
+</svg>

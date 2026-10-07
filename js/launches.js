@@ -187,10 +187,10 @@
   // being simulated or drawn (the helper functions below work on it).
   var flights = [];
   var launch = null;
-  var MAX_ASCENDING = 3;      // at most this many rockets climbing at the same time
+  var MAX_ASCENDING = 6;      // at most this many rockets climbing at the same time
   var ASCENT_END = 420;       // seconds: after this a flight is just plumes and landing boosters
-  var nextIn = 6 + Math.random() * 8;   // seconds until the next liftoff
-  function nextGap() { return 80 + rng() * 90; }   // ~1.5-3 minutes between liftoffs
+  var nextIn = 2 + Math.random() * 3;   // seconds until the next liftoff
+  function nextGap() { return 30 + rng() * 40; }   // ~30-70 seconds between liftoffs
   var rng = Math.random;
 
   // Scratch object for projections (avoids garbage every frame).
@@ -513,9 +513,9 @@
         if (!fs || q.alt > 35 || q.age > SMOKE_LIFE) continue;
         c = project(V, L, q.alt, q.s, q.lat);
         if (c.el < -0.02) continue;
-        var rs = (0.14 + q.age * 0.006 * (q.fuel === 'srb' ? 1.6 : 1)) / c.d * V.k;
+        var rs = (0.2 + q.age * 0.006 * (q.fuel === 'srb' ? 1.6 : 1)) / c.d * V.k;
         var thin = 1 - smoothstep(22, 35, q.alt);            // thins out with altitude
-        var as = 0.2 * fs * smokeVis * thin * (1 - q.age / SMOKE_LIFE) / (1 + rs / 6);
+        var as = 0.32 * fs * smokeVis * thin * (1 - q.age / SMOKE_LIFE) / (1 + rs / 6);
         if (as < 0.004) continue;
         ctx.fillStyle = rgba([226, 229, 234], as);
         ctx.beginPath();
@@ -574,7 +574,7 @@
     }
 
     // 3) Flames: a short glowing tail plus a bright point with a halo.
-    var pointDim = 1 - 0.8 * dayness;
+    var pointDim = 1 - 0.55 * dayness;
     for (i = 0; i < L.bodies.length; i++) {
       b = L.bodies[i];
       if (b.level <= 0.01 || b.dead) continue;
@@ -586,13 +586,13 @@
       var x = c.x, y = c.y;
       var distF = clamp(300 / c.d, 0.3, 1.3);
       var ext = clamp(c.el / 0.05, 0.3, 1);       // dimmer through thick air near the horizon
-      var a = F.point * bright * b.level * distF * ext * pointDim;
+      var a = 1.6 * F.point * bright * b.level * distF * ext * pointDim;   // boosted so launches stand out
       if (a < 0.01) continue;
 
       // Tail: the long afterburning flame you only get in thick air.
       if (b.tail.length >= 6 && b.alt < 40) {
-        ctx.lineWidth = 1.2;
-        ctx.strokeStyle = rgba(F.glow, Math.min(0.5, a * 0.35) * (1 - smoothstep(25, 40, b.alt)));
+        ctx.lineWidth = 2;
+        ctx.strokeStyle = rgba(F.glow, Math.min(0.7, a * 0.5) * (1 - smoothstep(25, 40, b.alt)));
         ctx.beginPath();
         for (var k = 0; k < b.tail.length; k += 3) {
           var tp = project(V, L, b.tail[k], b.tail[k + 1], b.tail[k + 2]);
@@ -603,7 +603,7 @@
       }
 
       // Halo + core
-      var r = 3 + 9 * Math.min(a, 1.5);
+      var r = 5 + 14 * Math.min(a, 1.5);
       var g = ctx.createRadialGradient(x, y, 0, x, y, r);
       g.addColorStop(0, rgba(F.core, Math.min(1, a)));
       g.addColorStop(0.25, rgba(F.glow, Math.min(1, a * 0.45)));
@@ -611,7 +611,7 @@
       ctx.fillStyle = g;
       ctx.fillRect(x - r, y - r, r * 2, r * 2);
       ctx.fillStyle = rgba([255, 250, 240], Math.min(1, a * 1.2));
-      ctx.fillRect(x - 0.8, y - 0.8, 1.6, 1.6);
+      ctx.fillRect(x - 1.2, y - 1.2, 2.4, 2.4);
     }
 
     // 4) Staging flashes
@@ -652,7 +652,7 @@
     setEnabled: function (on) {
       enabled = !!on;
       if (!enabled) { flights = []; launch = null; }
-      else nextIn = Math.min(nextIn, 6 + Math.random() * 8);
+      else nextIn = Math.min(nextIn, 2 + Math.random() * 3);
     },
     isEnabled: function () { return enabled; },
     // The most recent flight (for testing/debugging).

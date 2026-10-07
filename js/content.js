@@ -776,7 +776,8 @@ window.SITE = {
           summary: "My laptop for school and on the go",
           bullets: [
             "Size: 13-inch",
-            "Chip: Apple M2"
+            "Chip: Apple M2",
+            "Memory: 8 GB"
           ]
         }
       ]

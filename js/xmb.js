@@ -478,7 +478,7 @@
 
   document.querySelectorAll("[data-site-name]").forEach(function (n) { n.textContent = SITE.name; });
   document.querySelectorAll("[data-site-tagline]").forEach(function (n) { n.textContent = SITE.tagline || ""; });
-  document.title = SITE.name + " · Résumé";
+  document.title = "Dreamliner.web";
   if (window.matchMedia && matchMedia("(pointer: coarse)").matches) {
     document.getElementById("hint").textContent = "swipe to browse · tap twice to open";
     splash.querySelector(".splash-hint").textContent = "tap anywhere. go on.";

@@ -515,7 +515,7 @@
         if (c.el < -0.02) continue;
         var rs = (0.2 + q.age * 0.006 * (q.fuel === 'srb' ? 1.6 : 1)) / c.d * V.k;
         var thin = 1 - smoothstep(22, 35, q.alt);            // thins out with altitude
-        var as = 0.32 * fs * smokeVis * thin * (1 - q.age / SMOKE_LIFE) / (1 + rs / 6);
+        var as = 0.26 * fs * smokeVis * thin * (1 - q.age / SMOKE_LIFE) / (1 + rs / 6);
         if (as < 0.004) continue;
         ctx.fillStyle = rgba([226, 229, 234], as);
         ctx.beginPath();
@@ -574,7 +574,7 @@
     }
 
     // 3) Flames: a short glowing tail plus a bright point with a halo.
-    var pointDim = 1 - 0.55 * dayness;
+    var pointDim = 1 - 0.65 * dayness;
     for (i = 0; i < L.bodies.length; i++) {
       b = L.bodies[i];
       if (b.level <= 0.01 || b.dead) continue;
@@ -586,13 +586,13 @@
       var x = c.x, y = c.y;
       var distF = clamp(300 / c.d, 0.3, 1.3);
       var ext = clamp(c.el / 0.05, 0.3, 1);       // dimmer through thick air near the horizon
-      var a = 1.6 * F.point * bright * b.level * distF * ext * pointDim;   // boosted so launches stand out
+      var a = 1.25 * F.point * bright * b.level * distF * ext * pointDim;   // boosted so launches stand out
       if (a < 0.01) continue;
 
       // Tail: the long afterburning flame you only get in thick air.
       if (b.tail.length >= 6 && b.alt < 40) {
-        ctx.lineWidth = 2;
-        ctx.strokeStyle = rgba(F.glow, Math.min(0.7, a * 0.5) * (1 - smoothstep(25, 40, b.alt)));
+        ctx.lineWidth = 1.6;
+        ctx.strokeStyle = rgba(F.glow, Math.min(0.6, a * 0.42) * (1 - smoothstep(25, 40, b.alt)));
         ctx.beginPath();
         for (var k = 0; k < b.tail.length; k += 3) {
           var tp = project(V, L, b.tail[k], b.tail[k + 1], b.tail[k + 2]);
@@ -603,7 +603,7 @@
       }
 
       // Halo + core
-      var r = 5 + 14 * Math.min(a, 1.5);
+      var r = 4 + 11 * Math.min(a, 1.5);
       var g = ctx.createRadialGradient(x, y, 0, x, y, r);
       g.addColorStop(0, rgba(F.core, Math.min(1, a)));
       g.addColorStop(0.25, rgba(F.glow, Math.min(1, a * 0.45)));
@@ -611,7 +611,7 @@
       ctx.fillStyle = g;
       ctx.fillRect(x - r, y - r, r * 2, r * 2);
       ctx.fillStyle = rgba([255, 250, 240], Math.min(1, a * 1.2));
-      ctx.fillRect(x - 1.2, y - 1.2, 2.4, 2.4);
+      ctx.fillRect(x - 1, y - 1, 2, 2);
     }
 
     // 4) Staging flashes

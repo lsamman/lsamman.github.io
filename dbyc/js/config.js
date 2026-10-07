@@ -1,6 +1,6 @@
 // Google sign-in for your real YouTube subscriptions (see README → "Google setup").
 // The client ID is public by design; Google only accepts it from the origins you list.
-export const GOOGLE_CLIENT_ID = "";
+export const GOOGLE_CLIENT_ID = "743693733147-lpibvu559jiqphco80vmuru7tue8g1kl.apps.googleusercontent.com";
 
 // Piped servers to try for ad-free playback, search and channels, in order.
 // DBYC also fetches the current public list and remembers whichever one last worked.

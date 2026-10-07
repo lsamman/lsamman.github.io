@@ -297,7 +297,7 @@ td.waiting { font-style: italic; }
   background: linear-gradient(#5fb4ff, #bfe6ff 60%, #e9f8ff); color: #10324f; opacity: 0; transition: opacity .4s; overflow: hidden; }
 .nudge.in { opacity: 1; }
 .nudge-sky { position: absolute; inset: 0; }
-.nudge-sun { position: absolute; right: 12%; top: 10%; width: 110px; height: 110px; border-radius: 50%; background: radial-gradient(circle, #fff7b0, #ffd23f 60%, rgba(255, 210, 63, 0) 72%);
+.nudge-sun { position: absolute; right: 12%; top: 10%; width: 110px; height: 110px; border-radius: 50%; background: radial-gradient(circle, #fff7b0, #ffd23f 70%);
   box-shadow: 0 0 80px 30px rgba(255, 230, 120, .6); animation: sun 6s ease-in-out infinite alternate; }
 @keyframes sun { to { transform: translateY(8px) scale(1.04); } }
 .nudge-grass { position: absolute; left: 0; right: 0; bottom: 0; height: 28vh;
@@ -346,8 +346,8 @@ td.waiting { font-style: italic; }
   .picon .glyph svg { width: 48px; height: 48px; }
   .badge { left: calc(50% + 12px); }
   .label { min-width: 0; text-align: left; }
-  .specs { grid-template-columns: 1fr; gap: 0; }
-  .specs dt { text-align: left; margin-top: 6px; font-size: 11.5px; }
+  .specs { gap: 4px 10px; }
+  .specs dt { text-align: left; }
   .about .specs { text-align: left; }
   .list.storage small { display: none; }
   .list th, .list td { padding: 6px 4px; }

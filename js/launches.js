@@ -99,7 +99,8 @@
     kero:     { core: [255, 226, 170], glow: [255, 150, 60],  point: 1.0,  smoke: 0.9, plume: 1.0 },
     srb:      { core: [255, 240, 210], glow: [255, 175, 90],  point: 1.3,  smoke: 1.7, plume: 1.0 },
     methalox: { core: [240, 238, 255], glow: [255, 175, 120], point: 0.95, smoke: 0.3, plume: 1.0 },
-    mvac:     { core: [255, 232, 200], glow: [255, 170, 100], point: 0.45, smoke: 0,   plume: 1.0 },
+    mvac:     { core: [255, 255, 255], glow: [225, 232, 250], point: 0.45, smoke: 0,   plume: 1.0 },   // second stage: white
+    shipvac:  { core: [255, 255, 255], glow: [225, 232, 250], point: 0.95, smoke: 0.3, plume: 1.0 },   // Starship's upper stage: white
     hydrolox: { core: [215, 228, 255], glow: [150, 180, 255], point: 0.12, smoke: 0,   plume: 0.75 }
   };
 
@@ -148,7 +149,7 @@
         // The ship's exhaust hitting the booster's dome lights it up briefly.
         { fuel: 'methalox', bright: 2.4, burns: [[0, 158], [158, 159, 0.12], [159, 162, 0.45], [162, 166, 0.12]],
           sep: 162, boost: [169, 214], boostBright: 1.3, landing: { power: 0.5 } },   // no entry burn; caught by the tower
-        { fuel: 'methalox', bright: 0.95, burns: [[159, 520]], flash: 159, hotStage: true }
+        { fuel: 'shipvac', bright: 0.95, burns: [[159, 520]], flash: 159, hotStage: true }
       ];
     } },
     'Atlas V': { weight: 12, build: function (rng) {

@@ -251,7 +251,7 @@ window.SITE = {
           body: [
             "A fan wiki for The Legend Of Chris, an absurdist comedy book written with friends. It has over 300 articles covering every character, place, planet, item and event, with search, categories and backlinks. It's styled to look like the original document.",
             "The site is generated from the article text by a small Python script and deployed automatically with GitHub Pages.",
-            "Tap the phone in its toolbar and Steve Jobs's iPhone 3G flies to the front of the screen, sideways and cracked, with my apps on it: MySpace v1.3.3, my YouTube client with no ads or Shorts, and Twitter: Bluebird Variant, my X client with no character limit."
+            "Tap the phone in its toolbar and Steve Jobs's iPhone 3G flies to the front of the screen, sideways and cracked, (or the Nokia I-4500 flip phone, if you'd rather) with the six Sacred Apps on it, each a real app I built: MySpace v1.3.3 (YouTube with no ads or Shorts), Twitter: Bluebird Variant (X with no character limit), Snapchat: Ghost Protocol Edition (self-destructing messages), Facebook (Pre-Cringe) (a 2007-style Bluesky client), Apple Podcasts 2 (a podcast player) and Settings (Full access), which runs them all."
           ],
           tags: ["Static site generator", "Python", "HTML", "CSS", "JavaScript", "GitHub Pages"],
           links: [

@@ -864,19 +864,19 @@ window.SITE = {
     },
 
     {
-      id: "dbyc",
-      label: "MySpace",
-      icon: "assets/icons/myspace.png",
+      id: "iphone-3g",
+      label: "Virtual iPhone 3G",
+      icon: "assets/icons/iphone.svg",
       items: [
         {
-          id: "client",
+          id: "myspace",
           title: "MySpace v1.3.3",
           photo: "assets/icons/myspace.png",
           subtitle: "Dreamliner's Better YouTube Client",
           summary: "YouTube with no ads and no Shorts",
           body: [
-            "My own YouTube client, named after the Sacred App from The Legend Of Chris. Videos play ad-free, Shorts are filtered out of everything, and signing in with Google brings in my subscriptions, playlists and likes.",
-            "It's styled like a 2009 dream: frosted glass, glossy orbs and an animated sky, in light and dark."
+            "In The Legend Of Chris, the Sacred Apps only run on the iPhone 3G, and MySpace v1.3.3 is the first of them. So here it is, on a virtual one.",
+            "It's my own YouTube client. Videos play ad-free, Shorts are filtered out of everything, and signing in with Google brings in my subscriptions, playlists and likes. It's styled like a 2009 dream: frosted glass, glossy orbs and an animated sky, in light and dark."
           ],
           tags: ["No ads", "No Shorts", "Subscriptions", "Frutiger Aero"],
           links: [{ label: "Open MySpace", url: "dbyc/" }]

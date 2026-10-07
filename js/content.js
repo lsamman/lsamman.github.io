@@ -748,7 +748,7 @@ window.SITE = {
       items: [
         {
           id: "main-pc",
-          title: "Main PC",
+          title: "Wavebird",
           subtitle: "Arch Linux · Ryzen 7 5800XT · RTX 4060",
           summary: "My desktop, where most of my gaming and building happens",
           bullets: [

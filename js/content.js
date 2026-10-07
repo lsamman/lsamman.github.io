@@ -700,11 +700,12 @@ window.SITE = {
         {
           id: "steam",
           title: "Steam library",
-          subtitle: "23 games I'm playing",
+          subtitle: "24 games I'm playing",
           summary: "What's installed and in rotation",
           body: ["The games I'm playing right now, mostly on Linux."],
           bullets: [
             "Celeste",
+            "College Football 27",
             "DEATH STRANDING DIRECTOR'S CUT",
             "DELTARUNE",
             "Easy Delivery Co.",

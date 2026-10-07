@@ -187,8 +187,20 @@
     };
   }
 
-  function position() {
+  // Where item i sits (top edge) when item s is selected.
+  function itemY(i, s, m) {
+    var selY = m.barY + m.catSel + m.titleH + 8;
+    if (i === s) return selY;
+    if (i > s) return selY + m.selTile + m.gap + (i - s - 1) * (m.tile + m.gap);
+    return m.barY - m.gap * 2 - (s - i) * (m.tile + m.gap);   // earlier items slide up above the row
+  }
+
+  // Lay everything out. `p` is the item position: normally the selected index,
+  // but while a finger drags the list it's fractional (e.g. 2.4), so the list
+  // glides continuously between the resting layouts instead of jumping.
+  function position(p) {
     var m = metrics();
+    if (typeof p !== "number") p = selItem[selCat];
     var left = m.anchorX - m.catSel / 2;   // shared left edge for title + items
 
     catEls.forEach(function (el, i) {
@@ -206,13 +218,13 @@
 
     catTitle.style.transform = "translate(" + left + "px," + (m.barY + m.catSel + 6) + "px)";
 
-    var s = selItem[selCat];
-    var selY = m.barY + m.catSel + m.titleH + 8;
+    var n = itemEls.length;
+    var s0 = Math.max(0, Math.min(n - 1, Math.floor(p))), s1 = Math.max(0, Math.min(n - 1, Math.ceil(p)));
+    var f = p - Math.floor(p);
+    var over = p < 0 ? p : p > n - 1 ? p - (n - 1) : 0;   // rubber-band past either end
+    var s = Math.max(0, Math.min(n - 1, Math.round(p)));
     itemEls.forEach(function (el, i) {
-      var y;
-      if (i === s) y = selY;
-      else if (i > s) y = selY + m.selTile + m.gap + (i - s - 1) * (m.tile + m.gap);
-      else y = m.barY - m.gap * 2 - (s - i) * (m.tile + m.gap);   // earlier items slide up above the row
+      var y = itemY(i, s0, m) + (itemY(i, s1, m) - itemY(i, s0, m)) * f - over * (m.tile + m.gap);
       el.style.transform = "translate(" + left + "px," + y + "px)";
       el.classList.toggle("sel", i === s);
       el.classList.toggle("above", i < s);
@@ -282,18 +294,88 @@
     if (horizontal) setCat(selCat + Math.sign(d)); else moveItem(Math.sign(d));
   }, { passive: false });
 
+  // Touch: the list follows your finger and glides to the nearest item when
+  // you let go, carrying on a little further if you flick. Sideways drags
+  // slide the category row the same way.
+  var xmbEl = document.getElementById("xmb");
   var touch = null;
-  document.getElementById("xmb").addEventListener("touchstart", function (e) {
-    touch = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+  var suppressClickUntil = 0;
+
+  function rubber(v, lo, hi) {   // resist past the ends, like iOS
+    if (v < lo) return lo - (1 - 1 / (1 + (lo - v) * 0.6)) / 0.6;
+    if (v > hi) return hi + (1 - 1 / (1 + (v - hi) * 0.6)) / 0.6;
+    return v;
+  }
+
+  xmbEl.addEventListener("touchstart", function (e) {
+    if (!started || window.Detail.isOpen()) return;
+    var t = e.touches[0];
+    touch = { x0: t.clientX, y0: t.clientY, x: t.clientX, y: t.clientY, axis: null,
+              p0: selItem[selCat], p: selItem[selCat], v: 0, lastT: performance.now(), lastPos: 0 };
   }, { passive: true });
-  document.getElementById("xmb").addEventListener("touchend", function (e) {
+
+  xmbEl.addEventListener("touchmove", function (e) {
     if (!touch) return;
-    var dx = e.changedTouches[0].clientX - touch.x, dy = e.changedTouches[0].clientY - touch.y;
-    touch = null;
-    if (Math.max(Math.abs(dx), Math.abs(dy)) < 30) return;   // a tap: the click handler deals with it
-    if (Math.abs(dx) > Math.abs(dy)) setCat(selCat - Math.sign(dx));
-    else moveItem(-Math.sign(dy) * Math.max(1, Math.round(Math.abs(dy) / 90)));
+    var t = e.touches[0], m = metrics();
+    var dx = t.clientX - touch.x0, dy = t.clientY - touch.y0;
+    if (!touch.axis) {
+      if (Math.max(Math.abs(dx), Math.abs(dy)) < 8) return;    // still could be a tap
+      touch.axis = Math.abs(dy) >= Math.abs(dx) ? "y" : "x";
+      xmbEl.classList.add("dragging");
+    }
+    var now = performance.now(), dt = Math.max(1, now - touch.lastT);
+    var pos = touch.axis === "y" ? dy : dx;
+    touch.v = touch.v * 0.6 + ((pos - touch.lastPos) / dt) * 0.4;   // px per ms, smoothed
+    touch.lastPos = pos; touch.lastT = now;
+
+    if (touch.axis === "y") {
+      var n = itemEls.length;
+      var p = rubber(touch.p0 - dy / (m.tile + m.gap), 0, n - 1);
+      var s = Math.max(0, Math.min(n - 1, Math.round(p)));
+      if (s !== selItem[selCat]) { selItem[selCat] = s; Sound.play("move"); }
+      touch.p = p;
+      position(p);
+    } else {
+      var step = m.catTile + m.catGap;
+      var lim = (dx > 0 ? selCat : cats.length - 1 - selCat) * step + step * 0.5;
+      var x = Math.sign(dx) * Math.min(Math.abs(dx), lim + (Math.abs(dx) > lim ? (Math.abs(dx) - lim) * 0.25 : 0));
+      catBar.style.transform = "translateX(" + x + "px)";
+      itemList.style.opacity = String(1 - Math.min(0.6, Math.abs(dx) / 260));
+    }
   }, { passive: true });
+
+  function endTouch() {
+    if (!touch) return;
+    var tc = touch, m = metrics();
+    touch = null;
+    xmbEl.classList.remove("dragging");
+    if (!tc.axis) return;                       // a tap: the click handler deals with it
+    suppressClickUntil = Date.now() + 350;      // a drag shouldn't also count as a click
+
+    if (tc.axis === "y") {
+      var n = itemEls.length;
+      var flick = -tc.v * 160 / (m.tile + m.gap);     // carry on in the direction of the flick
+      var target = Math.max(0, Math.min(n - 1, Math.round(tc.p + flick)));
+      if (target !== selItem[selCat]) Sound.play("move");
+      selItem[selCat] = target;
+      position();                                // transitions glide it home
+    } else {
+      var step = m.catTile + m.catGap;
+      var dx = tc.lastPos;
+      var steps = Math.round(-(dx + tc.v * 140) / step);
+      if (!steps && Math.abs(dx) > 30) steps = -Math.sign(dx);
+      catBar.style.transform = "";
+      itemList.style.opacity = "";
+      if (steps) setCat(selCat + steps);
+    }
+  }
+  xmbEl.addEventListener("touchend", endTouch, { passive: true });
+  xmbEl.addEventListener("touchcancel", endTouch, { passive: true });
+
+  // Swallow the click a browser may still send after a drag.
+  xmbEl.addEventListener("click", function (e) {
+    if (Date.now() < suppressClickUntil) { e.stopPropagation(); e.preventDefault(); }
+  }, true);
 
   // ---------- Mute button, clock, film grain, start screen ----------------
 

@@ -42,8 +42,8 @@ The live site updates in about a minute. (Or just ask Claude to "publish my chan
 
 | Action | Keyboard | Mouse | Phone |
 |---|---|---|---|
-| Change category | ← → (or A/D) | click an icon / shift+scroll | swipe sideways |
-| Change item | ↑ ↓ (or W/S) | scroll wheel / click | swipe up/down |
+| Change category | ← → (or A/D) | click an icon / shift+scroll | drag sideways |
+| Change item | ↑ ↓ (or W/S) | scroll wheel / click | drag or flick up/down |
 | Open | Enter | click the highlighted item | tap the highlighted item |
 | Back | Esc | ✕ button or click outside | ✕ button |
 

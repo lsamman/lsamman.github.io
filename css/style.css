@@ -135,6 +135,10 @@ body.started #xmb { opacity: 1; }
 body.detail-open #xmb { opacity: .3; filter: blur(2px) grayscale(.6); pointer-events: none; }
 
 #categories, #items { position: absolute; inset: 0; margin: 0; padding: 0; list-style: none; pointer-events: none; }
+#categories { transition: transform .35s var(--ease-out); }
+#items { transition: opacity .3s; }
+/* While a finger is dragging, everything tracks it directly (no lag) */
+#xmb.dragging .item, #xmb.dragging #categories, #xmb.dragging #items { transition: none; }
 
 /* Category tiles: positioned and sized by JS (they set --size) */
 .cat {

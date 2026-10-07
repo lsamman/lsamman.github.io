@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Twitter: Bluebird Variant</title>
+<meta name="description" content="Twitter: Bluebird Variant (with no limits), the Sacred App from The Legend Of Chris. An X client with no character limit and no auto-correct.">
+<meta name="theme-color" content="#c0deed" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0a1a2a" media="(prefers-color-scheme: dark)">
+<link rel="icon" type="image/svg+xml" href="img/bird.svg">
+<link rel="apple-touch-icon" href="img/apple-touch-icon.png">
+<script>try { var t = localStorage.getItem("bluebird.theme"); if (t === '"light"' || t === '"dark"') document.documentElement.dataset.theme = JSON.parse(t); } catch (e) {}</script>
+<meta http-equiv="Cache-Control" content="no-cache">
+<!-- Self-update: if a newer version of the site is published, clear caches and reload it.
+     SITE_VERSION and the ?v= tags are kept in sync by ../bump-version.sh -->
+<script>
+  (function () {
+    var SITE_VERSION = "20261007165958";
+    if (!window.fetch) return;
+    fetch("../version.json?t=" + Date.now(), { cache: "no-store" })
+      .then(function (r) { return r.ok ? r.json() : null; })
+      .then(function (d) {
+        if (!d || !d.v || d.v === SITE_VERSION) return;
+        var key = "bluebird.reloaded." + d.v;
+        try { if (sessionStorage.getItem(key)) return; sessionStorage.setItem(key, "1"); } catch (e) {}
+        function go() { var u = new URL(location.href); u.searchParams.set("v", d.v); location.replace(u.toString()); }
+        var clears = [];
+        if (window.caches && caches.keys) clears.push(caches.keys().then(function (ks) { return Promise.all(ks.map(function (k) { return caches.delete(k); })); }));
+        Promise.all(clears).catch(function () {}).then(go, go);
+      })
+      .catch(function () {});
+  })();
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Varela+Round&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/app.css?v=20261007165958">
+</head>
+<body>
+<!-- Boot: Club Shadowban's giant rotating X, suspended by Elon's tears, shatters and the bird flies out -->
+<div id="boot" class="boot" role="button" tabindex="0" aria-label="Skip intro" hidden>
+  <div class="boot-stage">
+    <svg class="boot-x" viewBox="0 0 100 100" aria-hidden="true">
+      <path class="xa" d="M18 14h18l46 72H64z"/><path class="xb" d="M82 14H70L18 86h12z"/>
+    </svg>
+    <div class="tears" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div>
+    <img class="boot-bird" src="img/bird.svg" alt="">
+  </div>
+  <p class="boot-line" id="boot-line">Rolling back from X…</p>
+  <p class="boot-hint">tap to skip</p>
+</div>
+
+<div class="clouds" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i></div>
+
+<!-- iPhone 3G status bar -->
+<div class="statusbar" aria-hidden="true">
+  <span class="sig"><i></i><i></i><i></i><i></i><i></i></span><span class="carrier">God's router</span><span class="g3">3G</span>
+  <span class="clock" id="clock"></span>
+  <span class="batt"><span class="lvl"></span></span>
+</div>
+
+<header class="top">
+  <a class="brand" href="#/" aria-label="Bluebird home"><img src="img/bird.svg" alt=""><span class="word">twitter</span><span class="variant" title="As named by Steve Jobs at the iPhone 3G Keynote">Bluebird Variant <em>(with no limits)</em></span></a>
+  <nav class="top-nav" aria-label="Main">
+    <a href="#/" data-nav="home">Home</a>
+    <a href="#/lookup" data-nav="lookup">Look up</a>
+    <a href="#/nest" data-nav="nest">Nest</a>
+    <a href="#/settings" data-nav="settings">Settings</a>
+  </nav>
+</header>
+
+<div class="layout">
+  <main id="view" class="view" tabindex="-1"></main>
+  <aside class="side" aria-label="Sidebar">
+    <section class="box me">
+      <img src="img/bird.svg" alt="">
+      <div><b>You</b><span>@baller · not verified</span></div>
+      <dl><div><dt id="n-posts">0</dt><dd>drafts</dd></div><div><dt id="n-favs">0</dt><dd>favorites</dd></div><div><dt>97</dt><dd>followers</dd></div></dl>
+    </section>
+    <section class="box">
+      <h3>Trending Topics</h3>
+      <ol class="trends" id="trends"></ol>
+    </section>
+    <section class="box small">
+      <h3>About this phone</h3>
+      <p>Firmware: <b>Never update</b><br>Auto-Correct: <b>Off</b> <span class="muted">(you are forced to mean what you say)</span><br>Front camera: <b>None</b> <span class="muted">(to avoid self-reflection)</span></p>
+    </section>
+  </aside>
+</div>
+
+<!-- Tweetie-style tab bar on phones -->
+<nav class="tabbar" aria-label="Tabs">
+  <a href="#/" data-nav="home"><svg viewBox="0 0 24 24"><path d="M3 11l9-7 9 7v9h-6v-6H9v6H3z"/></svg><span>Home</span></a>
+  <a href="#/lookup" data-nav="lookup"><svg viewBox="0 0 24 24"><path d="M10 3a7 7 0 1 1 0 14 7 7 0 0 1 0-14zm0 2.5a4.5 4.5 0 1 0 0 9 4.5 4.5 0 0 0 0-9zM15 16l1.8-1.8 5 5L20 21z"/></svg><span>Look up</span></a>
+  <a href="#/compose" data-nav="compose" class="tweet-tab"><svg viewBox="0 0 24 24"><path d="M4 17.2V21h3.8L19 9.8 15.2 6zM21 7.8a1 1 0 0 0 0-1.4L18.6 4a1 1 0 0 0-1.4 0l-1.6 1.6 3.8 3.8z"/></svg><span>Tweet</span></a>
+  <a href="#/nest" data-nav="nest"><svg viewBox="0 0 24 24"><path d="M12 3l2.8 5.8 6.2.9-4.5 4.4 1 6.3L12 17.5l-5.5 2.9 1-6.3L3 9.7l6.2-.9z"/></svg><span>Nest</span></a>
+  <a href="#/settings" data-nav="settings"><svg viewBox="0 0 24 24"><path d="M19.4 13a7.6 7.6 0 0 0 0-2l2.1-1.6-2-3.5-2.5 1a7.4 7.4 0 0 0-1.7-1L15 3h-4l-.4 2.9a7.4 7.4 0 0 0-1.7 1l-2.5-1-2 3.5L6.6 11a7.6 7.6 0 0 0 0 2l-2.1 1.6 2 3.5 2.5-1a7.4 7.4 0 0 0 1.7 1L11 21h4l.4-2.9a7.4 7.4 0 0 0 1.7-1l2.5 1 2-3.5zM13 15.5a3.5 3.5 0 1 1 0-7 3.5 3.5 0 0 1 0 7z"/></svg><span>Settings</span></a>
+</nav>
+
+<a class="fab" href="#/compose" aria-label="New tweet" title="What's happening?"><svg viewBox="0 0 24 24"><path d="M4 17.2V21h3.8L19 9.8 15.2 6zM21 7.8a1 1 0 0 0 0-1.4L18.6 4a1 1 0 0 0-1.4 0l-1.6 1.6 3.8 3.8z"/></svg></a>
+<div id="toast" class="toast" role="status" hidden></div>
+<script type="module" src="js/app.js?v=20261007165958"></script>
+</body>
+</html>

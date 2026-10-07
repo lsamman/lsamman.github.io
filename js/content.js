@@ -879,6 +879,19 @@ window.SITE = {
           ],
           tags: ["No ads", "No Shorts", "Subscriptions", "Frutiger Aero"],
           links: [{ label: "Open MySpace", url: "dbyc/" }]
+        },
+        {
+          id: "bluebird",
+          title: "Twitter: Bluebird Variant",
+          photo: "assets/icons/bluebird.png",
+          subtitle: "(with no limits)",
+          summary: "An X client from before the X",
+          body: [
+            "Steve Jobs names Twitter Bluebird Variant (with no limits) as one of the Sacred Apps at the iPhone 3G Keynote. This is my take on it: the 2009 sky-and-clouds Twitter, booting up as Club Shadowban's giant X shatters.",
+            "There's no character limit (long tweets go up as a numbered thread) and no auto-correct. You can look up tweets and profiles, save them, favorite with a star, and scroll The Canon, a timeline of tweets from the book's characters."
+          ],
+          tags: ["No limits", "No auto-correct", "Never update", "2009"],
+          links: [{ label: "Open Bluebird", url: "bluebird/" }]
         }
       ]
     },

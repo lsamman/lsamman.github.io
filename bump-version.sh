@@ -7,8 +7,8 @@ cd "$(dirname "$0")"
 V=$(date -u +%Y%m%d%H%M%S)
 sed -i.bak -E "s/\?v=[0-9]+/?v=$V/g; s/SITE_VERSION = \"[0-9]+\"/SITE_VERSION = \"$V\"/" index.html
 rm -f index.html.bak
-# DBYC (dbyc/) uses the same version, on its page and on the imports between its scripts.
-for f in dbyc/index.html dbyc/js/*.js; do
+# DBYC (dbyc/) and Bluebird (bluebird/) use the same version, on their pages and on the imports between their scripts.
+for f in dbyc/index.html dbyc/js/*.js bluebird/index.html bluebird/js/*.js; do
   sed -i.bak -E "s/\?v=[0-9]+/?v=$V/g; s/SITE_VERSION = \"[0-9]+\"/SITE_VERSION = \"$V\"/" "$f"
   rm -f "$f.bak"
 done

@@ -15,7 +15,7 @@
      SITE_VERSION and the ?v= tags are kept in sync by ../bump-version.sh -->
 <script>
   (function () {
-    var SITE_VERSION = "20261007164903";
+    var SITE_VERSION = "20261007165958";
     if (!window.fetch) return;
     fetch("../version.json?t=" + Date.now(), { cache: "no-store" })
       .then(function (r) { return r.ok ? r.json() : null; })
@@ -34,7 +34,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Comic+Neue:wght@400;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/app.css?v=20261007164903">
+<link rel="stylesheet" href="css/app.css?v=20261007165958">
 </head>
 <body>
 <div class="aero-bg" aria-hidden="true">
@@ -61,6 +61,6 @@
 <main id="view" class="view" tabindex="-1"></main>
 <dialog id="dlg" class="dlg"><div class="dlg-head"><h2 id="dlg-title"></h2><form method="dialog"><button class="dlg-x" aria-label="Close">✕</button></form></div><div id="dlg-body"></div></dialog>
 <div id="toast" class="toast" role="status" hidden></div>
-<script type="module" src="js/app.js?v=20261007164903"></script>
+<script type="module" src="js/app.js?v=20261007165958"></script>
 </body>
 </html>

@@ -1,6 +1,6 @@
 // Plays a video ad-free through Piped, or with YouTube's own player, depending on the
 // Playback setting. In "auto" mode a Piped failure falls back to YouTube's player.
-import { streamsFor } from "./piped.js?v=20261007164903";
+import { streamsFor } from "./piped.js?v=20261007165958";
 
 const HLS_JS = "https://cdn.jsdelivr.net/npm/hls.js@1.7.3/dist/hls.min.js";
 const START_TIMEOUT = 12000;

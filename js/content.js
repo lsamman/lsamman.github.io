@@ -95,7 +95,7 @@ window.SITE = {
         },
         {
           id: "community-rocketry",
-          photo: "assets/images/sjca-crest.png",
+          photo: "assets/images/community-rocketry.jpg",
           title: "Community Science Program",
           subtitle: "Instructional Speaker & Launch Administrator · St. John Chrysostom Academy · Grade 12",
           summary: "Designed and led a rocketry program for 20 kids aged 9–15",
@@ -135,7 +135,7 @@ window.SITE = {
         },
         {
           id: "sound-tech",
-          photo: "assets/images/sjca-crest.png",
+          photo: "assets/images/sound-tech.jpg",
           title: "Microphone & Sound Technician",
           subtitle: "St. John Chrysostom Academy · Grades 9–12",
           summary: "The school's first sound specialist",
@@ -162,7 +162,6 @@ window.SITE = {
         },
         {
           id: "choir",
-          photo: "assets/images/sjca-crest.png",
           title: "Upper School Choir",
           subtitle: "Bass · St. John Chrysostom Academy · Grades 9–12",
           summary: "Bass singer at school, local venues and churches",
@@ -355,8 +354,10 @@ window.SITE = {
           bullets: [
             { text: "Eisenman Camp: \"Kunststoffzugprobe Dauerfestigkeit 02\" by Hb tuw, CC BY-SA 4.0", url: "https://commons.wikimedia.org/wiki/File:Kunststoffzugprobe_Dauerfestigkeit_02.jpg" },
             { text: "Lehigh camp: \"Welding Student\" by Tstc, CC BY-SA 4.0", url: "https://commons.wikimedia.org/wiki/File:Welding_Student.jpg" },
+            { text: "Community Science Program: \"An photograph of a model rocket being launched, taken in 2019\" by newmexico.photographer, CC BY 2.0", url: "https://commons.wikimedia.org/wiki/File:An_photograph_of_a_model_rocket_being_launched,_taken_in_2019.jpg" },
             { text: "Porphyrian Society: \"Intel DTC-AAL03 and Asus motherboard 20080206\" by Victorrocha, CC BY-SA 3.0", url: "https://commons.wikimedia.org/wiki/File:Intel_DTC-AAL03_and_Asus_motherboard_20080206.jpg" },
             { text: "Rocket team: \"Level 3 high power rocket at launch pad\" by National Association of Rocketry, CC BY-SA 3.0", url: "https://commons.wikimedia.org/wiki/File:Level_3_high_power_rocket_at_launch_pad.jpg" },
+            { text: "Sound technician: \"Stagetec AURUS 02\" by CLI, CC BY-SA 4.0", url: "https://commons.wikimedia.org/wiki/File:Stagetec_AURUS_02.jpg" },
             { text: "DBE volunteering: \"Jam jar, Kazakhstan\" by Nurken, CC BY-SA 4.0", url: "https://commons.wikimedia.org/wiki/File:Jam_jar,_Kazakhstan.jpg" },
             { text: "KSP mod: \"Space Launch Complex 40 at Cape Canaveral (aerial)\" by SpaceX, CC0", url: "https://commons.wikimedia.org/wiki/File:Space_Launch_Complex_40_at_Cape_Canaveral_(aerial).jpg" },
             { text: "Guitar building: \"1 Rockinger electric guitar headstock 1980s vintage\" by Elmschrat, CC BY-SA 4.0", url: "https://commons.wikimedia.org/wiki/File:1_Rockinger_electric_guitar_headstock_1980s_vintage.jpg" },

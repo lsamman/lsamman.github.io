@@ -79,9 +79,35 @@
     ]
   };
 
-  var cats = SITE.categories.concat([settingsCat]);
+  // Main row: categories in a group collapse into one tab (see `groups` in content.js)
+  var backItem = { id: "__back", title: "Back", icon: "assets/icons/back.svg", back: true };
+  var cats = [];
+  var placed = {};
+  SITE.categories.forEach(function (cat) {
+    var group = (SITE.groups || []).find(function (g) { return g.members.indexOf(cat.id) >= 0; });
+    if (!group) { cats.push(cat); return; }
+    if (placed[group.id]) return;
+    var entry = { id: group.id, label: group.label, icon: group.icon, isGroup: true, items: [] };
+    group.members.forEach(function (id) {
+      var m = SITE.categories.find(function (c) { return c.id === id; });
+      if (m) entry.items.push({ id: m.id, title: m.label, icon: m.icon, folder: m,
+        summary: m.items.length + (m.items.length === 1 ? " entry" : " entries") });
+    });
+    placed[group.id] = entry;
+    cats.push(entry);
+  });
+  cats.push(settingsCat);
   var selCat = 0;
-  var selItem = cats.map(function () { return 0; });   // remembers the item position in each category
+  var folder = null;      // the folder open inside a group tab, if any
+  var selItem = {};       // remembers the item position in each list, by list id
+
+  // What the item column is showing: a category, or a folder opened inside a group
+  function view() {
+    if (folder) return { id: folder.id, label: folder.label, icon: folder.icon, items: [backItem].concat(folder.items) };
+    return cats[selCat];
+  }
+  function sel() { var v = selItem[view().id]; return v == null ? (folder ? 1 : 0) : v; }
+  function setSel(i) { selItem[view().id] = i; }
   var catEls = [], itemEls = [];
   var started = false;
 
@@ -103,7 +129,7 @@
   }
 
   function buildItems(animate) {
-    var cat = cats[selCat];
+    var cat = view();
     catTitle.textContent = cat.label;
     itemList.innerHTML = "";
     itemEls = cat.items.map(function (item, i) {
@@ -122,8 +148,8 @@
         face.appendChild(v);
       }
       li.addEventListener("click", function () {
-        if (i === selItem[selCat]) activate();
-        else { selItem[selCat] = i; Sound.play("move"); position(); }
+        if (i === sel()) activate();
+        else { setSel(i); Sound.play("move"); position(); }
       });
       addTilt(face);
       itemList.appendChild(li);
@@ -133,7 +159,7 @@
   }
 
   function refreshValues() {
-    var cat = cats[selCat];
+    var cat = view();
     itemEls.forEach(function (li, i) {
       var v = li.querySelector(".value");
       if (v) v.textContent = cat.items[i].value();
@@ -200,7 +226,7 @@
   // glides continuously between the resting layouts instead of jumping.
   function position(p) {
     var m = metrics();
-    if (typeof p !== "number") p = selItem[selCat];
+    if (typeof p !== "number") p = sel();
     var left = m.anchorX - m.catSel / 2;   // shared left edge for title + items
 
     catEls.forEach(function (el, i) {
@@ -236,7 +262,9 @@
 
   function setCat(i) {
     i = Math.max(0, Math.min(cats.length - 1, i));
-    if (i === selCat) return;
+    if (i === selCat && !folder) return;
+    folder = null;
+    if (i === selCat) { Sound.play("move"); buildItems(true); position(); glitch(); return; }
     selCat = i;
     Sound.play("move");
     buildItems(true);
@@ -245,18 +273,37 @@
   }
 
   function moveItem(d) {
-    var n = cats[selCat].items.length;
-    var i = Math.max(0, Math.min(n - 1, selItem[selCat] + d));
-    if (i === selItem[selCat]) return;
-    selItem[selCat] = i;
+    var n = view().items.length;
+    var i = Math.max(0, Math.min(n - 1, sel() + d));
+    if (i === sel()) return;
+    setSel(i);
     Sound.play("move");
     position();
   }
 
+  function enterFolder(f) {
+    folder = f;
+    Sound.play("open");
+    buildItems(true);
+    position();
+    glitch();
+  }
+
+  function leaveFolder() {
+    if (!folder) return;
+    folder = null;
+    Sound.play("move");
+    buildItems(true);
+    position();
+    glitch();
+  }
+
   function activate() {
-    var cat = cats[selCat];
-    var item = cat.items[selItem[selCat]];
+    var cat = view();
+    var item = cat.items[sel()];
     if (!item) return;
+    if (item.back) { leaveFolder(); return; }
+    if (item.folder) { enterFolder(item.folder); return; }
     if (cat.isSettings) {
       item.change();
       Sound.play("open");
@@ -273,8 +320,9 @@
     if (!started) { start(); e.preventDefault(); return; }
     if (window.Detail.isOpen()) return;
     var k = e.key;
-    if (k === "ArrowLeft" || k === "a") setCat(selCat - 1);
-    else if (k === "ArrowRight" || k === "d") setCat(selCat + 1);
+    if (k === "ArrowLeft" || k === "a") { if (folder) leaveFolder(); else setCat(selCat - 1); }
+    else if (k === "ArrowRight" || k === "d") { if (!folder) setCat(selCat + 1); }
+    else if (k === "Escape" || k === "Backspace") { if (!folder) return; leaveFolder(); }
     else if (k === "ArrowUp" || k === "w") moveItem(-1);
     else if (k === "ArrowDown" || k === "s") moveItem(1);
     else if (k === "Enter" || k === " ") activate();
@@ -311,7 +359,7 @@
     if (!started || window.Detail.isOpen()) return;
     var t = e.touches[0];
     touch = { x0: t.clientX, y0: t.clientY, x: t.clientX, y: t.clientY, axis: null,
-              p0: selItem[selCat], p: selItem[selCat], v: 0, lastT: performance.now(), lastPos: 0 };
+              p0: sel(), p: sel(), v: 0, lastT: performance.now(), lastPos: 0 };
   }, { passive: true });
 
   xmbEl.addEventListener("touchmove", function (e) {
@@ -332,7 +380,7 @@
       var n = itemEls.length;
       var p = rubber(touch.p0 - dy / (m.tile + m.gap), 0, n - 1);
       var s = Math.max(0, Math.min(n - 1, Math.round(p)));
-      if (s !== selItem[selCat]) { selItem[selCat] = s; Sound.play("move"); }
+      if (s !== sel()) { setSel(s); Sound.play("move"); }
       touch.p = p;
       position(p);
     } else {
@@ -356,8 +404,8 @@
       var n = itemEls.length;
       var flick = -tc.v * 160 / (m.tile + m.gap);     // carry on in the direction of the flick
       var target = Math.max(0, Math.min(n - 1, Math.round(tc.p + flick)));
-      if (target !== selItem[selCat]) Sound.play("move");
-      selItem[selCat] = target;
+      if (target !== sel()) Sound.play("move");
+      setSel(target);
       position();                                // transitions glide it home
     } else {
       var step = m.catTile + m.catGap;
@@ -458,10 +506,19 @@
     // Jump to a category/item (used when opening from a link)
     select: function (catId, itemId) {
       var ci = cats.findIndex(function (c) { return c.id === catId; });
+      var f = null;
+      if (ci < 0) {   // maybe it lives in a folder inside a group tab
+        ci = cats.findIndex(function (c) {
+          return c.isGroup && c.items.some(function (it) { if (it.folder.id === catId) { f = it.folder; return true; } });
+        });
+      }
       if (ci < 0) return;
-      var ii = cats[ci].items.findIndex(function (it) { return it.id === itemId; });
-      selItem[ci] = Math.max(0, ii);
-      if (ci !== selCat) { selCat = ci; buildItems(false); }
+      var items = f ? f.items : cats[ci].items;
+      var ii = Math.max(0, items.findIndex(function (it) { return it.id === itemId; }));
+      var rebuild = ci !== selCat || f !== folder;
+      selCat = ci; folder = f;
+      setSel(f ? ii + 1 : ii);          // folders have a Back tile first
+      if (rebuild) buildItems(false);
       position();
     },
     // The visible tile faces, for the detail page's turnstile animation

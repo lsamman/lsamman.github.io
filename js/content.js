@@ -32,6 +32,18 @@ window.SITE = {
     apiKey: ""
   },
 
+  // Categories listed here are tucked into one tab on the main row. Open the
+  // tab, then a folder inside it, like the PlayStation menu. Anything not
+  // listed stays on the main row.
+  groups: [
+    {
+      id: "resume",
+      label: "Résumé",
+      icon: "assets/icons/resume.svg",
+      members: ["experience", "projects", "websites", "honors", "skills", "education"]
+    }
+  ],
+
   categories: [
     {
       id: "about",

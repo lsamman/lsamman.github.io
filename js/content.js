@@ -864,19 +864,21 @@ window.SITE = {
 
     {
       id: "dbyc",
-      label: "DBYC",
-      icon: "assets/icons/dbyc.svg",
+      label: "MySpace",
+      icon: "assets/icons/myspace.png",
       items: [
         {
           id: "client",
-          title: "DBYC",
+          title: "MySpace v1.3.3",
+          photo: "assets/icons/myspace.png",
           subtitle: "Dreamliner's Better YouTube Client",
           summary: "YouTube with no ads and no Shorts",
           body: [
-            "My own YouTube client. Videos play ad-free, Shorts are filtered out of everything, and signing in with Google shows the newest videos from my subscriptions."
+            "My own YouTube client, named after the Sacred App from The Legend Of Chris. Videos play ad-free, Shorts are filtered out of everything, and signing in with Google brings in my subscriptions, playlists and likes.",
+            "It's styled like a 2009 dream: frosted glass, glossy orbs and an animated sky, in light and dark."
           ],
-          tags: ["No ads", "No Shorts", "Subscriptions"],
-          links: [{ label: "Open DBYC", url: "dbyc/" }]
+          tags: ["No ads", "No Shorts", "Subscriptions", "Frutiger Aero"],
+          links: [{ label: "Open MySpace", url: "dbyc/" }]
         }
       ]
     },

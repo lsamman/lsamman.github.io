@@ -1,6 +1,6 @@
-# DBYC
+# MySpace v1.3.3 (DBYC)
 
-**Dreamliner's Better YouTube Client** — YouTube without the ads or the Shorts. Made by Will.
+**MySpace v1.3.3**, named after the Sacred App from The Legend Of Chris. Also known as DBYC, **Dreamliner's Better YouTube Client**: YouTube without the ads or the Shorts, in a Frutiger Aero skin (frosted glass, glossy orbs, an animated sky, light and dark). Made by Will.
 
 - **No ads.** Videos play through [Piped](https://github.com/TeamPiped/Piped), an open-source, ad-free way to watch YouTube. If Piped can't play a video, DBYC falls back to YouTube's own player (which may show ads) and tells you so. You can change this in **Settings → Playback**.
 - **No Shorts.** They're filtered out of every list: subscriptions, search, trending, channels and Up next.

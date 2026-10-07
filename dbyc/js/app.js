@@ -1,10 +1,11 @@
-// DBYC: Dreamliner's Better YouTube Client. YouTube without the ads or the Shorts.
-import * as piped from "./piped.js?v=20261007143201";
-import * as yt from "./youtube.js?v=20261007143201";
-import * as player from "./player.js?v=20261007143201";
-import { settings, get, set, del } from "./store.js?v=20261007143201";
-import { PIPED_INSTANCES } from "./config.js?v=20261007143201";
-import { esc, duration, views, ago, thumb, noShorts, linkify, htmlToText } from "./util.js?v=20261007143201";
+// MySpace v1.3.3 (DBYC, Dreamliner's Better YouTube Client): YouTube without the ads or the Shorts.
+// Named for the Sacred App from The Legend Of Chris.
+import * as piped from "./piped.js?v=20261007144524";
+import * as yt from "./youtube.js?v=20261007144524";
+import * as player from "./player.js?v=20261007144524";
+import { settings, get, set, del } from "./store.js?v=20261007144524";
+import { PIPED_INSTANCES } from "./config.js?v=20261007144524";
+import { esc, duration, views, ago, thumb, noShorts, linkify, htmlToText } from "./util.js?v=20261007144524";
 
 const view = document.getElementById("view");
 const $ = (sel, root = document) => root.querySelector(sel);
@@ -74,7 +75,7 @@ async function home(rid) {
       view.innerHTML = `<div class="row" style="justify-content:space-between"><div><h1>Subscriptions</h1>
         <p class="sub">${f.subs.length} channel${f.subs.length === 1 ? "" : "s"} · updated ${ago(f.at)} · no Shorts</p></div>
         <button class="btn" type="button" id="refresh">Refresh</button></div>` +
-        (f.items.length ? grid(f.items) : notice("No recent videos from your subscriptions."));
+        (f.items.length ? grid(f.items) : notice("No recent videos from your subscriptions. Even the MySpace servers are quiet."));
       $("#refresh").onclick = async () => {
         const b = $("#refresh"); b.disabled = true; b.textContent = "Refreshing…";
         try { const nf = await yt.feed({ force: true }); if (rid === renderId) show(nf); } catch (e) { toast(e.message); b.disabled = false; b.textContent = "Refresh"; }
@@ -152,7 +153,7 @@ async function watch(rid, id) {
       </div></div>
       <div class="desc" id="desc" hidden></div></div>
     <aside class="side"><h2>Up next</h2><div id="related">${'<div class="skel"><div class="thumb"></div><div class="card-body"><div class="lines"><i></i><i></i></div></div></div>'.repeat(5)}</div></aside></div>`;
-  if (pre) document.title = pre.title + " · DBYC";
+  if (pre) document.title = pre.title + " · MySpace";
   const state = { d: pre };
   wireActions(id, state);
 
@@ -182,7 +183,7 @@ async function watch(rid, id) {
   d = d || pre;
   if (d) {
     state.d = { ...pre, ...d, channelAvatar: d.channelAvatar || pre?.channelAvatar };
-    document.title = d.title + " · DBYC";
+    document.title = d.title + " · MySpace";
     $("#title").textContent = d.title;
     $("#chan").innerHTML = chanLink(state.d);
     if (d.likes != null) $("#like-n").textContent = compact(d.likes);
@@ -237,7 +238,7 @@ const ICON = {
 async function ensureWrite() {
   if (!yt.canSignIn) throw new Error("Google sign-in isn't set up.");
   if (!yt.signedIn() || !yt.canWrite()) {
-    toast("Allow DBYC to like and save videos for you.");
+    toast("Allow MySpace to like and save videos for you.");
     await yt.signIn();
     renderAccount();
   }
@@ -310,7 +311,7 @@ const privacyLabel = p => ({ private: "Private", unlisted: "Unlisted", public: "
 // for every video. Discover asks for those around what you've watched, liked and subscribed to,
 // keeps only channels you don't follow, and ranks videos suggested from several places first.
 async function discoverPage(rid, { force = false } = {}) {
-  document.title = "Discover · DBYC";
+  document.title = "Discover · MySpace";
   const head = `<div class="row" style="justify-content:space-between"><div><h1>Discover</h1>
     <p class="sub">Channels you don't follow yet, picked from what YouTube recommends alongside what you watch. No Shorts.</p></div>
     <button class="btn" type="button" id="refresh">Shuffle new picks</button></div>`;
@@ -334,7 +335,7 @@ async function discoverPage(rid, { force = false } = {}) {
   }
   if (rid !== renderId) return;
   if (!seeds.length) {
-    view.innerHTML = head + notice("Discover learns from what you watch. Watch a few videos (or sign in so it can use your subscriptions and likes), then come back.");
+    view.innerHTML = head + notice("Discover learns from what you watch, much like Chris learned the secret teachings of social media. Watch a few videos (or sign in so it can use your subscriptions and likes), then come back.");
     $("#refresh").onclick = () => discoverPage(++renderId, { force: true });
     return;
   }
@@ -363,7 +364,7 @@ function showDiscover(head, items) {
 
 // ---------- your channels ----------
 async function subscriptionsPage(rid) {
-  document.title = "Subscriptions · DBYC";
+  document.title = "Subscriptions · MySpace";
   if (!yt.signedIn()) { view.innerHTML = `<h1>Subscriptions</h1>` + notice(`Sign in to see the channels you follow.<div class="row" style="margin-top:10px">${signInButton()}</div>`); return; }
   let f = yt.cachedFeed();
   if (f) { showChannels(f); if (f.at > Date.now() - yt.FEED_FRESH) return; }
@@ -384,7 +385,7 @@ function showChannels(f) {
 
 // ---------- your playlists ----------
 async function playlistsPage(rid) {
-  document.title = "Playlists · DBYC";
+  document.title = "Playlists · MySpace";
   if (!yt.signedIn()) { view.innerHTML = `<h1>Playlists</h1>` + notice(`Sign in to see your playlists.<div class="row" style="margin-top:10px">${signInButton()}</div>`); return; }
   const saved = yt.cachedPlaylists();
   if (saved) showPlaylists(saved);
@@ -409,7 +410,7 @@ async function playlistPage(rid, id) {
   try { p = await yt.playlist(id); } catch (e) { if (rid === renderId) view.innerHTML = notice(esc(e.message), "bad"); return; }
   if (rid !== renderId) return;
   const shown = noShorts(p.items), hidden = p.items.length - shown.length;
-  document.title = (p.title || "Playlist") + " · DBYC";
+  document.title = (p.title || "Playlist") + " · MySpace";
   view.innerHTML = `<h1>${esc(p.title || "Liked videos")}</h1><p class="sub">${[privacyLabel(p.privacy), shown.length + " videos", hidden ? hidden + " Short" + (hidden === 1 ? "" : "s") + " hidden" : ""].filter(Boolean).join(" · ")}</p>` +
     (shown.length ? grid(shown) : notice("No videos here yet."));
 }
@@ -424,7 +425,7 @@ async function channelPage(rid, id) {
     if (!c) { if (rid === renderId) view.innerHTML = notice(`Couldn't load this channel: ${esc(e.message)}`, "bad"); return; }
   }
   if (rid !== renderId) return;
-  document.title = (c.name || "Channel") + " · DBYC";
+  document.title = (c.name || "Channel") + " · MySpace";
   view.innerHTML = (c.banner ? `<div class="banner"><img src="${esc(c.banner)}" alt=""></div>` : "") +
     `<div class="chan-head">${c.avatar ? `<img src="${esc(c.avatar)}" alt="">` : ""}<div><h1>${esc(c.name)}</h1>
      <p class="sub" style="margin:0">${c.subscribers ? Number(c.subscribers).toLocaleString() + " subscribers · " : ""}no Shorts</p></div></div>` +
@@ -443,12 +444,14 @@ async function channelPage(rid, id) {
 }
 
 function settingsPage() {
-  document.title = "Settings · DBYC";
+  document.title = "Settings · MySpace";
   const p = yt.profile();
   const list = get("pipedList", null) || PIPED_INSTANCES;
   const pb = settings.playback;
   const opt = (v, label, help) => `<label class="choice"><input type="radio" name="playback" value="${v}" ${pb === v ? "checked" : ""}><span>${label}<small>${help}</small></span></label>`;
   view.innerHTML = `<div class="settings"><h1>Settings</h1><p class="sub">Saved on this device.</p>
+    <section class="setting"><h2>Appearance</h2><p>Day sky or night sky. Automatic follows your device.</p>
+      <div class="row">${["auto", "light", "dark"].map(t => `<label class="choice" style="padding:4px 14px 4px 0"><input type="radio" name="theme" value="${t}" ${(get("theme", "auto") || "auto") === t ? "checked" : ""}><span>${{ auto: "Automatic", light: "Light", dark: "Dark" }[t]}</span></label>`).join("")}</div></section>
     <section class="setting"><h2>Playback</h2><p>Where videos play from.</p>
       ${opt("auto", "Ad-free, with backup (recommended)", "Plays through Piped with no ads. If Piped can't play a video, uses YouTube's player instead (which may show ads).")}
       ${opt("piped", "Ad-free only", "Always Piped. If it can't play a video, you'll see a message instead of an ad.")}
@@ -462,12 +465,15 @@ function settingsPage() {
       <input type="text" id="region" maxlength="2" value="${esc(settings.region)}" style="max-width:90px;text-transform:uppercase"></section>
     <section class="setting"><h2>Google account</h2>
       ${!yt.canSignIn ? "<p>Google sign-in isn't set up yet. Add your OAuth client ID to <code>js/config.js</code> (see the README).</p>"
-        : yt.signedIn() ? `<p>Signed in as <b>${esc(p?.name || "you")}</b>. DBYC reads your subscriptions and playlists, and only changes things when you press Like, Dislike or Save.</p><button class="btn" type="button" id="signout">Sign out</button>`
-        : `<p>Sign in to see your subscriptions and playlists, and to like and save videos. DBYC only changes things when you press those buttons.</p>${signInButton()}`}
+        : yt.signedIn() ? `<p>Signed in as <b>${esc(p?.name || "you")}</b>. MySpace reads your subscriptions and playlists, and only changes things when you press Like, Dislike or Save.</p><button class="btn" type="button" id="signout">Sign out</button>`
+        : `<p>Sign in to see your subscriptions and playlists, and to like and save videos. MySpace only changes things when you press those buttons.</p>${signInButton()}`}
     </section>
-    <section class="setting"><h2>Watch history</h2><p>DBYC remembers your last 40 videos on this device only, so Discover can suggest new channels.</p>
+    <section class="setting"><h2>Watch history</h2><p>MySpace remembers your last 40 videos on this device only, so Discover can suggest new channels.</p>
       <button class="btn" type="button" id="clear-history">Clear watch history</button></section>
-    <section class="setting"><h2>About</h2><p>DBYC, Dreamliner's Better YouTube Client. No ads, no Shorts.</p></section></div>`;
+    <section class="setting"><h2>About</h2><p class="lore"><img src="img/logo.png" alt="">MySpace v1.3.3, the first of the Sacred Apps, as named by Steve Jobs at the iPhone 3G Keynote. Kept by the Keepers of the MySpace Relics. Also known as DBYC, Dreamliner's Better YouTube Client: no ads, no Shorts.</p>
+      <p class="lore">A single MySpace server cries in the back.</p>
+      <p><a class="btn" href="https://lsamman.github.io/legend-of-chris-wiki/myspace.html" target="_blank" rel="noopener">Read about MySpace on the wiki ↗</a></p></section></div>`;
+  view.querySelectorAll("input[name=theme]").forEach(r => r.onchange = () => setTheme(r.value));
   view.querySelectorAll("input[name=playback]").forEach(r => r.onchange = () => { settings.playback = r.value; toast("Playback setting saved."); });
   $("#instance").onchange = e => { settings.pipedInstance = e.target.value; toast("Piped server saved."); };
   $("#region").onchange = e => { settings.region = e.target.value.trim().toUpperCase() || "US"; };
@@ -476,6 +482,18 @@ function settingsPage() {
   if (so) so.onclick = () => { yt.signOut(); toast("Signed out."); settingsPage(); };
 }
 
+// ---------- light / dark ----------
+function setTheme(t) {
+  if (t === "light" || t === "dark") { document.documentElement.dataset.theme = t; set("theme", t); }
+  else { delete document.documentElement.dataset.theme; del("theme"); }
+}
+$("#theme-btn").addEventListener("click", () => {
+  const now = document.documentElement.dataset.theme || (matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+  setTheme(now === "dark" ? "light" : "dark");
+  toast(now === "dark" ? "Day sky." : "Night sky.");
+  document.querySelectorAll("input[name=theme]").forEach(r => { r.checked = r.value === (get("theme", "auto") || "auto"); });
+});
+
 // ---------- routing ----------
 function route() {
   const rid = ++renderId;
@@ -483,7 +501,7 @@ function route() {
   const h = location.hash.replace(/^#/, "") || "/";
   const [, page, arg] = /^\/([^/?]*)\/?([^?]*)?/.exec(h) || [];
   document.querySelectorAll("[data-nav]").forEach(a => a.toggleAttribute("aria-current", a.dataset.nav === ({ playlist: "playlists", "": "home" }[page || ""] ?? page)));
-  document.title = "DBYC";
+  document.title = "MySpace v1.3.3";
   window.scrollTo(0, 0);
   if (page === "watch" && arg) return watch(rid, decodeURIComponent(arg));
   if (page === "channel" && arg) return channelPage(rid, decodeURIComponent(arg));

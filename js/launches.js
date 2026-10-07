@@ -187,10 +187,9 @@
   // being simulated or drawn (the helper functions below work on it).
   var flights = [];
   var launch = null;
-  var MAX_ASCENDING = 6;      // at most this many rockets climbing at the same time
+  var MAX_ASCENDING = 1;      // at most this many rockets climbing at the same time
   var ASCENT_END = 420;       // seconds: after this a flight is just plumes and landing boosters
   var nextIn = 2 + Math.random() * 3;   // seconds until the next liftoff
-  function nextGap() { return 30 + rng() * 40; }   // ~30-70 seconds between liftoffs
   var rng = Math.random;
 
   // Scratch object for projections (avoids garbage every frame).
@@ -409,15 +408,11 @@
 
   function update(dt) {
     if (enabled) {
-      nextIn -= dt;
-      var ascending = 0, inView = 0;
-      for (var k = 0; k < flights.length; k++) {
-        if (flights[k].t < ASCENT_END) ascending++;
-        if (flights[k].t < ASCENT_END - 60) inView++;   // still has a good while left in the sky
-      }
-      // Always keep a rocket in the sky: if the last one is about to leave, launch another now
-      if (!inView) { start(); nextIn = nextGap(); }
-      else if (nextIn <= 0 && ascending < MAX_ASCENDING) { start(); nextIn = nextGap(); }
+      nextIn = Math.max(0, nextIn - dt);
+      var ascending = 0;
+      for (var k = 0; k < flights.length; k++) if (flights[k].t < ASCENT_END) ascending++;
+      // Exactly one rocket climbing at a time: the next lifts off as soon as the last one is done
+      if (nextIn <= 0 && ascending < MAX_ASCENDING) { start(); nextIn = 0; }
     }
     for (var j = flights.length - 1; j >= 0; j--) {
       use(flights[j]);

@@ -240,7 +240,7 @@ window.SITE = {
         {
           id: "resume-site",
           photo: "assets/images/this-site.jpg",
-          title: "This Résumé Site",
+          title: "Dreamliner.web",
           subtitle: "lsamman.github.io · 2026",
           summary: "The console-dashboard résumé you're looking at",
           body: ["My personal résumé site, styled like a 2010-era console dashboard. More details are under Projects."],

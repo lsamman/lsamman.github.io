@@ -50,7 +50,15 @@
 
     if (item.bullets && item.bullets.length) {
       var ul = el("ul", "bullets");
-      item.bullets.forEach(function (b) { ul.appendChild(el("li", null, b)); });
+      item.bullets.forEach(function (b) {
+        if (b && b.url) {   // { text, url }: a bullet that links somewhere
+          var li = el("li"), a = el("a", null, b.text);
+          a.href = b.url; a.target = "_blank"; a.rel = "noopener";
+          li.appendChild(a); ul.appendChild(li);
+        } else {
+          ul.appendChild(el("li", null, b));
+        }
+      });
       parts.push(ul);
     }
     if (item.tags && item.tags.length) {

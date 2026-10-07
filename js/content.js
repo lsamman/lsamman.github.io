@@ -11,7 +11,7 @@
  *   subtitle   smaller line under the title, e.g. "Company · 2023 – Present"
  *   summary    one-line description shown in the menu when the item is selected
  *   body       list of paragraphs
- *   bullets    list of bullet points
+ *   bullets    list of bullet points (a bullet can also be { text: "…", url: "https://…" } to make it a link)
  *   tags       list of short labels (skills, tools…)
  *   images     list of { src: "assets/images/your-photo.jpg", caption: "…" }
  *   photo      a square picture shown in place of the icon, e.g. "assets/images/avatar.png"
@@ -68,6 +68,7 @@ window.SITE = {
       items: [
         {
           id: "eisenman-camp",
+          photo: "assets/images/eisenman-camp.jpg",
           title: "Materials Education Foundation Eisenman Camp",
           subtitle: "Summer program · Grade 12",
           summary: "Selected as 1 of 28 students from 15 states and France",
@@ -81,6 +82,7 @@ window.SITE = {
         },
         {
           id: "lehigh-camp",
+          photo: "assets/images/lehigh-camp.jpg",
           title: "Lehigh University Material Science Camp",
           subtitle: "Summer program · Grade 11",
           summary: "Selected as 1 of 16 students from 9 school districts",
@@ -93,6 +95,7 @@ window.SITE = {
         },
         {
           id: "community-rocketry",
+          photo: "assets/images/community-rocketry.jpg",
           title: "Community Science Program",
           subtitle: "Instructional Speaker & Launch Administrator · St. John Chrysostom Academy · Grade 12",
           summary: "Designed and led a rocketry program for 20 kids aged 9–15",
@@ -105,6 +108,7 @@ window.SITE = {
         },
         {
           id: "porphyrian-society",
+          photo: "assets/images/porphyrian-society.jpg",
           title: "Porphyrian Society (Technology Club)",
           subtitle: "Founding member, Vice President, President · Grades 9–12",
           summary: "Founded and led the school's technology club",
@@ -117,6 +121,7 @@ window.SITE = {
         },
         {
           id: "rocket-team",
+          photo: "assets/images/rocket-team.jpg",
           title: "4-H Morris County & Resistojets Rocket Team",
           subtitle: "Rocket Assembly & Design Specialist · Grades 10–11",
           summary: "Designed, flew and iterated competition rockets",
@@ -130,6 +135,7 @@ window.SITE = {
         },
         {
           id: "sound-tech",
+          photo: "assets/images/sound-tech.jpg",
           title: "Microphone & Sound Technician",
           subtitle: "St. John Chrysostom Academy · Grades 9–12",
           summary: "The school's first sound specialist",
@@ -142,6 +148,7 @@ window.SITE = {
         },
         {
           id: "dbe-volunteer",
+          photo: "assets/images/dbe-volunteer.jpg",
           title: "Daughters of the British Empire / Commonwealth of Nations",
           subtitle: "Tech Services & Assembly Volunteer · Grades 9–12",
           summary: "Tech and hands-on help for a senior citizens' charity group",
@@ -171,6 +178,7 @@ window.SITE = {
       items: [
         {
           id: "ksp-mod",
+          photo: "assets/images/ksp-mod.jpg",
           title: "Dreamliner's KSRSS Site Expansion",
           subtitle: "Kerbal Space Program mod · Creator · 2024 – present",
           summary: "A popular mod that recreates 40+ real launch sites",
@@ -186,6 +194,7 @@ window.SITE = {
         },
         {
           id: "guitars",
+          photo: "assets/images/guitars.jpg",
           title: "Guitar Building & Restoration",
           subtitle: "Hobby luthier · Grades 9–12",
           summary: "Bringing guitars back to life with solder and wood",
@@ -194,6 +203,7 @@ window.SITE = {
         },
         {
           id: "this-site",
+          photo: "assets/images/this-site.jpg",
           title: "This Website",
           subtitle: "2026",
           summary: "A console-dashboard résumé with a live city and generated music",
@@ -213,6 +223,7 @@ window.SITE = {
       items: [
         {
           id: "magazine",
+          photo: "assets/images/magazine.jpg",
           title: "Published Magazine Author",
           subtitle: "Home Life Publishers · International · Grade 11",
           summary: "\"How to get in to Sport Rocketry\" (print)",
@@ -220,24 +231,28 @@ window.SITE = {
         },
         {
           id: "nar-l1",
+          photo: "assets/images/nar-l1.jpg",
           title: "Level 1 High Power Rocket Certification",
           subtitle: "National Association of Rocketry · National · Grade 11",
           summary: "Certified to fly high-power rockets"
         },
         {
           id: "easton-speaker",
+          photo: "assets/images/easton-speaker.jpg",
           title: "Speaker, Easton Library Space Program",
           subtitle: "With the Nurture Nature Center · State/Regional · Grade 11",
           summary: "Invited speaker at a public space program"
         },
         {
           id: "dante",
+          photo: "assets/images/dante.jpg",
           title: "Dante Certification for AV Professionals",
           subtitle: "National · Grades 10–11",
           summary: "Training in digital audio, video and networking"
         },
         {
           id: "school-awards",
+          photo: "assets/images/school-awards.jpg",
           title: "St. John's Annual Awards",
           subtitle: "School · Grades 9 & 11",
           summary: "Literature, Perseverance and Art awards",
@@ -253,6 +268,7 @@ window.SITE = {
       items: [
         {
           id: "lab",
+          photo: "assets/images/lab.jpg",
           title: "Lab & Engineering",
           summary: "Materials testing, rocketry and fabrication",
           body: [
@@ -269,6 +285,7 @@ window.SITE = {
         },
         {
           id: "tech",
+          photo: "assets/images/tech.jpg",
           title: "Tech & Audio",
           summary: "Computers, coding, AV and sound",
           body: ["I've worked with Dante networked sound systems for school concerts and plays."],
@@ -294,6 +311,7 @@ window.SITE = {
       items: [
         {
           id: "sjca",
+          photo: "assets/images/sjca.jpg",
           title: "St. John Chrysostom Academy",
           subtitle: "Bethlehem, PA · 2023 – 2027 (expected graduation May 2027)",
           summary: "High school, Class of 2027",
@@ -301,6 +319,7 @@ window.SITE = {
         },
         {
           id: "dual-enrollment",
+          photo: "assets/images/dual-enrollment.jpg",
           title: "Dual Enrollment",
           subtitle: "Grove City College (2025 – 2026) · Northampton Community College (2026)",
           summary: "College coursework alongside high school",
@@ -325,6 +344,32 @@ window.SITE = {
           links: [
             { label: "Email: william_vella@icloud.com", url: "mailto:william_vella@icloud.com" },
             { label: "GitHub: lsamman", url: "https://github.com/lsamman" }
+          ]
+        },
+        {
+          id: "photo-credits",
+          title: "Photo credits",
+          summary: "Where the pictures on this site come from",
+          body: ["Apart from my profile picture and the screenshot of this site, the pictures here are illustrative photos from Wikimedia Commons, used under their free licenses. Thanks to their photographers. Each line links to the original file and its license."],
+          bullets: [
+            { text: "Eisenman Camp: \"Kunststoffzugprobe Dauerfestigkeit 02\" by Hb tuw, CC BY-SA 4.0", url: "https://commons.wikimedia.org/wiki/File:Kunststoffzugprobe_Dauerfestigkeit_02.jpg" },
+            { text: "Lehigh camp: \"Welding Student\" by Tstc, CC BY-SA 4.0", url: "https://commons.wikimedia.org/wiki/File:Welding_Student.jpg" },
+            { text: "Community Science Program: \"An photograph of a model rocket being launched, taken in 2019\" by newmexico.photographer, CC BY 2.0", url: "https://commons.wikimedia.org/wiki/File:An_photograph_of_a_model_rocket_being_launched,_taken_in_2019.jpg" },
+            { text: "Porphyrian Society: \"Intel DTC-AAL03 and Asus motherboard 20080206\" by Victorrocha, CC BY-SA 3.0", url: "https://commons.wikimedia.org/wiki/File:Intel_DTC-AAL03_and_Asus_motherboard_20080206.jpg" },
+            { text: "Rocket team: \"Level 3 high power rocket at launch pad\" by National Association of Rocketry, CC BY-SA 3.0", url: "https://commons.wikimedia.org/wiki/File:Level_3_high_power_rocket_at_launch_pad.jpg" },
+            { text: "Sound technician: \"Stagetec AURUS 02\" by CLI, CC BY-SA 4.0", url: "https://commons.wikimedia.org/wiki/File:Stagetec_AURUS_02.jpg" },
+            { text: "DBE volunteering: \"Jam jar, Kazakhstan\" by Nurken, CC BY-SA 4.0", url: "https://commons.wikimedia.org/wiki/File:Jam_jar,_Kazakhstan.jpg" },
+            { text: "KSP mod: \"Space Launch Complex 40 at Cape Canaveral (aerial)\" by SpaceX, CC0", url: "https://commons.wikimedia.org/wiki/File:Space_Launch_Complex_40_at_Cape_Canaveral_(aerial).jpg" },
+            { text: "Guitar building: \"1 Rockinger electric guitar headstock 1980s vintage\" by Elmschrat, CC BY-SA 4.0", url: "https://commons.wikimedia.org/wiki/File:1_Rockinger_electric_guitar_headstock_1980s_vintage.jpg" },
+            { text: "Magazine author: \"A rocketry triptych (42308755852)\" by Steve Jurvetson, CC BY 2.0", url: "https://commons.wikimedia.org/wiki/File:A_rocketry_triptych_(42308755852).jpg" },
+            { text: "Level 1 certification: \"A glorious launch of my Red Mongoose rocket to Mach 1.4 (52387748282)\" by Steve Jurvetson, CC BY 2.0", url: "https://commons.wikimedia.org/wiki/File:A_glorious_launch_of_my_Red_Mongoose_rocket_to_Mach_1.4_(52387748282).jpg" },
+            { text: "Easton Library speaker: \"Easton Area Public Library\" by Semmendinger, CC BY-SA 4.0", url: "https://commons.wikimedia.org/wiki/File:Easton_Area_Public_Library.jpg" },
+            { text: "Dante certification: \"RJ45 Ethernet Cable\" by Khairil Yusof from Malaysia, CC BY 2.0", url: "https://commons.wikimedia.org/wiki/File:RJ45_Ethernet_Cable.jpg" },
+            { text: "School awards: \"Blue Darter Trophy\" by RoyalxOptimum, CC BY-SA 4.0", url: "https://commons.wikimedia.org/wiki/File:Blue_Darter_Trophy.jpg" },
+            { text: "Lab & Engineering: \"Laboratory Optical Microscope\" by Aliva Sahoo, CC BY-SA 4.0", url: "https://commons.wikimedia.org/wiki/File:Laboratory_Optical_Microscope.jpg" },
+            { text: "Tech & Audio: \"Soldering iron (UK Plug)\" by ooml, CC BY-SA 2.0", url: "https://commons.wikimedia.org/wiki/File:Soldering_iron_(UK_Plug).jpg" },
+            { text: "St. John Chrysostom Academy: \"Moravian Star at the Central Moravian Church, Bethlehem, PA\" by JerseyThroughandThrough, CC BY-SA 4.0", url: "https://commons.wikimedia.org/wiki/File:Moravian_Star_at_the_Central_Moravian_Church,_Bethlehem,_PA.png" },
+            { text: "Dual enrollment: \"Grove City College Campus\" by Mark Schellhase, CC BY-SA 3.0", url: "https://commons.wikimedia.org/wiki/File:Grove_City_College_Campus.jpg" }
           ]
         }
       ]

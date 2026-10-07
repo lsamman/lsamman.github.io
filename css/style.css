@@ -370,3 +370,5 @@ html.reduce-motion *, html.reduce-motion *::before, html.reduce-motion *::after 
 }
 html.reduce-motion #grain { display: none; }
 html.reduce-motion .item, html.reduce-motion .cat, html.reduce-motion .face { transition-duration: .12s; }
+.panel ul.bullets a { color: var(--text); text-decoration-color: var(--accent); text-underline-offset: 3px; }
+.panel ul.bullets a:hover { color: var(--accent-hi); }

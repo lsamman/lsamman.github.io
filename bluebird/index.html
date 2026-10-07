@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Twitter: Bluebird Variant</title>
-<meta name="description" content="Twitter: Bluebird Variant (with no limits), the Sacred App from The Legend Of Chris. An X client for a sideways, cracked iPhone 3G: no character limit, no auto-correct, never update.">
+<meta name="description" content="Twitter: Bluebird Variant (with no limits), the Sacred App from The Legend Of Chris. An X client in the style of iPhone OS 3: no character limit, no auto-correct, never update.">
 <meta name="theme-color" content="#6d84a2" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -20,7 +20,7 @@
      SITE_VERSION and the ?v= tags are kept in sync by ../bump-version.sh -->
 <script>
   (function () {
-    var SITE_VERSION = "20261007171649";
+    var SITE_VERSION = "20261007172844";
     if (!window.fetch) return;
     var newer = null, last = 0;
     function busy() {
@@ -65,14 +65,11 @@
     setInterval(function () { check(false); }, 5 * 60 * 1000);
   })();
 </script>
-<link rel="stylesheet" href="css/app.css?v=20261007171649">
+<link rel="stylesheet" href="css/app.css?v=20261007172844">
 </head>
 <body>
-<!-- On a computer, Bluebird runs on a virtual iPhone 3G: sideways, cracked, as Steve Jobs presented it.
-     On a phone, your phone is the iPhone 3G. -->
+<!-- Full screen, like an app. The iPhone 3G it runs on lives on the wiki now. -->
 <div class="device">
-  <span class="earpiece" aria-hidden="true"></span>
-  <a class="homebtn" href="#/" aria-label="Home"><i></i></a>
   <div class="screen">
     <div class="statusbar" aria-hidden="true">
       <span class="sig"><i></i><i></i><i></i><i></i><i></i></span><span class="carrier">God's router</span><span class="g3">3G</span>
@@ -95,10 +92,6 @@
       <a href="#/settings" data-nav="settings"><svg viewBox="0 0 30 30"><path d="M24 16.3a9 9 0 0 0 0-2.6l2.6-2-2.5-4.4-3.1 1.2a9 9 0 0 0-2.2-1.3L18.4 4h-5l-.5 3.2a9 9 0 0 0-2.2 1.3L7.6 7.3l-2.5 4.4 2.6 2a9 9 0 0 0 0 2.6l-2.6 2 2.5 4.4 3.1-1.2c.7.5 1.4 1 2.2 1.3l.5 3.2h5l.5-3.2a9 9 0 0 0 2.2-1.3l3.1 1.2 2.5-4.4zM15.9 19a4 4 0 1 1 0-8 4 4 0 0 1 0 8z"/></svg><span>Settings</span></a>
     </nav>
 
-    <!-- The crack. It's cracked. -->
-    <svg class="crack" viewBox="0 0 600 400" preserveAspectRatio="none" aria-hidden="true">
-      <g><path d="M548 372l-38-52-61-21-48-46"/><path d="M510 320l-19-71-37-40"/><path d="M510 320l-64 18-58-8"/><path d="M548 372l-8-47 21-60"/><path d="M548 372l30-38"/><path d="M449 299l-30 31"/><path d="M491 249l23-29"/></g>
-    </svg>
 
     <!-- Boot: Club Shadowban's giant rotating X, suspended by Elon's tears, shatters and the bird flies out -->
     <div id="boot" class="boot" role="button" tabindex="0" aria-label="Skip intro" hidden>
@@ -116,7 +109,6 @@
     <div id="toast" class="hud" role="status" hidden></div>
   </div>
 </div>
-<p class="caption">Twitter: Bluebird Variant <em>(with no limits)</em> · running on a virtual iPhone 3G · sideways, cracked, never updated</p>
-<script type="module" src="js/app.js?v=20261007171649"></script>
+<script type="module" src="js/app.js?v=20261007172844"></script>
 </body>
 </html>

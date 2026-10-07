@@ -1,6 +1,6 @@
 # Twitter: Bluebird Variant (with no limits)
 
-An X client named after the Sacred App from The Legend Of Chris, which Steve Jobs says only the iPhone 3G can run. It's built as an iPhone OS 3 app: blue-gray navigation bar, segmented controls, pinstripe grouped tables and the black glossy tab bar. On a computer it runs on a virtual iPhone 3G, sideways and cracked, as the book describes it. On a phone, it fills the screen. It boots as Club Shadowban's giant rotating X (suspended by Elon's tears) shatters and the bird flies out. Made by Will.
+An X client named after the Sacred App from The Legend Of Chris, which Steve Jobs says only the iPhone 3G can run. It's built as an iPhone OS 3 app: blue-gray navigation bar, segmented controls, pinstripe grouped tables and the black glossy tab bar. It fills the screen like an app; on wide screens the content stays in a readable column. To open it from the iPhone 3G itself, tap the phone in the toolbar of [the wiki](https://lsamman.github.io/legend-of-chris-wiki/#iphone-3g). It boots as Club Shadowban's giant rotating X (suspended by Elon's tears) shatters and the bird flies out. Made by Will.
 
 - **Timeline.** Characters from the book tweet through the day. Tweets appear at random times, a "new tweets" bar shows up when someone posts, and every visitor sees the same timeline. Only fictional and book-invented characters post (Elon Mush, not Elon Musk).
 - **Following.** Follow real X accounts by @handle and tap one to see its latest posts through X's embed.
@@ -27,7 +27,7 @@ From the résumé site's folder, run `python3 -m http.server 8000` and open http
 
 | File | What it does |
 |---|---|
-| `index.html`, `css/app.css` | The iPhone 3G, the iPhone OS 3 look |
+| `index.html`, `css/app.css` | The page and its iPhone OS 3 look |
 | `js/app.js` | Screens (Timeline, New Tweet, Look up, Nest, Settings), the thread splitter, X embeds, the boot intro |
 | `js/feed.js` | The generated Timeline: the cast, their lines and the daily schedule |
 | `js/canon.js` | Tweets quoted from the book, trending topics and the boot lines |

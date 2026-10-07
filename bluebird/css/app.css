@@ -1,6 +1,6 @@
 /* Twitter: Bluebird Variant (with no limits) — the Sacred App, as Steve Jobs named it at the iPhone 3G Keynote.
    An iPhone OS 3 app: blue-gray navigation bar, pinstripe grouped tables, the black glossy tab bar.
-   On a computer it runs on a virtual iPhone 3G, sideways and cracked. Night uses the black bar style. */
+   It fills the screen; on wide screens the content stays in a readable column. Night uses the black bar style. */
 
 /* ---------- theme ---------- */
 :root {
@@ -47,29 +47,14 @@
 * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 [hidden] { display: none !important; }
 html, body { margin: 0; height: 100%; font: 15px/1.35 var(--ui); color: var(--text); -webkit-font-smoothing: antialiased; }
-body { background: radial-gradient(ellipse at 50% 35%, #3a3f47 0%, #1b1d21 55%, #0c0d0f 100%) #111; overflow: hidden; }
+body { background: #000; overflow: hidden; }
 a { color: var(--link); text-decoration: none; }
 button { font: inherit; color: inherit; cursor: pointer; }
 img { display: block; max-width: 100%; }
 
-/* ---------- the iPhone 3G, sideways ---------- */
-.device { position: absolute; left: 50%; top: calc(50% - 14px); transform: translate(-50%, -50%);
-  width: min(1180px, 94vw, calc((100vh - 70px) * 1.9)); aspect-ratio: 1.9; border-radius: 9% / 17%;
-  background: radial-gradient(ellipse at 30% 0%, #3d3d3d 0%, #121212 45%, #050505 100%);
-  box-shadow: 0 0 0 2px #2a2a2a, 0 0 0 5px #b9bec4, 0 0 0 6px #7d8288, 0 30px 70px rgba(0, 0, 0, .7), inset 0 2px 1px rgba(255, 255, 255, .18); }
-.device::before { content: ""; position: absolute; inset: 0; border-radius: inherit; pointer-events: none;
-  background: linear-gradient(115deg, rgba(255, 255, 255, .12) 0%, rgba(255, 255, 255, 0) 38%); }
-.earpiece { position: absolute; left: 5.6%; top: 50%; width: 7px; height: 9%; transform: translateY(-50%); border-radius: 4px; background: #1e1e1e; box-shadow: inset 0 1px 2px #000, 0 1px 0 rgba(255, 255, 255, .1); }
-.homebtn { position: absolute; right: 3.6%; top: 50%; width: 6.2%; aspect-ratio: 1; transform: translateY(-50%); border-radius: 50%;
-  background: radial-gradient(circle at 50% 30%, #2b2b2b, #0b0b0b 70%); box-shadow: inset 0 1px 2px rgba(0, 0, 0, .9), 0 1px 0 rgba(255, 255, 255, .15); display: grid; place-items: center; }
-.homebtn i { width: 34%; aspect-ratio: 1; border: 2px solid #8a8a8a; border-radius: 22%; }
-.homebtn:active { background: #000; }
-.screen { position: absolute; top: 5.5%; bottom: 5.5%; left: 12.5%; right: 12.5%; overflow: hidden; background: #000;
-  display: flex; flex-direction: column; box-shadow: 0 0 0 2px #000; }
-.caption { position: absolute; left: 0; right: 0; bottom: 14px; margin: 0; text-align: center; color: #7d838c; font: 12px var(--ui); padding: 0 16px; }
-.caption em { font-style: normal; color: #9aa1ab; }
-.crack { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 40; opacity: .5; }
-.crack path { fill: none; stroke: #fff; stroke-width: 1.1; vector-effect: non-scaling-stroke; filter: drop-shadow(0 0 1px rgba(0, 0, 0, .8)); }
+/* ---------- full screen ---------- */
+.device { position: fixed; inset: 0; }
+.screen { position: absolute; inset: 0; overflow: hidden; display: flex; flex-direction: column; background: #000; padding-top: env(safe-area-inset-top); }
 
 /* ---------- status bar ---------- */
 .statusbar { flex: none; position: relative; display: flex; align-items: center; gap: 5px; height: 20px; padding: 0 6px;
@@ -238,12 +223,19 @@ a.row:active, button.row:active { background: var(--select); color: #fff; }
 .boot-hint { margin: 0; font-size: 11px; opacity: .5; }
 @media (prefers-reduced-motion: reduce) { .boot-x, .tears i { animation: none; } }
 
-/* ---------- on a phone, the phone is the iPhone ---------- */
+/* ---------- wide screens: keep lines readable ---------- */
+@media (min-width: 900px) {
+  .scroll > * { max-width: 860px; margin-left: auto; margin-right: auto; }
+  .scroll > .group { width: calc(100% - 20px); margin: 14px auto; }
+  .scroll > .cells { border-left: 1px solid var(--cell-edge); border-right: 1px solid var(--cell-edge); }
+  .scroll > .cells .tw:last-child { border-bottom: 1px solid var(--cell-edge); }
+  .toolbar .segbar, .toolbar form { max-width: 620px; margin: 0 auto; }
+  .compose textarea, .compose .to, .parts { padding-left: max(10px, calc(50% - 430px)); padding-right: max(10px, calc(50% - 430px)); }
+}
+
+/* ---------- phones: the phone has its own status bar ---------- */
 @media (max-width: 899px), (max-height: 520px) {
-  body { background: #000; }
-  .device { position: fixed; inset: 0; transform: none; width: auto; aspect-ratio: auto; border-radius: 0; background: #000; box-shadow: none; }
-  .device::before, .earpiece, .homebtn, .caption, .crack, .statusbar { display: none; }   /* the real phone has its own status bar */
-  .screen { inset: 0; padding-top: env(safe-area-inset-top); box-shadow: none; }
+  .statusbar { display: none; }
   .tabbar { height: calc(49px + env(safe-area-inset-bottom)); padding-bottom: env(safe-area-inset-bottom); }
 }
 .row input { font: 16px var(--ui); color: var(--text); background: none; border: 0; outline: 0; padding: 6px 0; }

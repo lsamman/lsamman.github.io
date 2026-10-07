@@ -250,11 +250,13 @@ window.SITE = {
           summary: "The Chris Files",
           body: [
             "A fan wiki for The Legend Of Chris, an absurdist comedy book written with friends. It has over 300 articles covering every character, place, planet, item and event, with search, categories and backlinks. It's styled to look like the original document.",
-            "The site is generated from the article text by a small Python script and deployed automatically with GitHub Pages."
+            "The site is generated from the article text by a small Python script and deployed automatically with GitHub Pages.",
+            "Tap the phone in its toolbar and Steve Jobs's iPhone 3G flies to the front of the screen, sideways and cracked, with my apps on it: MySpace v1.3.3, my YouTube client with no ads or Shorts, and Twitter: Bluebird Variant, my X client with no character limit."
           ],
           tags: ["Static site generator", "Python", "HTML", "CSS", "JavaScript", "GitHub Pages"],
           links: [
             { label: "Visit site", url: "https://lsamman.github.io/legend-of-chris-wiki/" },
+            { label: "Open the iPhone 3G", url: "https://lsamman.github.io/legend-of-chris-wiki/#iphone-3g" },
             { label: "Source on GitHub", url: "https://github.com/lsamman/legend-of-chris-wiki" }
           ]
         },
@@ -858,40 +860,6 @@ window.SITE = {
           title: "Nothing Headphone (1)",
           subtitle: "Headphones",
           summary: "Over-ear headphones"
-        }
-      ]
-    },
-
-    {
-      id: "iphone-3g",
-      label: "Virtual iPhone 3G",
-      icon: "assets/icons/iphone.svg",
-      items: [
-        {
-          id: "myspace",
-          title: "MySpace v1.3.3",
-          photo: "assets/icons/myspace.png",
-          subtitle: "Dreamliner's Better YouTube Client",
-          summary: "YouTube with no ads and no Shorts",
-          body: [
-            "In The Legend Of Chris, the Sacred Apps only run on the iPhone 3G, and MySpace v1.3.3 is the first of them. So here it is, on a virtual one.",
-            "It's my own YouTube client. Videos play ad-free, Shorts are filtered out of everything, and signing in with Google brings in my subscriptions, playlists and likes. It's styled like a 2009 dream: frosted glass, glossy orbs and an animated sky, in light and dark."
-          ],
-          tags: ["No ads", "No Shorts", "Subscriptions", "Frutiger Aero"],
-          links: [{ label: "Open MySpace", url: "dbyc/" }]
-        },
-        {
-          id: "bluebird",
-          title: "Twitter: Bluebird Variant",
-          photo: "assets/icons/bluebird.png",
-          subtitle: "(with no limits)",
-          summary: "An X client from before the X",
-          body: [
-            "Steve Jobs names Twitter Bluebird Variant (with no limits) as one of the Sacred Apps at the iPhone 3G Keynote. This is my take on it: an iPhone OS 3 app running on a sideways, cracked iPhone 3G, booting up as Club Shadowban's giant X shatters.",
-            "It's an X client: follow real accounts, look up tweets and post with no character limit (long tweets go up as a numbered thread) and no auto-correct. Between them, the book's characters tweet on the Timeline at random times through the day."
-          ],
-          tags: ["No limits", "No auto-correct", "Never update", "iPhone OS 3"],
-          links: [{ label: "Open Bluebird", url: "bluebird/" }]
         }
       ]
     },

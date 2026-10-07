@@ -30,6 +30,8 @@ Then open http://localhost:8000. Refresh the page after each change.
 
 ## Publishing changes
 
+Browsers cache the CSS and JS files. After editing, bump the `?v=` number on the `<script>` and `<link>` lines in `index.html` so visitors get the new version straight away. Claude does this automatically when it publishes.
+
 ```
 git add -A
 git commit -m "Update my details"

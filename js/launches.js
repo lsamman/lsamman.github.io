@@ -410,9 +410,14 @@
   function update(dt) {
     if (enabled) {
       nextIn -= dt;
-      var ascending = 0;
-      for (var k = 0; k < flights.length; k++) if (flights[k].t < ASCENT_END) ascending++;
-      if (nextIn <= 0 && ascending < MAX_ASCENDING) { start(); nextIn = nextGap(); }
+      var ascending = 0, inView = 0;
+      for (var k = 0; k < flights.length; k++) {
+        if (flights[k].t < ASCENT_END) ascending++;
+        if (flights[k].t < ASCENT_END - 60) inView++;   // still has a good while left in the sky
+      }
+      // Always keep a rocket in the sky: if the last one is about to leave, launch another now
+      if (!inView) { start(); nextIn = nextGap(); }
+      else if (nextIn <= 0 && ascending < MAX_ASCENDING) { start(); nextIn = nextGap(); }
     }
     for (var j = flights.length - 1; j >= 0; j--) {
       use(flights[j]);

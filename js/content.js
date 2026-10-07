@@ -67,7 +67,7 @@ window.SITE = {
           identity: { flag: "nonbinary", label: "Non-binary", pronouns: ["They/Them", "She/Her"] },
           summary: "Rockets, materials science, sound and building things",
           body: [
-            "I'm a senior at St. John Chrysostom Academy who likes building things that fly, make sound, or teach someone something new. I've tested materials to failure in university lab camps, designed and flown rockets, written a published guide to sport rocketry, and run the sound for every school play and concert.",
+            "I'm a high school senior who likes building things that fly, make sound, or teach someone something new. I've tested materials to failure in university lab camps, designed and flown rockets, written a published guide to sport rocketry, and run the sound for every school play and concert.",
             "I'm headed toward engineering and materials science, with a master's degree along the way. My end goal is to work in the aerospace industry."
           ],
           tags: ["Aerospace", "Materials science", "Rocketry", "Engineering", "Teaching", "Audio tech"]

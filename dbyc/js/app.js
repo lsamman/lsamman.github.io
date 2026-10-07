@@ -1,11 +1,11 @@
 // MySpace v1.3.3 (DBYC, Dreamliner's Better YouTube Client): YouTube without the ads or the Shorts.
 // Named for the Sacred App from The Legend Of Chris.
-import * as piped from "./piped.js?v=20261007145007";
-import * as yt from "./youtube.js?v=20261007145007";
-import * as player from "./player.js?v=20261007145007";
-import { settings, get, set, del } from "./store.js?v=20261007145007";
-import { PIPED_INSTANCES } from "./config.js?v=20261007145007";
-import { esc, duration, views, ago, thumb, noShorts, linkify, htmlToText } from "./util.js?v=20261007145007";
+import * as piped from "./piped.js?v=20261007164903";
+import * as yt from "./youtube.js?v=20261007164903";
+import * as player from "./player.js?v=20261007164903";
+import { settings, get, set, del } from "./store.js?v=20261007164903";
+import { PIPED_INSTANCES } from "./config.js?v=20261007164903";
+import { esc, duration, views, ago, thumb, noShorts, linkify, htmlToText } from "./util.js?v=20261007164903";
 
 const view = document.getElementById("view");
 const $ = (sel, root = document) => root.querySelector(sel);

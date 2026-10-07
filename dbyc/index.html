@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>DBYC</title>
+<meta name="description" content="Dreamliner's Better YouTube Client: YouTube without the ads or Shorts.">
+<meta name="theme-color" content="#0e1011">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%23107c10'/%3E%3Cpath d='M12 9v14l11-7z' fill='%23fff'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="css/app.css">
+</head>
+<body>
+<header class="top">
+  <a class="brand" href="#/" aria-label="DBYC home"><span class="brand-mark" aria-hidden="true">▶</span><span class="brand-name">DBYC</span></a>
+  <form class="search" id="search-form" role="search">
+    <input id="search-input" type="search" placeholder="Search" autocomplete="off" aria-label="Search videos">
+  </form>
+  <nav class="top-nav">
+    <a href="#/" data-nav="home">Home</a>
+    <a href="#/settings" data-nav="settings">Settings</a>
+    <button id="account" class="account" type="button">Sign in</button>
+  </nav>
+</header>
+<main id="view" class="view" tabindex="-1"></main>
+<div id="toast" class="toast" role="status" hidden></div>
+<script type="module" src="js/app.js"></script>
+</body>
+</html>

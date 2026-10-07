@@ -43,10 +43,10 @@ function saveFeed(id, eps) {
   set("feeds", f);
 }
 function newEpisodes() {
-  const f = get("feeds", {}), out = [];
+  const f = get("feeds", {}), out = [], cur = player.state().current;
   for (const s of subs()) {
     for (const e of (f[s.id] && f[s.id].eps) || []) {
-      if (Date.parse(e.date) > (s.seen || s.added) && !player.isPlayed(e.id) && !player.progress(e.id)) out.push(e);
+      if (Date.parse(e.date) > (s.seen || s.added) && !player.isPlayed(e.id) && !player.progress(e.id) && !(cur && cur.id === e.id)) out.push(e);
     }
   }
   return out.sort((a, b) => (b.date > a.date ? 1 : -1));

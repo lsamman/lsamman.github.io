@@ -20,6 +20,7 @@ export const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;"
 export function htmlToText(html) {
   const src = String(html || "").replace(/<br\s*\/?>/gi, "\n").replace(/<\/(p|div|li|h\d)>/gi, "\n");
   const d = new DOMParser().parseFromString(`<body>${src}</body>`, "text/html");
+  d.querySelectorAll("script, style, noscript, template").forEach(n => n.remove());
   return (d.body.textContent || "").replace(/[ \t]+\n/g, "\n").replace(/\n{3,}/g, "\n\n").trim();
 }
 // Plain text to HTML: escaped, with links and line breaks.

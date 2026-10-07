@@ -12,7 +12,7 @@
      SITE_VERSION and the ?v= tags are kept in sync by ../bump-version.sh -->
 <script>
   (function () {
-    var SITE_VERSION = "20261007140750";
+    var SITE_VERSION = "20261007142440";
     if (!window.fetch) return;
     fetch("../version.json?t=" + Date.now(), { cache: "no-store" })
       .then(function (r) { return r.ok ? r.json() : null; })
@@ -28,7 +28,7 @@
       .catch(function () {});
   })();
 </script>
-<link rel="stylesheet" href="css/app.css?v=20261007140750">
+<link rel="stylesheet" href="css/app.css?v=20261007142440">
 </head>
 <body>
 <header class="top">
@@ -37,13 +37,17 @@
     <input id="search-input" type="search" placeholder="Search" autocomplete="off" aria-label="Search videos">
   </form>
   <nav class="top-nav">
-    <a href="#/" data-nav="home">Home</a>
-    <a href="#/settings" data-nav="settings">Settings</a>
-    <button id="account" class="account" type="button">Sign in</button>
+    <a href="#/" data-nav="home" title="Home"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11l9-7 9 7v9h-6v-6H9v6H3z"/></svg><span>Home</span></a>
+    <a href="#/discover" data-nav="discover" title="Discover"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm0 2a8 8 0 1 1 0 16 8 8 0 0 1 0-16zm4.5 3.5-6 2.5-2.5 6 6-2.5 2.5-6zM12 11a1 1 0 1 1 0 2 1 1 0 0 1 0-2z"/></svg><span>Discover</span></a>
+    <a href="#/subscriptions" data-nav="subscriptions" title="Subscriptions"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16v2H4zm2-4h12v2H6zm-2 8h16v12H4zm6 3v6l5-3z"/></svg><span>Subscriptions</span></a>
+    <a href="#/playlists" data-nav="playlists" title="Playlists"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h13v2H3zm0 5h13v2H3zm0 5h9v2H3zm12 0l6 3.5-6 3.5z"/></svg><span>Playlists</span></a>
+    <a href="#/settings" data-nav="settings" title="Settings"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19.4 13a7.6 7.6 0 0 0 0-2l2.1-1.6-2-3.5-2.5 1a7.4 7.4 0 0 0-1.7-1L15 3h-4l-.4 2.9a7.4 7.4 0 0 0-1.7 1l-2.5-1-2 3.5L6.6 11a7.6 7.6 0 0 0 0 2l-2.1 1.6 2 3.5 2.5-1a7.4 7.4 0 0 0 1.7 1L11 21h4l.4-2.9a7.4 7.4 0 0 0 1.7-1l2.5 1 2-3.5zM13 15.5a3.5 3.5 0 1 1 0-7 3.5 3.5 0 0 1 0 7z"/></svg><span>Settings</span></a>
   </nav>
+  <button id="account" class="account" type="button">Sign in</button>
 </header>
 <main id="view" class="view" tabindex="-1"></main>
+<dialog id="dlg" class="dlg"><div class="dlg-head"><h2 id="dlg-title"></h2><form method="dialog"><button class="dlg-x" aria-label="Close">✕</button></form></div><div id="dlg-body"></div></dialog>
 <div id="toast" class="toast" role="status" hidden></div>
-<script type="module" src="js/app.js?v=20261007140750"></script>
+<script type="module" src="js/app.js?v=20261007142440"></script>
 </body>
 </html>

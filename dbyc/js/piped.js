@@ -1,7 +1,7 @@
 // Piped (https://github.com/TeamPiped/Piped): an open-source, ad-free front door to YouTube.
 // Public servers come and go, so every request tries several and remembers the one that worked.
-import { PIPED_INSTANCES, PIPED_INSTANCE_LIST } from "./config.js?v=20261007140750";
-import { get, set, settings } from "./store.js?v=20261007140750";
+import { PIPED_INSTANCES, PIPED_INSTANCE_LIST } from "./config.js?v=20261007142440";
+import { get, set, settings } from "./store.js?v=20261007142440";
 
 const TIMEOUT = 7000;
 let listLoaded = false;
@@ -105,4 +105,11 @@ export async function streamsFor(id) {
     },
     related: streams(data.relatedStreams)
   };
+}
+
+// YouTube's own "related videos" for a video (what YouTube thinks goes with it).
+const relatedCache = new Map();
+export async function related(id) {
+  if (!relatedCache.has(id)) relatedCache.set(id, api(`/streams/${encodeURIComponent(id)}`).then(r => streams(r.data.relatedStreams)));
+  try { return await relatedCache.get(id); } catch (e) { relatedCache.delete(id); throw e; }
 }

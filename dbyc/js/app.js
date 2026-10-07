@@ -1,10 +1,10 @@
 // DBYC: Dreamliner's Better YouTube Client. YouTube without the ads or the Shorts.
-import * as piped from "./piped.js?v=20261007140750";
-import * as yt from "./youtube.js?v=20261007140750";
-import * as player from "./player.js?v=20261007140750";
-import { settings, get } from "./store.js?v=20261007140750";
-import { PIPED_INSTANCES } from "./config.js?v=20261007140750";
-import { esc, duration, views, ago, thumb, noShorts, linkify, htmlToText } from "./util.js?v=20261007140750";
+import * as piped from "./piped.js?v=20261007142440";
+import * as yt from "./youtube.js?v=20261007142440";
+import * as player from "./player.js?v=20261007142440";
+import { settings, get, set, del } from "./store.js?v=20261007142440";
+import { PIPED_INSTANCES } from "./config.js?v=20261007142440";
+import { esc, duration, views, ago, thumb, noShorts, linkify, htmlToText } from "./util.js?v=20261007142440";
 
 const view = document.getElementById("view");
 const $ = (sel, root = document) => root.querySelector(sel);
@@ -25,7 +25,7 @@ function card(v) {
     <div class="card-body">
       ${v.channelAvatar ? `<img class="avatar" src="${esc(v.channelAvatar)}" alt="" loading="lazy">` : ""}
       <div><a class="card-title" href="#/watch/${esc(v.id)}">${esc(v.title)}</a>
-      <div class="card-meta">${chan}</div><div class="card-meta">${meta}</div></div>
+      <div class="card-meta">${chan}</div><div class="card-meta">${meta}</div>${v.why ? `<div class="card-meta why">${esc(v.why)}</div>` : ""}</div>
     </div></article>`;
 }
 const grid = list => `<div class="grid">${noShorts(list).map(card).join("")}</div>`;
@@ -82,7 +82,7 @@ async function home(rid) {
     }
   }
   const intro = yt.canSignIn
-    ? notice(`<b>${yt.wasSignedIn() ? "Your Google sign-in expired." : "See your subscriptions here."}</b> ${yt.wasSignedIn() ? "Sign in again to load your feed." : "Sign in with Google (read-only) to get the newest videos from the channels you follow."}<div class="row" style="margin-top:10px">${signInButton(yt.wasSignedIn() ? "Sign in again" : "Sign in with Google")}</div>`)
+    ? notice(`<b>${yt.wasSignedIn() ? "Your Google sign-in expired." : "See your subscriptions here."}</b> ${yt.wasSignedIn() ? "Sign in again to load your feed." : "Sign in with Google to get the newest videos from the channels you follow."}<div class="row" style="margin-top:10px">${signInButton(yt.wasSignedIn() ? "Sign in again" : "Sign in with Google")}</div>`)
     : notice("Google sign-in isn't set up yet, so here's what's trending. See the README to connect your subscriptions.", "warn");
   view.innerHTML = intro + `<h1>Trending</h1><p class="sub">No ads, no Shorts.</p>${loading()}`;
   try {
@@ -142,23 +142,225 @@ async function watch(rid, id) {
   let d = res.details, related = res.related || [];
   if (!d && yt.signedIn()) d = (await yt.videos([id]).catch(() => []))[0];
   if (rid !== renderId) return;
+  const stats = d ? [d.views != null ? views(d.views) : "", d.published ? ago(d.published) : ""].filter(Boolean).join(" · ") : "";
   if (d) {
     document.title = d.title + " · DBYC";
     $("#title").textContent = d.title;
-    const text = d.descriptionIsHtml ? htmlToText(d.description) : d.description || "";
-    const stats = [d.views != null ? views(d.views) : "", d.published ? ago(d.published) : "", d.likes ? d.likes.toLocaleString() + " likes" : ""].filter(Boolean).join(" · ");
-    $("#details").innerHTML = `<div class="channel-line">${d.channelAvatar ? `<img class="avatar" src="${esc(d.channelAvatar)}" alt="">` : ""}
-      <a class="name" href="#/channel/${esc(d.channelId)}">${esc(d.channelName)}</a></div>
-      <div class="desc" id="desc"><span class="stats">${esc(stats)}</span>${linkify(text)}</div>`;
-    $("#desc").onclick = e => { if (!e.target.closest("a")) e.currentTarget.classList.add("open"); };
+    remember({ id, title: d.title, channelId: d.channelId });
   }
-  if (!related.length && d && d.channelId) {
+  const text = d ? (d.descriptionIsHtml ? htmlToText(d.description) : d.description || "") : "";
+  $("#details").innerHTML = `<div class="channel-line">${d && d.channelAvatar ? `<img class="avatar" src="${esc(d.channelAvatar)}" alt="">` : ""}
+      ${d ? `<a class="name" href="#/channel/${esc(d.channelId)}">${esc(d.channelName)}</a>` : ""}
+      <div class="actions">
+        <div class="pill"><button type="button" class="act" id="like" aria-pressed="false" title="I like this">${ICON.like}<span id="like-n">${d && d.likes ? compact(d.likes) : "Like"}</span></button><button type="button" class="act" id="dislike" aria-pressed="false" title="I dislike this">${ICON.dislike}</button></div>
+        <button type="button" class="act" id="save">${ICON.save}<span>Save</span></button>
+        <button type="button" class="act" id="share">${ICON.share}<span>Share</span></button>
+      </div></div>` +
+    (d ? `<div class="desc" id="desc"><span class="stats">${esc(stats)}</span>${linkify(text)}</div>` : "");
+  if (d) $("#desc").onclick = e => { if (!e.target.closest("a")) e.currentTarget.classList.add("open"); };
+  wireActions(id, d);
+
+  // Up next: an assortment of new videos from your subscriptions, or related videos when signed out.
+  let fromSubs = false;
+  if (yt.signedIn()) {
+    const f = await yt.feed().catch(() => null);
+    const fresh = f ? noShorts(f.items).filter(v => v.id !== id && v.published > Date.now() - 14 * 864e5) : [];
+    if (fresh.length) { related = shuffle(fresh).slice(0, 20); fromSubs = true; }
+  }
+  if (!fromSubs && !related.length && d && d.channelId) {
     related = await piped.channel(d.channelId).then(c => c.items)
       .catch(() => yt.signedIn() ? yt.channel(d.channelId).then(c => c.items) : []).catch(() => []);
   }
   if (rid !== renderId) return;
   related = noShorts(related).filter(v => v.id !== id).slice(0, 20);
+  $(".side h2").textContent = fromSubs ? "Up next from your subscriptions" : "Up next";
   $("#related").innerHTML = related.length ? related.map(card).join("") : '<p class="sub">Nothing to suggest.</p>';
+}
+
+// Watch history stays on this device; Discover uses it to find things you might like.
+function remember(v) {
+  const h = get("history", []).filter(x => x.id !== v.id);
+  set("history", [{ ...v, at: Date.now() }, ...h].slice(0, 40));
+}
+
+const shuffle = list => { const a = list.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
+const compact = n => n >= 1e6 ? (Math.round(n / 1e5) / 10) + "M" : n >= 1e3 ? (n >= 1e4 ? Math.round(n / 1e3) : Math.round(n / 100) / 10) + "K" : String(n);
+const svg = d => `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="${d}"/></svg>`;
+const ICON = {
+  like: svg("M7 10v11H3V10h4zm2 11h8.6a2 2 0 0 0 2-1.6l1.3-7A2 2 0 0 0 19 10h-5.2l.9-4.4A1.8 1.8 0 0 0 11.4 4L9 10v11z"),
+  dislike: svg("M17 14V3h4v11h-4zm-2-11H6.4a2 2 0 0 0-2 1.6l-1.3 7A2 2 0 0 0 5 14h5.2l-.9 4.4a1.8 1.8 0 0 0 3.3 1.6L15 14V3z"),
+  save: svg("M4 6h12v2H4V6zm0 5h12v2H4v-2zm0 5h8v2H4v-2zm14-2v-3h2v3h3v2h-3v3h-2v-3h-3v-2h3z"),
+  share: svg("M14 5l7 7-7 7v-4c-5 0-8.5 1.6-11 5 1-5 4-10 11-11V5z")
+};
+
+// Like / dislike / save / share on the watch page. Changing things needs Google sign-in with
+// permission to manage YouTube; asking for it happens from the click itself (popups need that).
+async function ensureWrite() {
+  if (!yt.canSignIn) throw new Error("Google sign-in isn't set up.");
+  if (!yt.signedIn() || !yt.canWrite()) {
+    toast("Allow DBYC to like and save videos for you.");
+    await yt.signIn();
+    renderAccount();
+  }
+}
+function wireActions(id, d) {
+  const like = $("#like"), dislike = $("#dislike");
+  let rating = "none";
+  const show = () => {
+    like.setAttribute("aria-pressed", rating === "like");
+    dislike.setAttribute("aria-pressed", rating === "dislike");
+    if (d && d.likes != null) $("#like-n").textContent = compact(d.likes + (rating === "like" && !d._liked ? 1 : 0) - (rating !== "like" && d._liked ? 1 : 0));
+  };
+  if (yt.signedIn() && yt.canWrite()) yt.rating(id).then(r => { rating = r; if (d) d._liked = r === "like"; show(); }).catch(() => {});
+  const rateTo = async target => {
+    try {
+      await ensureWrite();
+      const next = rating === target ? "none" : target;
+      const before = rating; rating = next; show();
+      try { await yt.rate(id, next); toast(next === "like" ? "Liked. It's in your Liked videos." : next === "dislike" ? "Disliked." : "Rating removed."); }
+      catch (e) { rating = before; show(); throw e; }
+    } catch (e) { toast(e.message); }
+  };
+  like.onclick = () => rateTo("like");
+  dislike.onclick = () => rateTo("dislike");
+  $("#save").onclick = async () => {
+    try { await ensureWrite(); await saveDialog(id); } catch (e) { toast(e.message); }
+  };
+  $("#share").onclick = async () => {
+    const url = `https://youtu.be/${id}`, title = d ? d.title : "YouTube video";
+    if (navigator.share) { try { await navigator.share({ title, url }); return; } catch (e) { if (e.name === "AbortError") return; } }
+    try { await navigator.clipboard.writeText(url); toast("Link copied: " + url); }
+    catch (e) { prompt("Copy this link:", url); }
+  };
+}
+
+async function saveDialog(videoId) {
+  const dlg = $("#dlg"), body = $("#dlg-body");
+  $("#dlg-title").textContent = "Save to playlist";
+  body.innerHTML = loading("Loading your playlists");
+  dlg.showModal();
+  let lists;
+  try { lists = await yt.playlists(); } catch (e) { body.innerHTML = notice(esc(e.message), "bad"); return; }
+  body.innerHTML = `<ul class="pick">${lists.items.map(p => `<li><button type="button" class="pick-item" data-id="${esc(p.id)}">
+      ${p.thumb ? `<img src="${esc(p.thumb)}" alt="">` : '<span class="pl-blank"></span>'}<span><b>${esc(p.title)}</b><small>${privacyLabel(p.privacy)}${p.count != null ? " · " + p.count + " videos" : ""}</small></span></button></li>`).join("")}</ul>
+    <form class="new-pl" id="new-pl"><input type="text" id="new-pl-name" placeholder="New playlist name" maxlength="150" required>
+      <select id="new-pl-privacy" aria-label="Who can see it"><option value="private">Private</option><option value="unlisted">Unlisted</option><option value="public">Public</option></select>
+      <button class="btn primary" type="submit">Create &amp; save</button></form>`;
+  body.querySelectorAll(".pick-item").forEach(b => b.onclick = async () => {
+    b.disabled = true;
+    try { await yt.addToPlaylist(b.dataset.id, videoId); dlg.close(); toast(`Saved to “${b.querySelector("b").textContent}”.`); }
+    catch (e) { b.disabled = false; toast(e.message); }
+  });
+  $("#new-pl").onsubmit = async ev => {
+    ev.preventDefault();
+    const name = $("#new-pl-name").value.trim(); if (!name) return;
+    try {
+      const p = await yt.createPlaylist(name, $("#new-pl-privacy").value);
+      await yt.addToPlaylist(p.id, videoId);
+      dlg.close(); toast(`Made “${p.title}” and saved the video to it.`);
+    } catch (e) { toast(e.message); }
+  };
+}
+const privacyLabel = p => ({ private: "Private", unlisted: "Unlisted", public: "Public" }[p] || "");
+
+// ---------- discover ----------
+// YouTube's API doesn't share your personal recommendations, but YouTube recommends related videos
+// for every video. Discover asks for those around what you've watched, liked and subscribed to,
+// keeps only channels you don't follow, and ranks videos suggested from several places first.
+async function discoverPage(rid, { force = false } = {}) {
+  document.title = "Discover · DBYC";
+  const head = `<div class="row" style="justify-content:space-between"><div><h1>Discover</h1>
+    <p class="sub">Channels you don't follow yet, picked from what YouTube recommends alongside what you watch. No Shorts.</p></div>
+    <button class="btn" type="button" id="refresh">Shuffle new picks</button></div>`;
+  const cached = get("discover", null);
+  if (!force && cached && cached.at > Date.now() - 30 * 60000 && cached.items.length) { showDiscover(head, cached.items); return; }
+  view.innerHTML = head + loading("Finding videos you might like");
+  $("#refresh").onclick = () => discoverPage(++renderId, { force: true });
+
+  const seeds = [], seen = new Set();
+  const add = (v, why) => { if (v && v.id && !seen.has(v.id)) { seen.add(v.id); seeds.push({ id: v.id, title: v.title, why }); } };
+  const history = get("history", []);
+  history.slice(0, 6).forEach(v => add(v, "watched"));
+  let subs = new Set();
+  if (yt.signedIn()) {
+    const f = await yt.feed().catch(() => null);
+    if (f) { subs = new Set(f.subs.map(s => s.id)); noShorts(f.items).slice(0, 4).forEach(v => add(v, "subscribed")); }
+    if (yt.canWrite()) {
+      const lists = await yt.playlists().catch(() => null);
+      if (lists && lists.liked) { const liked = await yt.playlist(lists.liked, { max: 10 }).catch(() => null); if (liked) noShorts(liked.items).slice(0, 4).forEach(v => add(v, "liked")); }
+    }
+  }
+  if (rid !== renderId) return;
+  if (!seeds.length) {
+    view.innerHTML = head + notice("Discover learns from what you watch. Watch a few videos (or sign in so it can use your subscriptions and likes), then come back.");
+    $("#refresh").onclick = () => discoverPage(++renderId, { force: true });
+    return;
+  }
+  const picks = new Map(), skip = new Set([...seen, ...history.map(h => h.id)]);
+  const results = await Promise.all(shuffle(seeds).slice(0, 10).map(s => piped.related(s.id).then(list => [s, list]).catch(() => [s, []])));
+  if (rid !== renderId) return;
+  for (const [seed, list] of results) for (const v of noShorts(list)) {
+    if (skip.has(v.id) || (v.channelId && subs.has(v.channelId))) continue;
+    const p = picks.get(v.id) || { ...v, score: 0, why: ({ watched: "Because you watched", liked: "Because you liked", subscribed: "Similar to" }[seed.why] || "Like") + ` “${seed.title || "a video"}”` + (seed.why === "subscribed" ? " from your subscriptions" : "") };
+    p.score += 1; picks.set(v.id, p);
+  }
+  // Ranked by how many of your videos led here; ties shuffled so each refresh feels new.
+  const items = shuffle([...picks.values()]).sort((a, b) => b.score - a.score).slice(0, 48);
+  if (!items.length) {
+    view.innerHTML = head + notice("Couldn't find recommendations right now. Piped may be down; try again in a bit.", "warn");
+    $("#refresh").onclick = () => discoverPage(++renderId, { force: true });
+    return;
+  }
+  set("discover", { at: Date.now(), items });
+  showDiscover(head, items);
+}
+function showDiscover(head, items) {
+  view.innerHTML = head + grid(items);
+  $("#refresh").onclick = () => discoverPage(++renderId, { force: true });
+}
+
+// ---------- your channels ----------
+async function subscriptionsPage(rid) {
+  document.title = "Subscriptions · DBYC";
+  if (!yt.signedIn()) { view.innerHTML = `<h1>Subscriptions</h1>` + notice(`Sign in to see the channels you follow.<div class="row" style="margin-top:10px">${signInButton()}</div>`); return; }
+  view.innerHTML = `<h1>Subscriptions</h1>${loading("Loading your channels")}`;
+  let f;
+  try { f = await yt.feed(); } catch (e) { if (rid === renderId) view.innerHTML = `<h1>Subscriptions</h1>` + notice(esc(e.message), "bad"); return; }
+  if (rid !== renderId) return;
+  const week = Date.now() - 7 * 864e5;
+  const subs = f.subs.slice().sort((a, b) => ((b.latest > week) - (a.latest > week)) || (b.latest > week ? b.latest - a.latest : 0) || a.name.localeCompare(b.name));
+  const fresh = subs.filter(s => s.latest > week).length;
+  view.innerHTML = `<h1>Subscriptions</h1><p class="sub">${subs.length} channel${subs.length === 1 ? "" : "s"} · <span class="ring-key"></span> ${fresh} posted in the last week</p>
+    <div class="chans">${subs.map(s => `<a class="chan${s.latest > week ? " fresh" : ""}" href="#/channel/${esc(s.id)}" title="${s.latest ? "Last video " + ago(s.latest) : ""}">
+      <span class="ring">${s.avatar ? `<img src="${esc(s.avatar)}" alt="" loading="lazy">` : ""}</span>
+      <span class="chan-name">${esc(s.name)}</span><small>${s.latest > week ? "New · " + ago(s.latest) : s.latest ? ago(s.latest) : ""}</small></a>`).join("")}</div>`;
+}
+
+// ---------- your playlists ----------
+async function playlistsPage(rid) {
+  document.title = "Playlists · DBYC";
+  if (!yt.signedIn()) { view.innerHTML = `<h1>Playlists</h1>` + notice(`Sign in to see your playlists.<div class="row" style="margin-top:10px">${signInButton()}</div>`); return; }
+  view.innerHTML = `<h1>Playlists</h1>${loading("Loading your playlists")}`;
+  let r;
+  try { r = await yt.playlists(); } catch (e) { if (rid === renderId) view.innerHTML = `<h1>Playlists</h1>` + notice(esc(e.message), "bad"); return; }
+  if (rid !== renderId) return;
+  const tile = (href, title, sub, img) => `<a class="pl" href="${href}"><span class="pl-thumb">${img ? `<img src="${esc(img)}" alt="" loading="lazy">` : ""}</span><b>${esc(title)}</b><small>${esc(sub)}</small></a>`;
+  view.innerHTML = `<h1>Playlists</h1><p class="sub">Your YouTube playlists. Shorts are hidden inside them.</p><div class="pls">` +
+    (r.liked ? tile(`#/playlist/${encodeURIComponent(r.liked)}`, "Liked videos", "Everything you've liked", null).replace('<span class="pl-thumb">', '<span class="pl-thumb liked">' + ICON.like) : "") +
+    r.items.map(p => tile(`#/playlist/${encodeURIComponent(p.id)}`, p.title, [privacyLabel(p.privacy), p.count != null ? p.count + " videos" : ""].filter(Boolean).join(" · "), p.thumb)).join("") +
+    `</div>` + (r.items.length ? "" : '<p class="sub">You don\'t have any playlists yet. Use Save on any video to make one.</p>');
+}
+
+async function playlistPage(rid, id) {
+  if (!yt.signedIn()) { view.innerHTML = notice(`Sign in to see this playlist.<div class="row" style="margin-top:10px">${signInButton()}</div>`); return; }
+  view.innerHTML = loading("Loading playlist");
+  let p;
+  try { p = await yt.playlist(id); } catch (e) { if (rid === renderId) view.innerHTML = notice(esc(e.message), "bad"); return; }
+  if (rid !== renderId) return;
+  const shown = noShorts(p.items), hidden = p.items.length - shown.length;
+  document.title = (p.title || "Playlist") + " · DBYC";
+  view.innerHTML = `<h1>${esc(p.title || "Liked videos")}</h1><p class="sub">${[privacyLabel(p.privacy), shown.length + " videos", hidden ? hidden + " Short" + (hidden === 1 ? "" : "s") + " hidden" : ""].filter(Boolean).join(" · ")}</p>` +
+    (shown.length ? grid(shown) : notice("No videos here yet."));
 }
 
 async function channelPage(rid, id) {
@@ -208,13 +410,16 @@ function settingsPage() {
       <input type="text" id="region" maxlength="2" value="${esc(settings.region)}" style="max-width:90px;text-transform:uppercase"></section>
     <section class="setting"><h2>Google account</h2>
       ${!yt.canSignIn ? "<p>Google sign-in isn't set up yet. Add your OAuth client ID to <code>js/config.js</code> (see the README).</p>"
-        : yt.signedIn() ? `<p>Signed in as <b>${esc(p?.name || "you")}</b>, read-only. DBYC can see your subscriptions but can't change anything on your account.</p><button class="btn" type="button" id="signout">Sign out</button>`
-        : `<p>Sign in to see your subscriptions. Read-only: DBYC can't change anything on your account.</p>${signInButton()}`}
+        : yt.signedIn() ? `<p>Signed in as <b>${esc(p?.name || "you")}</b>. DBYC reads your subscriptions and playlists, and only changes things when you press Like, Dislike or Save.</p><button class="btn" type="button" id="signout">Sign out</button>`
+        : `<p>Sign in to see your subscriptions and playlists, and to like and save videos. DBYC only changes things when you press those buttons.</p>${signInButton()}`}
     </section>
+    <section class="setting"><h2>Watch history</h2><p>DBYC remembers your last 40 videos on this device only, so Discover can suggest new channels.</p>
+      <button class="btn" type="button" id="clear-history">Clear watch history</button></section>
     <section class="setting"><h2>About</h2><p>DBYC, Dreamliner's Better YouTube Client. No ads, no Shorts.</p></section></div>`;
   view.querySelectorAll("input[name=playback]").forEach(r => r.onchange = () => { settings.playback = r.value; toast("Playback setting saved."); });
   $("#instance").onchange = e => { settings.pipedInstance = e.target.value; toast("Piped server saved."); };
   $("#region").onchange = e => { settings.region = e.target.value.trim().toUpperCase() || "US"; };
+  $("#clear-history").onclick = () => { del("history"); del("discover"); toast("Watch history cleared."); };
   const so = $("#signout");
   if (so) so.onclick = () => { yt.signOut(); toast("Signed out."); settingsPage(); };
 }
@@ -225,13 +430,17 @@ function route() {
   player.stop();
   const h = location.hash.replace(/^#/, "") || "/";
   const [, page, arg] = /^\/([^/?]*)\/?([^?]*)?/.exec(h) || [];
-  document.querySelectorAll("[data-nav]").forEach(a => a.toggleAttribute("aria-current", a.dataset.nav === (page || "home")));
+  document.querySelectorAll("[data-nav]").forEach(a => a.toggleAttribute("aria-current", a.dataset.nav === ({ playlist: "playlists", "": "home" }[page || ""] ?? page)));
   document.title = "DBYC";
   window.scrollTo(0, 0);
   if (page === "watch" && arg) return watch(rid, decodeURIComponent(arg));
   if (page === "channel" && arg) return channelPage(rid, decodeURIComponent(arg));
   if (page === "search") return search(rid, decodeURIComponent(arg || ""));
   if (page === "settings") return settingsPage();
+  if (page === "subscriptions") return subscriptionsPage(rid);
+  if (page === "discover") return discoverPage(rid);
+  if (page === "playlists") return playlistsPage(rid);
+  if (page === "playlist" && arg) return playlistPage(rid, decodeURIComponent(arg));
   $("#search-input").value = "";
   return home(rid);
 }

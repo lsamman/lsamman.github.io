@@ -383,6 +383,7 @@ window.SITE = {
       items: [
         {
           id: "forever",
+          photo: "assets/images/forever.webp",   // playlist cover art
           title: "Forever",
           subtitle: "My Apple Music playlist · 297 songs",
           summary: "The songs on repeat right now",

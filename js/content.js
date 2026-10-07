@@ -863,6 +863,25 @@ window.SITE = {
     },
 
     {
+      id: "dbyc",
+      label: "DBYC",
+      icon: "assets/icons/dbyc.svg",
+      items: [
+        {
+          id: "client",
+          title: "DBYC",
+          subtitle: "Dreamliner's Better YouTube Client",
+          summary: "YouTube with no ads and no Shorts",
+          body: [
+            "My own YouTube client. Videos play ad-free, Shorts are filtered out of everything, and signing in with Google shows the newest videos from my subscriptions."
+          ],
+          tags: ["No ads", "No Shorts", "Subscriptions"],
+          links: [{ label: "Open DBYC", url: "dbyc/" }]
+        }
+      ]
+    },
+
+    {
       id: "contact",
       label: "Contact",
       icon: "assets/icons/contact.svg",

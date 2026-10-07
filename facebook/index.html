@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Facebook (Pre-Cringe)</title>
+<meta name="description" content="Facebook (Pre-Cringe), the Sacred App from The Legend Of Chris, restored from a 67gb micro SD card. A real Bluesky client in the style of 2007 Facebook: a strictly chronological News Feed of your friends, profiles with a Wall, status updates and pokes.">
+<meta name="theme-color" content="#3b5998">
+<meta name="color-scheme" content="light">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<meta name="apple-mobile-web-app-title" content="Facebook">
+<link rel="icon" type="image/svg+xml" href="img/icon.svg">
+<link rel="apple-touch-icon" href="img/apple-touch-icon.png">
+<meta http-equiv="Cache-Control" content="no-cache">
+<!-- Self-update: always run the latest published version, even in a tab left open for days or restored with Back.
+     Checks ../version.json on load, when the tab comes back into view, when it's restored from the back/forward cache,
+     and every 5 minutes. A newer version found on load reloads at once; one found later waits for a moment that
+     won't lose anything (a page change, or coming back to the tab) and never interrupts typing or a playing video.
+     SITE_VERSION and the ?v= tags are kept in sync by ../bump-version.sh -->
+<script>
+  (function () {
+    var SITE_VERSION = "20261007172844";
+    if (!window.fetch) return;
+    var newer = null, last = 0;
+    function busy() {
+      var a = document.activeElement, m = document.querySelectorAll("video, audio");
+      if (a && /^(TEXTAREA|INPUT)$/.test(a.tagName) && a.value) return true;
+      for (var i = 0; i < m.length; i++) if (!m[i].paused && !m[i].ended) return true;
+      return false;
+    }
+    function reload() {
+      if (!newer || busy()) return;
+      var key = "fb.reloaded." + newer;   // reload at most once per new version
+      try { if (sessionStorage.getItem(key)) return; sessionStorage.setItem(key, "1"); } catch (e) {}
+      var v = newer;
+      function go() {
+        var u = new URL(location.href);
+        u.searchParams.set("v", v);          // a new URL, so the browser fetches fresh HTML
+        location.replace(u.toString());
+      }
+      var clears = [];
+      if (window.caches && caches.keys) clears.push(caches.keys().then(function (ks) { return Promise.all(ks.map(function (k) { return caches.delete(k); })); }));
+      if (navigator.serviceWorker && navigator.serviceWorker.getRegistrations) clears.push(navigator.serviceWorker.getRegistrations().then(function (rs) { return Promise.all(rs.map(function (r) { return r.unregister(); })); }));
+      Promise.all(clears).catch(function () {}).then(go, go);
+    }
+    function check(now) {
+      if (newer) { if (now) reload(); return; }
+      if (Date.now() - last < 10000) return;  // at most every 10 seconds
+      last = Date.now();
+      fetch("../version.json?t=" + last, { cache: "no-store" })
+        .then(function (r) { return r.ok ? r.json() : null; })
+        .then(function (d) {
+          if (!d || !d.v || d.v === SITE_VERSION) return;
+          newer = d.v;
+          if (now) reload();
+        })
+        .catch(function () {});
+    }
+    check(true);
+    addEventListener("pageshow", function (e) { if (e.persisted) { last = 0; check(true); } });
+    addEventListener("hashchange", function () { check(true); });
+    addEventListener("focus", function () { check(true); });
+    document.addEventListener("visibilitychange", function () { if (document.visibilityState === "visible") check(true); });
+    setInterval(function () { check(false); }, 5 * 60 * 1000);
+  })();
+</script>
+<link rel="stylesheet" href="css/app.css?v=20261007172844">
+</head>
+<body>
+<!-- Facebook (Pre-Cringe). Found under a build building, in the rubble, on a 67gb micro SD card.
+     Kept in the Projects National Archives. Runs on Bluesky's public API. -->
+<header class="topbar">
+  <div class="topbar-in">
+    <a class="wordmark" href="#/feed" aria-label="facebook (pre-cringe), News Feed">facebook <small>(pre-cringe)</small></a>
+    <nav class="toplinks" aria-label="Main">
+      <a href="#/feed" data-nav="feed">home</a>
+      <a href="#/profile" data-nav="profile">profile</a>
+      <a href="#/friends" data-nav="friends">friends</a>
+      <a href="#/pokes" data-nav="pokes">pokes</a>
+    </nav>
+    <form class="topsearch" id="topsearch" role="search">
+      <input type="search" id="topq" placeholder="Search Bluesky" aria-label="Search people on Bluesky" autocomplete="off" autocapitalize="none" spellcheck="false">
+    </form>
+  </div>
+</header>
+
+<div class="page">
+  <aside class="leftnav" aria-label="Applications">
+    <ul class="apps">
+      <li><a href="#/feed" data-nav="feed"><span class="ico ico-feed" aria-hidden="true"></span>News Feed</a></li>
+      <li><a href="#/profile" data-nav="profile"><span class="ico ico-profile" aria-hidden="true"></span>Profile</a></li>
+      <li><a href="#/friends" data-nav="friends"><span class="ico ico-friends" aria-hidden="true"></span>Friends</a></li>
+      <li><a href="#/pokes" data-nav="pokes"><span class="ico ico-pokes" aria-hidden="true"></span>Pokes <b class="badge" id="poke-badge" hidden></b></a></li>
+    </ul>
+    <div class="archive-note">
+      <b>Restored from the archives</b>
+      <p>This copy was found under a build building, in the rubble, on a 67gb micro SD card. It is the prize possession of the Projects National Archives.</p>
+      <p>Posts come from Bluesky. Newest first. No algorithm.</p>
+    </div>
+  </aside>
+
+  <main id="view" class="main" tabindex="-1" aria-live="polite"></main>
+</div>
+
+<footer class="foot">
+  <p>Facebook (Pre-Cringe) is a Sacred App from <a href="https://lsamman.github.io/legend-of-chris-wiki/" target="_blank" rel="noopener">The Legend Of Chris</a>. Posts and profiles come from <a href="https://bsky.app" target="_blank" rel="noopener">Bluesky</a>. Not affiliated with Facebook, Meta or Bluesky. Made by Will.</p>
+</footer>
+
+<div id="toast" class="toast" role="status" hidden></div>
+<script type="module" src="js/app.js?v=20261007172844"></script>
+</body>
+</html>

@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <rect width="64" height="64" rx="8" fill="#3b5998"/>
+  <path d="M17 8h22l3 3v10l-3 3v1l8 0v31H17z" fill="#fff"/>
+  <g fill="#d8dfea"><rect x="20" y="10" width="3" height="8"/><rect x="25" y="10" width="3" height="8"/><rect x="30" y="10" width="3" height="8"/><rect x="35" y="10" width="3" height="8"/></g>
+  <text x="32" y="47" text-anchor="middle" font-family="Lucida Grande, Tahoma, Verdana, Arial, sans-serif" font-weight="bold" font-size="17" letter-spacing="-1" fill="#3b5998">fb</text>
+</svg>

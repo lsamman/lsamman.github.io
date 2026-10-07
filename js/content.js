@@ -64,7 +64,6 @@ window.SITE = {
           title: "Hi, I'm Dreamliner",
           photo: "assets/images/avatar.png",   // made with nikonautic's Picrew maker
           subtitle: "High school senior · Class of 2027",
-          identity: { flag: "nonbinary", label: "Non-binary", pronouns: ["They/Them", "She/Her"] },
           summary: "Rockets, materials science, sound and building things",
           body: [
             "I'm a high school senior who likes building things that fly, make sound, or teach someone something new. I've tested materials to failure in university lab camps, designed and flown rockets, written a published guide to sport rocketry, and run the sound for every school play and concert.",
@@ -877,7 +876,7 @@ window.SITE = {
             "Discord: dreamliners"
           ],
           links: [
-            { label: "Email: willow_vella@icloud.com", url: "mailto:willow_vella@icloud.com" },
+            { label: "Email: william_vella@icloud.com", url: "mailto:william_vella@icloud.com" },
             { label: "GitHub: lsamman", url: "https://github.com/lsamman" }
           ]
         },

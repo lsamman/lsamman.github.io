@@ -94,6 +94,10 @@ button { font: inherit; color: inherit; cursor: pointer; }
   font-size: clamp(2.6rem, 8vw, 5rem); letter-spacing: -.01em; line-height: 1;
 }
 .splash-tagline { margin: .3rem 0 0; color: var(--muted); font-size: 1.05rem; }
+.splash-tagline .dots i { font-style: normal; opacity: 0; animation: live-dot 1.8s steps(1, end) infinite; }
+.splash-tagline .dots i:nth-child(2) { animation-delay: .3s; }
+.splash-tagline .dots i:nth-child(3) { animation-delay: .6s; }
+@keyframes live-dot { 0% { opacity: 0; } 25% { opacity: 1; } 85% { opacity: 0; } }   /* dots appear one by one, then reset */
 .splash-hint { margin-top: 2.4rem; font-size: .95rem; color: var(--accent-hi); animation: blink 1.6s steps(2, jump-none) infinite; }
 @keyframes blink { 50% { opacity: .25; } }
 

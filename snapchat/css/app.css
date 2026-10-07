@@ -43,9 +43,8 @@ a { color: inherit; }
 svg { display: block; }
 
 /* ---------- the ghost ---------- */
-.ghost .g-body { fill: #fff; stroke: #000; stroke-width: 3.2; stroke-linejoin: round; }
-.ghost .g-mask { fill: #111; }
-.ghost .g-eye { fill: #fff; }
+/* The ghost is one <symbol>; colours reach inside <use> through these custom properties. */
+.ghost { --g-body: #fff; --g-stroke: #000; --g-mask: #111; --g-eye: #fff; }
 
 /* ---------- desk + app frame ---------- */
 .desk { min-height: 100%; display: flex; justify-content: center; align-items: center; gap: 56px; }
@@ -108,9 +107,7 @@ svg { display: block; }
   color: #8d8a80; font: 600 11px var(--mono); letter-spacing: .08em; text-transform: uppercase; padding: 4px 0;
 }
 .tabbar svg { width: 26px; height: 26px; fill: currentColor; }
-.tabbar .tg .g-body { fill: currentColor; stroke: none; }
-.tabbar .tg .g-mask { fill: #000; }
-.tabbar .tg .g-eye { fill: currentColor; }
+.tabbar .tg { --g-body: currentColor; --g-stroke: transparent; --g-mask: #000; --g-eye: currentColor; }
 .tabbar a.on { color: var(--yellow); }
 
 .app.editing .topbar, .app.editing .tabbar { display: none; }
@@ -194,7 +191,7 @@ svg { display: block; }
 .ed-top, .ed-bottom { position: absolute; left: 0; right: 0; display: flex; align-items: center; gap: 8px; padding-left: calc(var(--sal) + 12px); padding-right: calc(var(--sar) + 12px); z-index: 2; }
 .ed-top { top: 0; padding-top: calc(var(--sat) + 12px); justify-content: space-between; }
 .ed-right { display: flex; gap: 6px; }
-.ed-bottom { bottom: 0; padding-bottom: calc(var(--sab) + 14px); }
+.ed-bottom { bottom: 0; padding-bottom: calc(var(--sab) + 14px); gap: 4px; }
 .ed-btn {
   height: 44px; min-width: 44px; border-radius: 22px; border: 0; background: rgba(0, 0, 0, .38);
   display: inline-flex; align-items: center; justify-content: center; gap: 6px; padding: 0 10px; color: #fff;
@@ -205,11 +202,11 @@ svg { display: block; }
 #edPen[aria-pressed="true"] { background: #fff; color: var(--pen, #000); }
 #edPen[aria-pressed="true"] svg { fill: var(--pen); stroke: #000; stroke-width: .8; }
 .ed-btn.timer b { font: 600 15px var(--mono); }
-.ed-btn.ghostlink { font: 600 13px var(--mono); padding: 0 14px 0 8px; }
+.ed-btn.ghostlink { font: 600 13px var(--mono); padding: 0 12px 0 6px; white-space: nowrap; }
 .ed-btn.ghostlink .ghost { width: 26px; height: 26px; }
 .send {
   margin-left: auto; height: 50px; border-radius: 25px; border: 2px solid #000; background: var(--yellow); color: #000;
-  font: 400 21px/1 var(--display); text-transform: uppercase; letter-spacing: .5px; padding: 0 16px 0 20px;
+  font: 400 21px/1 var(--display); text-transform: uppercase; letter-spacing: .5px; padding: 0 14px 0 18px; white-space: nowrap;
   display: inline-flex; align-items: center; gap: 8px; box-shadow: 0 3px 0 #000;
 }
 .send svg { width: 20px; height: 20px; fill: #000; }
@@ -426,7 +423,7 @@ svg { display: block; }
 
 /* ---------- toast ---------- */
 .toast {
-  position: absolute; left: 50%; bottom: calc(var(--sab) + 84px); transform: translate(-50%, 10px); z-index: 50;
+  position: absolute; left: 50%; top: calc(var(--sat) + 72px); transform: translate(-50%, -10px); z-index: 50;
   max-width: calc(100% - 32px); width: max-content; background: #000; color: var(--yellow);
   border: 1.5px solid var(--yellow); border-radius: 10px; padding: 10px 14px; font: 600 13px/1.4 var(--mono);
   opacity: 0; transition: opacity .2s, transform .2s; pointer-events: none; text-align: center;

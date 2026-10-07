@@ -180,7 +180,7 @@ export async function openMission(token, onClose) {
   let changed = false;
   for (const k in burned) if (burned[k].x < Date.now() - 86400e3) { delete burned[k]; changed = true; }
   if (changed) set("burned", burned);
-  if (burned[id]) return dead("Burned", `This message already self-destructed on this device, ${esc(when(burned[id].at))}. There’s nothing left but ash.`);
+  if (burned[id]) return dead("Burned", `This message already self-destructed on this device (${esc(when(burned[id].at))}). There’s nothing left but ash.`);
   let msg;
   try { msg = await open(token); }
   catch (e) {
@@ -194,7 +194,7 @@ export async function openMission(token, onClose) {
       <span class="stamp red">Classified</span>
       <p class="file-no">File ${esc(id.slice(0, 6).toUpperCase())} · Eyes only</p>
       <h1 class="d-title">${esc(msg.n || "Operation Ghost")}</h1>
-      <p class="typed">Good evening, Agent.</p>
+      <p class="typed">Good ${greeting()}, Agent.</p>
       <p class="typed">Your mission, should you choose to accept it, is to read ${msg.i && !msg.t ? "this snap" : "this message"}.</p>
       <p class="typed">As always, it will self-destruct <b>${plural(secs, "second")}</b> after you accept.</p>
       <dl class="meta">
@@ -217,6 +217,8 @@ export async function openMission(token, onClose) {
     read(msg, secs, onClose);
   };
 }
+
+function greeting() { const h = new Date().getHours(); return h < 5 ? "evening" : h < 12 ? "morning" : h < 18 ? "afternoon" : "evening"; }
 
 function read(msg, secs, onClose) {
   screen(`<div class="fuse" aria-hidden="true"><div class="rope" style="animation-duration:${secs}s"><span class="spark"></span></div></div>

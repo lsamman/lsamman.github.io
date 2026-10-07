@@ -283,7 +283,7 @@ function renderAbout(el) {
       .then(ok => {
         const cell = $(`[data-status="${a.id}"]`, el);
         if (!cell) return;
-        cell.textContent = ok ? "Installed" : "Waiting…";
+        cell.textContent = ok ? "Installed" : a.id === "wiki" ? "Can't reach it" : "Waiting…";
         cell.classList.toggle("waiting", !ok);
         if (ok && a.id !== "wiki") found++;
         const p = $("#prophecy", el);

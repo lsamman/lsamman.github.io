@@ -275,6 +275,29 @@ body.detail-open #xmb { opacity: .3; filter: blur(2px) grayscale(.6); pointer-ev
   font-size: clamp(2rem, 5vw, 3.2rem); line-height: 1;
 }
 .d-head p { margin: 6px 0 0; color: var(--accent-hi); font-weight: 500; }
+
+/* Gender and pronouns: [flag] Non-binary · They/Them · She/Her */
+.identity { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin-top: 10px; }
+.identity .id-label {
+  display: inline-flex; align-items: center; gap: 8px; padding: 4px 12px 4px 4px;
+  font-size: .86rem; font-weight: 600; letter-spacing: .02em;
+  background: rgba(255,255,255,.06); border: 1px solid var(--line);
+}
+.identity .pronoun {
+  padding: 4px 10px; font-size: .84rem; font-weight: 500; color: var(--muted);
+  border: 1px solid rgba(255,255,255,.16);
+}
+.flag { flex: none; display: block; width: 26px; height: 18px; outline: 1px solid rgba(255,255,255,.18); }
+.flag-nonbinary {
+  background: linear-gradient(#fcf434 0 25%, #fff 25% 50%, #9c59d1 50% 75%, #2c2c2c 75%);
+}
+.plain-item .identity { margin: 6px 0 2px; }
+@media (max-width: 640px) {
+  .identity { gap: 4px; margin-top: 8px; }
+  .identity .id-label { font-size: .8rem; padding-right: 9px; gap: 6px; }
+  .identity .pronoun { font-size: .78rem; padding: 4px 7px; }
+  .flag { width: 22px; height: 15px; }
+}
 .panel p { line-height: 1.65; color: rgba(242,243,243,.88); }
 .panel ul.bullets { padding-left: 0; list-style: none; line-height: 1.6; }
 .panel ul.bullets li { position: relative; padding-left: 20px; margin: 6px 0; }

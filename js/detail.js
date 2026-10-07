@@ -113,6 +113,21 @@
     return wrap;
   }
 
+  // Gender flag, label and pronoun chips, e.g. [flag] Non-binary  They/Them  She/Her
+  function identity(id) {
+    var row = el("div", "identity");
+    var who = el("span", "id-label");
+    if (id.flag) {
+      var flag = el("span", "flag flag-" + id.flag);
+      flag.setAttribute("aria-hidden", "true");
+      who.appendChild(flag);
+    }
+    if (id.label) who.appendChild(document.createTextNode(id.label));
+    row.appendChild(who);
+    (id.pronouns || []).forEach(function (p) { row.appendChild(el("span", "pronoun", p)); });
+    return row;
+  }
+
   function buildItem(cat, item) {
     var parts = [];
     var head = el("div", "d-head");
@@ -126,6 +141,7 @@
     var titles = el("div");
     titles.appendChild(el("h2", null, item.title));
     if (item.subtitle) titles.appendChild(el("p", null, item.subtitle));
+    if (item.identity) titles.appendChild(identity(item.identity));
     head.appendChild(titles);
     parts.push(head);
     itemBody(item, parts);
@@ -151,6 +167,7 @@
         var block = el("div", "plain-item");
         block.appendChild(el("h4", null, item.title));
         if (item.subtitle) block.appendChild(el("div", "sub", item.subtitle));
+        if (item.identity) block.appendChild(identity(item.identity));
         var inner = [];
         itemBody(item, inner);
         inner.forEach(function (n) { block.appendChild(n); });

@@ -15,6 +15,9 @@
  *   tags       list of short labels (skills, tools…)
  *   images     list of { src: "assets/images/your-photo.jpg", caption: "…" }
  *   photo      a square picture shown in place of the icon, e.g. "assets/images/avatar.png"
+ *   identity   gender and pronouns shown under the subtitle, e.g.
+ *              { flag: "nonbinary", label: "Non-binary", pronouns: ["They/Them", "She/Her"] }
+ *              (flag can be "nonbinary", or left out to show no flag)
  *   links      list of { label: "Visit site", url: "https://…" }
  *
  * Any of these except title can be left out.
@@ -61,6 +64,7 @@ window.SITE = {
           title: "Hi, I'm Dreamliner",
           photo: "assets/images/avatar.png",   // made with nikonautic's Picrew maker
           subtitle: "High school senior · Class of 2027",
+          identity: { flag: "nonbinary", label: "Non-binary", pronouns: ["They/Them", "She/Her"] },
           summary: "Rockets, materials science, sound and building things",
           body: [
             "I'm a senior at St. John Chrysostom Academy who likes building things that fly, make sound, or teach someone something new. I've tested materials to failure in university lab camps, designed and flown rockets, written a published guide to sport rocketry, and run the sound for every school play and concert.",

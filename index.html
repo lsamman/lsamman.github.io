@@ -6,10 +6,36 @@
   <meta name="theme-color" content="#0e1011">
   <title>Dreamliner · Résumé</title>
   <meta name="description" content="Résumé of Dreamliner: rocketry, materials science and engineering">
+  <meta http-equiv="Cache-Control" content="no-cache">
+  <!-- Self-update: if a newer version is published, clear caches and reload it.
+       SITE_VERSION and version.json are kept in sync by ./bump-version.sh -->
+  <script>
+    (function () {
+      var SITE_VERSION = "20261007020850";
+      if (!window.fetch) return;
+      fetch("version.json?t=" + Date.now(), { cache: "no-store" })
+        .then(function (r) { return r.ok ? r.json() : null; })
+        .then(function (d) {
+          if (!d || !d.v || d.v === SITE_VERSION) return;
+          var key = "site.reloaded." + d.v;   // reload at most once per new version
+          try { if (sessionStorage.getItem(key)) return; sessionStorage.setItem(key, "1"); } catch (e) {}
+          function go() {
+            var u = new URL(location.href);
+            u.searchParams.set("v", d.v);      // a new URL, so the browser fetches fresh HTML
+            location.replace(u.toString());
+          }
+          var clears = [];
+          if (window.caches && caches.keys) clears.push(caches.keys().then(function (ks) { return Promise.all(ks.map(function (k) { return caches.delete(k); })); }));
+          if (navigator.serviceWorker && navigator.serviceWorker.getRegistrations) clears.push(navigator.serviceWorker.getRegistrations().then(function (rs) { return Promise.all(rs.map(function (r) { return r.unregister(); })); }));
+          Promise.all(clears).catch(function () {}).then(go, go);
+        })
+        .catch(function () {});
+    })();
+  </script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600&family=Barlow+Condensed:wght@300;500;600&display=swap">
-  <link rel="stylesheet" href="css/style.css?v=202610062205">
+  <link rel="stylesheet" href="css/style.css?v=20261007020850">
 </head>
 <body>
   <!-- City + waves background (js/scene.js) -->
@@ -66,13 +92,13 @@
     <div class="noscript">This site needs JavaScript for its menu. Please enable it.</div>
   </noscript>
 
-  <script src="js/content.js?v=202610062205"></script>
-  <script src="js/sun.js?v=202610062205"></script>
-  <script src="js/launches.js?v=202610062205"></script>
-  <script src="js/scene.js?v=202610062205"></script>
-  <script src="js/audio.js?v=202610062205"></script>
-  <script src="js/detail.js?v=202610062205"></script>
-  <script src="js/xmb.js?v=202610062205"></script>
-  <script src="js/nowplaying.js?v=202610062205"></script>
+  <script src="js/content.js?v=20261007020850"></script>
+  <script src="js/sun.js?v=20261007020850"></script>
+  <script src="js/launches.js?v=20261007020850"></script>
+  <script src="js/scene.js?v=20261007020850"></script>
+  <script src="js/audio.js?v=20261007020850"></script>
+  <script src="js/detail.js?v=20261007020850"></script>
+  <script src="js/xmb.js?v=20261007020850"></script>
+  <script src="js/nowplaying.js?v=20261007020850"></script>
 </body>
 </html>

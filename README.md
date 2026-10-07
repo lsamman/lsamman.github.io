@@ -30,9 +30,16 @@ Then open http://localhost:8000. Refresh the page after each change.
 
 ## Publishing changes
 
-Browsers cache the CSS and JS files. After editing, bump the `?v=` number on the `<script>` and `<link>` lines in `index.html` so visitors get the new version straight away. Claude does this automatically when it publishes.
+The site updates itself for visitors. On load it checks `version.json`, and if a newer version has been published it clears the browser's caches and reloads the new one. To mark a new version, run `./bump-version.sh` before committing:
 
 ```
+./bump-version.sh
+```
+
+Claude does this automatically when it publishes.
+
+```
+./bump-version.sh
 git add -A
 git commit -m "Update my details"
 git push

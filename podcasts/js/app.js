@@ -1,9 +1,9 @@
 // Apple Podcasts 2. The Sacred App from The Legend Of Chris, which only the iPhone 3G can run.
 // Apple Podcasts 1 was the first church of Chris, until the Tech Bros deprecated it. This one is a real podcast player:
 // search Apple's directory, subscribe, and listen, with no account and no server. Everything you do stays in this browser.
-import { get, set, esc, htmlToText, textToHtml, clock, length, date, art } from "./util.js?v=20261008144924";
-import * as itunes from "./itunes.js?v=20261008144924";
-import * as player from "./player.js?v=20261008144924";
+import { get, set, esc, htmlToText, textToHtml, clock, length, date, art } from "./util.js?v=20261008145201";
+import * as itunes from "./itunes.js?v=20261008145201";
+import * as player from "./player.js?v=20261008145201";
 
 const $ = (sel, root = document) => root.querySelector(sel);
 const $$ = (sel, root = document) => [...root.querySelectorAll(sel)];

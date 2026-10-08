@@ -55,7 +55,7 @@
       { id: "music", title: "Background music", summary: "Neverending Night, on a loop",
         value: function () { return Sound.isMusicOn() ? "on" : "off"; },
         change: function () { Sound.setMusic(!Sound.isMusicOn()); syncMute(); } },
-      { id: "rain", title: "Rain", summary: "A perpetual storm on the window",
+      { id: "rain", title: "Weather", summary: "Rain or snow on the window, with its sound",
         value: function () { return Sound.isRainOn() ? "on" : "off"; },
         change: function () {
           var on = !Sound.isRainOn();
@@ -63,6 +63,9 @@
           if (window.RainFX) RainFX.setEnabled(on);
           syncMute();
         } },
+      { id: "weather", title: "Rain or snow", summary: "Pick one for now; it goes back to the season's weather when the season changes",
+        value: function () { return window.RainFX ? RainFX.weather() : "rain"; },
+        change: function () { if (window.RainFX) RainFX.setWeather(RainFX.weather() === "snow" ? "rain" : "snow"); } },
       { id: "sfx", title: "Sound effects", summary: "Menu clicks and blips",
         value: function () { return Sound.isSfxOn() ? "on" : "off"; },
         change: function () { Sound.setSfx(!Sound.isSfxOn()); } },

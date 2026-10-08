@@ -1,6 +1,6 @@
 # My résumé site
 
-A personal résumé website styled like a dark, gritty 2010-era console dashboard. Flat tiles sit over a city skyline that lights up to match the visitor's time of day, "Neverending Night" loops as the background music (`assets/audio/neverending-night.mp3`; the old jungle synth plays if it can't load), and a perpetual rainstorm plays underneath it, with drops running down the screen like a window.
+A personal résumé website styled like a dark, gritty 2010-era console dashboard. Flat tiles sit over a city skyline that lights up to match the visitor's time of day, "Neverending Night" loops as the background music (`assets/audio/neverending-night.mp3`; the old jungle synth plays if it can't load), and the weather plays underneath it: rain from March to October, with drops running down the screen like a window, and a snowstorm from November to February, with a soft wind, white mist in the distance and snow piling on the rooftops. To check both, use the **Rain or snow** switch in Settings (the ☂/❄ button on `/home/`): it lasts until the season changes, then the weather goes back to what the date says. `?weather=snow` or `?weather=rain` in the address also forces one.
 
 Live at **https://lsamman.github.io** (once published).
 
@@ -58,6 +58,10 @@ The live site updates in about a minute. (Or just ask Claude to "publish my chan
 
 The **Settings** category has music, rain (sound and drops on the glass), sound effects, volume, time of day (preview dawn/day/dusk/night), accent colour and reduce-motion options. Choices are remembered per visitor.
 
+## The willow copy
+
+`/willow/` is the older `willow` branch kept as a site inside this repo (https://lsamman.github.io/willow/). `./bump-version.sh` first runs `./sync-willow.sh`, which copies the shared engine files (`js/scene.js`, `rain.js`, `audio.js`, `detail.js`, `sun.js`, `launches.js`, `nowplaying.js` and the music) into it, so changes to those go live on both. Its own pages and content (`willow/index.html`, `willow/css/`, `willow/js/xmb.js`, `willow/js/content.js`, `willow/dbyc/`) are separate: edit them there too when a change should apply to both.
+
 ## How it's built
 
 Plain HTML, CSS and JavaScript, with no frameworks or build step.
@@ -68,6 +72,7 @@ Plain HTML, CSS and JavaScript, with no frameworks or build step.
 | `js/xmb.js` | The menu: layout, controls, settings, start screen |
 | `js/detail.js` | The detail panel, its turnstile open/close animation, and links like `#/projects/project-1` |
 | `js/scene.js` | The background: time-of-day sky, procedural city with lit windows, wave ribbons (canvas) |
-| `js/rain.js` | The rain on the window: falling streaks, beads of water that run, trail and merge (canvas) |
+| `js/rain.js` | The weather on the window: rain (streaks, beads of water that run, trail and merge) Mar-Oct, snowstorm with mist Nov-Feb (canvas) |
+| `home/` | A browser start page: the same skyline and weather with a grid of rounded app-icon shortcuts you can add and drag around (see `home/README.md`) |
 | `js/audio.js` | Jungle music, rain and sound effects, synthesised with the Web Audio API (no audio files or samples) |
 | `css/style.css` | All the styling. `--hue` at the top is the default accent colour |

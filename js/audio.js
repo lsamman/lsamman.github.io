@@ -1084,14 +1084,26 @@
   /* 7b. Rain: a steady storm bed under the music                        */
   /* ------------------------------------------------------------------ */
 
-  // Stereo noise (each side different, so the rain is wide) that loops.
+  // Stereo pink noise (-3 dB/octave, like real rain's broad spectrum); each side
+  // is different so the rain is wide, and it loops.
   function makeRainNoise(seconds) {
     var rate = ctx.sampleRate;
     var length = Math.floor(rate * seconds);
     var buf = ctx.createBuffer(2, length, rate);
     for (var ch = 0; ch < 2; ch++) {
       var data = buf.getChannelData(ch);
-      for (var i = 0; i < length; i++) data[i] = Math.random() * 2 - 1;
+      var b0 = 0, b1 = 0, b2 = 0, b3 = 0, b4 = 0, b5 = 0, b6 = 0;
+      for (var i = 0; i < length; i++) {
+        var w = Math.random() * 2 - 1;
+        b0 = 0.99886 * b0 + w * 0.0555179;
+        b1 = 0.99332 * b1 + w * 0.0750759;
+        b2 = 0.96900 * b2 + w * 0.1538520;
+        b3 = 0.86650 * b3 + w * 0.3104856;
+        b4 = 0.55000 * b4 + w * 0.5329522;
+        b5 = -0.7616 * b5 - w * 0.0168980;
+        data[i] = (b0 + b1 + b2 + b3 + b4 + b5 + b6 + w * 0.5362) * 0.11;
+        b6 = w * 0.115926;
+      }
     }
     return buf;
   }
@@ -1104,36 +1116,34 @@
       rainSrc.buffer = rainBuffer;
       rainSrc.loop = true;
 
-      // Hiss of drops: band-passed noise whose level drifts like gusts of wind.
-      var hissHP = ctx.createBiquadFilter();
-      hissHP.type = 'highpass';
-      hissHP.frequency.value = 1400;
-      var hissLP = ctx.createBiquadFilter();
-      hissLP.type = 'lowpass';
-      hissLP.frequency.value = 7000;
-      var hissGain = ctx.createGain();
-      hissGain.gain.value = 0.55;
-      rainSrc.connect(hissHP);
-      hissHP.connect(hissLP);
-      hissLP.connect(hissGain);
-      hissGain.connect(rainBus);
-
-      // Rumble of the storm: very quiet low end.
-      var rumbleLP = ctx.createBiquadFilter();
-      rumbleLP.type = 'lowpass';
-      rumbleLP.frequency.value = 280;
-      var rumbleGain = ctx.createGain();
-      rumbleGain.gain.value = 0.35;
-      rainSrc.connect(rumbleLP);
-      rumbleLP.connect(rumbleGain);
-      rumbleGain.connect(rainBus);
+      // A rounded spectrum: warm low rumble, a full body in the low mids,
+      // soft patter in the upper mids and only a little air on top.
+      var gains = [];
+      [
+        ['lowpass', 220, 0.7, 0.9],      // distant rumble
+        ['bandpass', 600, 0.6, 1.6],     // body of the downpour
+        ['bandpass', 1800, 0.7, 0.8],    // patter
+        ['lowpass', 4200, 0.5, 0.18]     // a touch of air, rolled off
+      ].forEach(function (b) {
+        var f = ctx.createBiquadFilter();
+        f.type = b[0];
+        f.frequency.value = b[1];
+        f.Q.value = b[2];
+        var g = ctx.createGain();
+        g.gain.value = b[3];
+        rainSrc.connect(f);
+        f.connect(g);
+        g.connect(rainBus);
+        gains.push(g);
+      });
+      var hissGain = gains[2];
 
       // Gusts: a slow LFO nudges the hiss level up and down.
       var gust = ctx.createOscillator();
       gust.type = 'sine';
       gust.frequency.value = 0.07;
       var gustDepth = ctx.createGain();
-      gustDepth.gain.value = 0.12;
+      gustDepth.gain.value = 0.2;
       gust.connect(gustDepth);
       gustDepth.connect(hissGain.gain);
       gust.start();
@@ -1154,7 +1164,7 @@
     }, FADE_TIME * 1000 + 100);
   }
 
-  // One drop tapping the glass: a tiny bright click. `size` 0..1, `pan` -1..1.
+  // One drop tapping the glass: a soft little tick. `size` 0..1, `pan` -1..1.
   function glassTap(size, pan) {
     var t = ctx.currentTime;
     if (t - lastTapTime < 0.12) return;      // at most ~8 a second
@@ -1164,10 +1174,10 @@
     src.loopStart = 0;
     var bp = ctx.createBiquadFilter();
     bp.type = 'bandpass';
-    bp.frequency.value = 1800 + Math.random() * 2600;
-    bp.Q.value = 3 + Math.random() * 4;
+    bp.frequency.value = 800 + Math.random() * 1400;
+    bp.Q.value = 1.5 + Math.random() * 2;
     var g = ctx.createGain();
-    var peak = 0.18 + 0.4 * size;
+    var peak = 0.1 + 0.25 * size;
     g.gain.setValueAtTime(0, t);
     g.gain.linearRampToValueAtTime(peak, t + 0.002);
     g.gain.exponentialRampToValueAtTime(0.0005, t + 0.03 + 0.03 * size);

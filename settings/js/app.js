@@ -1,9 +1,9 @@
 // Settings (Full access): Elon Mush's ani-social media platform, now the control panel for the whole iPhone 3G.
 // Every Sacred App lives on lsamman.github.io, so they share one localStorage and Settings can manage all of them.
 import { APPS, byId, raw, get, set, drop, allKeys, keysFor, usage, clearApp, formatBytes, managedKeys, bytesOf,
-  readTheme, writeTheme, writeAllThemes, overallTheme, makeBackup, backupName, parseBackup, diffBackup, applyDiff } from "./store.js?v=20261008143303";
-import { PRESETS, DEFAULT_BG, KEY as WALL_KEY, current as currentWall, save as saveWall, nameOf as wallName, fromFile } from "./wallpapers.js?v=20261008143303";
-import { icon } from "./icons.js?v=20261008143303";
+  readTheme, writeTheme, writeAllThemes, overallTheme, makeBackup, backupName, parseBackup, diffBackup, applyDiff } from "./store.js?v=20261008143344";
+import { PRESETS, DEFAULT_BG, KEY as WALL_KEY, current as currentWall, save as saveWall, nameOf as wallName, fromFile } from "./wallpapers.js?v=20261008143344";
+import { icon } from "./icons.js?v=20261008143344";
 
 const BUILD = new URL(import.meta.url).searchParams.get("v") || "unknown";
 const $ = (s, el = document) => el.querySelector(s);

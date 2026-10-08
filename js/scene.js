@@ -352,13 +352,13 @@
   // Palette for any hour of the day, blended from the keyframes.
   // Dark World: whatever the hour, the sky stays the deep navy-violet void of
   // Deltarune's Dark World. Only the city's lighting still follows the clock.
-  var DARK_SKY = { sky0: [1, 2, 10], sky1: [7, 6, 28], sky2: [30, 14, 64], haze: [44, 24, 92] };
+  var DARK_SKY = { sky0: [0, 0, 0], sky1: [0, 0, 1], sky2: [1, 1, 3], haze: [26, 14, 56] };   // jet black: only light from the scene tints it
   function darkWorld(P) {
-    P.sky0 = mixRGB(P.sky0, DARK_SKY.sky0, 0.9);
-    P.sky1 = mixRGB(P.sky1, DARK_SKY.sky1, 0.9);
-    P.sky2 = mixRGB(P.sky2, DARK_SKY.sky2, 0.9);
+    P.sky0 = DARK_SKY.sky0;
+    P.sky1 = DARK_SKY.sky1;
+    P.sky2 = DARK_SKY.sky2;
     P.haze = mixRGB(P.haze, DARK_SKY.haze, 0.7);
-    P.hazeA = Math.max(P.hazeA, 0.38);
+    P.hazeA = 0.22;
     P.starA = Math.max(P.starA, 0.9);
     P.sunA *= 0.3;
     P.moonA = 0;
@@ -1138,11 +1138,12 @@
     g.fillRect(mid(baseY) - half(baseY) * 1.15, baseY - 3, half(baseY) * 2.3, 6);
 
     // soft cyan glow in the sky around it
-    var halo = ctx.createRadialGradient(cx, H * 0.4, 0, cx, H * 0.4, W * 0.3);
-    halo.addColorStop(0, 'rgba(60,170,255,0.22)');
+    var halo = ctx.createRadialGradient(cx, H * 0.4, 0, cx, H * 0.4, W * 0.42);
+    halo.addColorStop(0, 'rgba(60,170,255,0.42)');
+    halo.addColorStop(0.45, 'rgba(40,120,240,0.16)');
     halo.addColorStop(1, 'rgba(60,170,255,0)');
     ctx.fillStyle = halo;
-    ctx.fillRect(cx - W * 0.3, 0, W * 0.6, H);
+    ctx.fillRect(cx - W * 0.45, 0, W * 0.9, H);
 
     // drawn pixel-sharp, slightly veiled so it sits far away
     ctx.save();
@@ -1160,6 +1161,38 @@
       var sy = H * (0.05 + 0.5 * ((Math.sin(s * 7.7) + 1) / 2));
       ctx.fillRect(Math.round(sx), Math.round(sy), 2, 2);
     }
+  }
+
+  // Ambient light: the sky is jet black, and everything bright in the scene
+  // spills a little light into it. The city's glow rises off the skyline, the
+  // neon trim and window lights colour the air above them, and the fountain's
+  // cyan glow is added in drawFountain.
+  function drawAmbient(P, now) {
+    var tt = now / 1000;
+    ctx.save();
+    ctx.globalCompositeOperation = 'lighter';
+    // light pollution rising off the whole skyline
+    var city = ctx.createLinearGradient(0, H * 0.18, 0, H * 0.75);
+    city.addColorStop(0, 'rgba(60,30,120,0)');
+    city.addColorStop(0.7, 'rgba(70,34,130,0.13)');
+    city.addColorStop(1, 'rgba(110,60,170,0.20)');
+    ctx.fillStyle = city;
+    ctx.fillRect(0, H * 0.18, W, H * 0.57);
+    // neon glow above each lit building, in its own colour
+    for (var i = 0; i < farNeon.length; i++) {
+      var s = farNeon[i];
+      if (s.orb || s.mast || s.dim) continue;
+      var c = NEON[s.c];
+      var r = Math.max(60 * unit, s.h * 0.55);
+      var cxn = s.x + s.w / 2, cyn = s.y + Math.min(s.h, H * 0.1) * 0.5;
+      var g = ctx.createRadialGradient(cxn, cyn, 0, cxn, cyn, r);
+      var flick = 0.85 + 0.15 * Math.sin(tt * 0.9 + i * 1.7);
+      g.addColorStop(0, 'rgba(' + c.join(',') + ',' + (0.13 * flick).toFixed(3) + ')');
+      g.addColorStop(1, 'rgba(' + c.join(',') + ',0)');
+      ctx.fillStyle = g;
+      ctx.fillRect(cxn - r, cyn - r, r * 2, r * 2);
+    }
+    ctx.restore();
   }
 
   function drawStars(P) {
@@ -1395,6 +1428,7 @@
     drawSky(P);
     drawStars(P);
     drawSun(P);
+    drawAmbient(P, Date.now());
     drawFountain(P, Date.now());
     ctx.drawImage(farLayer.canvas, 0, 0, W, H);
     drawHaze(P);

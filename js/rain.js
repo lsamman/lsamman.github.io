@@ -193,7 +193,7 @@
     ctx.clearRect(0, 0, W, H);
 
     // faint cool cast over the whole pane
-    ctx.fillStyle = 'rgba(40,60,90,0.10)';
+    ctx.fillStyle = 'rgba(40,60,90,0.03)';
     ctx.fillRect(0, 0, W, H);
 
     // condensation near the bottom edge

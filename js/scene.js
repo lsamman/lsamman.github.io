@@ -350,7 +350,27 @@
   }
 
   // Palette for any hour of the day, blended from the keyframes.
+  // Dark World: whatever the hour, the sky stays the deep navy-violet void of
+  // Deltarune's Dark World. Only the city's lighting still follows the clock.
+  var DARK_SKY = { sky0: [1, 2, 10], sky1: [7, 6, 28], sky2: [30, 14, 64], haze: [44, 24, 92] };
+  function darkWorld(P) {
+    P.sky0 = mixRGB(P.sky0, DARK_SKY.sky0, 0.9);
+    P.sky1 = mixRGB(P.sky1, DARK_SKY.sky1, 0.9);
+    P.sky2 = mixRGB(P.sky2, DARK_SKY.sky2, 0.9);
+    P.haze = mixRGB(P.haze, DARK_SKY.haze, 0.7);
+    P.hazeA = Math.max(P.hazeA, 0.38);
+    P.starA = Math.max(P.starA, 0.9);
+    P.sunA *= 0.3;
+    P.moonA = Math.max(P.moonA, 0.5);
+    P.day *= 0.25;
+    return P;
+  }
+
   function paletteAt(h) {
+    return darkWorld(rawPaletteAt(h));
+  }
+
+  function rawPaletteAt(h) {
     h = ((h % 24) + 24) % 24;
     for (var i = 0; i < KEYFRAMES.length - 1; i++) {
       var a = KEYFRAMES[i];
@@ -1010,6 +1030,89 @@
     ctx.fillRect(0, 0, W, H);
   }
 
+  // The Dark Fountain: a huge column of darkness rising from the far right
+  // of the city, flaring into a slowly turning vortex high in the sky.
+  function drawFountain(P, now) {
+    var tt = now / 1000;
+    var cx = W * 0.8;
+    var baseY = H * 0.72;
+    var topY = H * 0.06;
+    var baseW = W * 0.13, neckW = W * 0.028, flareW = W * 0.05;
+    var sway = Math.sin(tt * 0.2) * W * 0.004;
+
+    // violet glow in the sky behind it, so the dark shape reads
+    var halo = ctx.createRadialGradient(cx, H * 0.3, 0, cx, H * 0.3, W * 0.28);
+    halo.addColorStop(0, 'rgba(120,60,210,0.30)');
+    halo.addColorStop(0.5, 'rgba(70,30,150,0.14)');
+    halo.addColorStop(1, 'rgba(70,30,150,0)');
+    ctx.fillStyle = halo;
+    ctx.fillRect(cx - W * 0.3, 0, W * 0.6, H);
+
+    // the silhouette: wide base, narrow neck, flaring up into the vortex
+    function shape() {
+      var nk = H * 0.46, fl = H * 0.2;    // where the neck starts / where it flares
+      ctx.beginPath();
+      ctx.moveTo(cx - baseW / 2, baseY);
+      ctx.bezierCurveTo(cx - baseW * 0.2, baseY - H * 0.04, cx - neckW * 0.6, nk + H * 0.05, cx - neckW / 2 + sway, nk);
+      ctx.lineTo(cx - neckW / 2 + sway, fl);
+      ctx.bezierCurveTo(cx - neckW / 2 + sway, fl - H * 0.05, cx - flareW * 0.8, topY + H * 0.08, cx - flareW, topY);
+      ctx.lineTo(cx + flareW, topY);
+      ctx.bezierCurveTo(cx + flareW * 0.8, topY + H * 0.08, cx + neckW / 2 + sway, fl - H * 0.05, cx + neckW / 2 + sway, fl);
+      ctx.lineTo(cx + neckW / 2 + sway, nk);
+      ctx.bezierCurveTo(cx + neckW * 0.6, nk + H * 0.05, cx + baseW * 0.2, baseY - H * 0.04, cx + baseW / 2, baseY);
+      ctx.closePath();
+    }
+    ctx.save();
+    shape();
+    var body = ctx.createLinearGradient(0, topY, 0, baseY);
+    body.addColorStop(0, 'rgb(4,2,14)');
+    body.addColorStop(1, 'rgb(10,5,26)');
+    ctx.fillStyle = body;
+    ctx.fill();
+    ctx.clip();
+
+    // slow dark-violet bands spiralling up the column
+    ctx.lineWidth = Math.max(1, W * 0.002);
+    var span = baseY - topY, n = 9;
+    for (var i = 0; i < n; i++) {
+      var f = ((i / n) + tt * 0.025) % 1;            // 0 top .. 1 base, drifting upward
+      var y = topY + (1 - f) * span;
+      var wd = y < H * 0.2 ? neckW + (H * 0.2 - y) / (H * 0.14) * (flareW * 2 - neckW) : y < H * 0.46 ? neckW : neckW + (y - H * 0.46) / (baseY - H * 0.46) * baseW;
+      ctx.strokeStyle = 'rgba(130,70,220,' + (0.10 + 0.18 * Math.sin(f * Math.PI)).toFixed(3) + ')';
+      ctx.beginPath();
+      ctx.ellipse(cx + sway, y, wd * 0.5, wd * 0.09, -0.12, 0, Math.PI);
+      ctx.stroke();
+    }
+    ctx.restore();
+
+    // glowing rim along both edges
+    shape();
+    ctx.strokeStyle = 'rgba(150,90,255,0.22)';
+    ctx.lineWidth = Math.max(1, W * 0.0015);
+    ctx.stroke();
+
+    // swirling dark cloud at the top, turning slowly
+    for (var k = 0; k < 7; k++) {
+      var a = tt * (0.1 + k * 0.01) + k * 0.9;
+      var rx = flareW * (0.9 + 0.5 * Math.sin(k * 1.7)), ry = H * 0.026;
+      var px = cx + Math.cos(a) * flareW * 0.55 + sway, py = topY + H * 0.02 + Math.sin(a) * H * 0.012 + k * H * 0.006;
+      ctx.fillStyle = 'rgba(5,3,16,0.8)';
+      ctx.beginPath(); ctx.ellipse(px, py, rx, ry, Math.sin(a) * 0.12, 0, Math.PI * 2); ctx.fill();
+      ctx.strokeStyle = 'rgba(140,80,230,0.16)';
+      ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.ellipse(px, py, rx, ry, Math.sin(a) * 0.12, Math.PI * 1.05, Math.PI * 1.95); ctx.stroke();
+    }
+
+    // dark wisps drifting off the top
+    for (var j = 0; j < 12; j++) {
+      var u2 = (tt * 0.04 + j / 12) % 1;
+      var wx = cx + (Math.sin(j * 5.1) * 0.9) * flareW * (0.4 + u2) + sway;
+      var wy = topY - u2 * H * 0.08;
+      ctx.fillStyle = 'rgba(8,4,22,' + (0.5 * (1 - u2)).toFixed(3) + ')';
+      ctx.beginPath(); ctx.arc(wx, wy, W * 0.006 * (1 + u2 * 2), 0, Math.PI * 2); ctx.fill();
+    }
+  }
+
   function drawStars(P) {
     if (P.starA < 0.01) return;
     var count = Math.min(MAX_STARS, Math.round(W * H / 9000));
@@ -1244,6 +1347,7 @@
     drawStars(P);
     drawMoon(P);
     drawSun(P);
+    drawFountain(P, Date.now());
     if (window.Launches) window.Launches.draw(ctx, { W: W, H: H, P: P, sunElev: sunElevAtHour(hour) });   // behind the city
     ctx.drawImage(farLayer.canvas, 0, 0, W, H);
     drawHaze(P);

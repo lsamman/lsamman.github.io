@@ -4,7 +4,7 @@
  * loads this file right after js/content.js, so it is never overwritten.
  *   - About > "Hi, I'm Dreamliner" shows gender and pronouns, and willow's own profile picture
  *     (willow/willow-avatar.png, kept outside the folders the sync replaces)
- *   - Contact > "Get in touch" uses the willow email address and adds willow's X account
+ *   - Contact > "Get in touch" uses the willow email address and adds willow's X, KSP forum and Reddit accounts
  */
 (function () {
   'use strict';
@@ -23,9 +23,11 @@
 
   var contact = find(site.categories, 'contact');
   var touch = contact && find(contact.items, 'get-in-touch');
-  if (touch) touch.summary = 'Email, Discord, GitHub and X';
+  if (touch) touch.summary = 'Email, Discord, GitHub, X, the KSP forum and Reddit';
   if (touch && touch.links) {
     touch.links.push({ label: 'X: @Dreamliner232', url: 'https://x.com/Dreamliner232' });
+    touch.links.push({ label: 'Kerbal Space Program forum: Dreamliner', url: 'https://forum.kerbalspaceprogram.com/profile/209327-dreamliner/' });
+    touch.links.push({ label: 'Reddit: u/idokerbal', url: 'https://www.reddit.com/user/idokerbal/' });
     touch.links.forEach(function (l) {
       if (/^mailto:/.test(l.url)) {
         l.label = 'Email: willow_vella@icloud.com';

@@ -1,6 +1,6 @@
 // The player: one <audio> element that keeps playing while you move around the app.
 // Remembers where you stopped in every episode, which ones you've finished, the Up Next queue and your speed.
-import { get, set, art } from "./util.js?v=20261008143303";
+import { get, set, art } from "./util.js?v=20261008143344";
 
 const audio = document.getElementById("audio");
 export const SPEEDS = [1, 1.25, 1.5, 2];

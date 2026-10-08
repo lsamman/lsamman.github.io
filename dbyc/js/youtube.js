@@ -1,7 +1,7 @@
 // The official YouTube Data API, signed in with Google: subscriptions, playlists, likes and saving.
-import { GOOGLE_CLIENT_ID } from "./config.js?v=20261008143303";
-import { get, set, del } from "./store.js?v=20261008143303";
-import { isoDuration, isShort } from "./util.js?v=20261008143303";
+import { GOOGLE_CLIENT_ID } from "./config.js?v=20261008143344";
+import { get, set, del } from "./store.js?v=20261008143344";
+import { isoDuration, isShort } from "./util.js?v=20261008143344";
 
 const API = "https://www.googleapis.com/youtube/v3";
 // Full YouTube access, so DBYC can like videos and save them to playlists (it never posts or deletes).

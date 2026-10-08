@@ -2,7 +2,8 @@
  * willow.js: the only places /willow/ differs from the main site.
  * ./sync-willow.sh mirrors everything else from the main site into willow/ and
  * loads this file right after js/content.js, so it is never overwritten.
- *   - About > "Hi, I'm Dreamliner" shows gender and pronouns
+ *   - About > "Hi, I'm Dreamliner" shows gender and pronouns, and willow's own profile picture
+ *     (willow/willow-avatar.png, kept outside the folders the sync replaces)
  *   - Contact > "Get in touch" uses the willow email address
  */
 (function () {
@@ -17,6 +18,7 @@
 
   var about = find(site.categories, 'about');
   var me = about && find(about.items, 'me');
+  if (me) me.photo = 'willow-avatar.png';
   if (me) me.identity = { flag: 'nonbinary', label: 'Non-binary', pronouns: ['They/Them', 'She/Her'] };
 
   var contact = find(site.categories, 'contact');

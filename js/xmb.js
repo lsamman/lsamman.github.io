@@ -44,6 +44,7 @@
   function applyMotion() {
     root.classList.toggle("reduce-motion", reduceMotion);
     Scene.setReducedMotion(reduceMotion);
+    if (window.RainFX) RainFX.setReducedMotion(reduceMotion);
   }
 
   // ---------- The Settings category (built in) ------------------------------
@@ -51,9 +52,17 @@
   var settingsCat = {
     id: "settings", label: "Settings", icon: "assets/icons/settings.svg", isSettings: true,
     items: [
-      { id: "music", title: "Background music", summary: "Generated jungle, made live in your browser",
+      { id: "music", title: "Background music", summary: "Neverending Night, on a loop",
         value: function () { return Sound.isMusicOn() ? "on" : "off"; },
         change: function () { Sound.setMusic(!Sound.isMusicOn()); syncMute(); } },
+      { id: "rain", title: "Rain", summary: "A perpetual storm on the window",
+        value: function () { return Sound.isRainOn() ? "on" : "off"; },
+        change: function () {
+          var on = !Sound.isRainOn();
+          Sound.setRain(on);
+          if (window.RainFX) RainFX.setEnabled(on);
+          syncMute();
+        } },
       { id: "sfx", title: "Sound effects", summary: "Menu clicks and blips",
         value: function () { return Sound.isSfxOn() ? "on" : "off"; },
         change: function () { Sound.setSfx(!Sound.isSfxOn()); } },
@@ -440,11 +449,15 @@
   // ---------- Mute button, clock, film grain, start screen ----------------
 
   function syncMute() {
-    muteBtn.classList.toggle("off", !Sound.isMusicOn());
-    muteBtn.setAttribute("aria-pressed", String(!Sound.isMusicOn()));
+    var silent = !Sound.isMusicOn() && !Sound.isRainOn();
+    muteBtn.classList.toggle("off", silent);
+    muteBtn.setAttribute("aria-pressed", String(silent));
   }
   muteBtn.addEventListener("click", function () {
-    Sound.setMusic(!Sound.isMusicOn());
+    // Mute silences music and rain together; unmute brings both back.
+    var on = !Sound.isMusicOn() && !Sound.isRainOn();
+    Sound.setMusic(on);
+    Sound.setRain(on);
     syncMute();
     if (cats[selCat].isSettings) refreshValues();
   });

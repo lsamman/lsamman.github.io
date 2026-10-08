@@ -1,8 +1,8 @@
 // Ghost messages: write, seal into a link, and open a link ("Your mission, should you choose to accept it…").
 // The message and its key travel only in the link. Opening it burns it on this device.
-import { get, set, $, esc, toast, bumpStreak, plural, when, left } from "./store.js?v=20261008142811";
-import { seal, open, idOf, supported, SealError } from "./crypto.js?v=20261008142811";
-import { codename, fileNo, BURN_LINES } from "./lore.js?v=20261008142811";
+import { get, set, $, esc, toast, bumpStreak, plural, when, left } from "./store.js?v=20261008143024";
+import { seal, open, idOf, supported, SealError } from "./crypto.js?v=20261008143024";
+import { codename, fileNo, BURN_LINES } from "./lore.js?v=20261008143024";
 
 export const EXPIRIES = [["1 hour", 3600e3], ["1 day", 86400e3], ["1 week", 7 * 86400e3]];
 const BURNS = [5, 10, 20, 30];

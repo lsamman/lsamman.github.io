@@ -366,6 +366,18 @@
     }
   }, true);   // capture phase: runs before the menu's key handler
 
+  // The mouse's side "back" button works like Esc while a popup is open.
+  ["mousedown", "mouseup", "auxclick"].forEach(function (type) {
+    document.addEventListener(type, function (e) {
+      if (e.button !== 3 || !isOpen) return;
+      e.preventDefault();             // keep the browser from also going back a page
+      e.stopImmediatePropagation();
+      if (type !== "mouseup") return;
+      if (!lightbox.hidden) closeLightbox();
+      else Detail.back();
+    }, true);
+  });
+
   // ---------- Public API (used by xmb.js) ----------------------------------
 
   window.Detail = {

@@ -1,7 +1,7 @@
 // Bluesky's public AppView API. No sign-in, CORS-enabled, read-only.
 // Posting goes through Bluesky's own compose page (see app.js), so nothing here needs a password.
-import { get, set } from "./store.js?v=20261008031715";
-import { looksLikeHandle } from "./util.js?v=20261008031715";
+import { get, set } from "./store.js?v=20261008032104";
+import { looksLikeHandle } from "./util.js?v=20261008032104";
 
 const API = "https://public.api.bsky.app/xrpc/";
 const TIMEOUT = 12000;

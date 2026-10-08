@@ -2,9 +2,9 @@
 // A real Bluesky client dressed as 2007 Facebook: friends are Bluesky accounts you add, the News Feed is their posts
 // merged strictly by time (no algorithm, which is the whole point), profiles have an Information box and a Wall,
 // status updates start with "is" and go out through Bluesky's compose page, and pokes stay on this device.
-import * as store from "./store.js?v=20261008031715";
-import { getProfile, searchPeople, MergedFeed, clearFeedCache } from "./bsky.js?v=20261008031715";
-import { esc, ago, fullDate, num, plural, safeUrl, profileHref, bskyProfile, bskyPost, richText, cleanHandle } from "./util.js?v=20261008031715";
+import * as store from "./store.js?v=20261008032104";
+import { getProfile, searchPeople, MergedFeed, clearFeedCache } from "./bsky.js?v=20261008032104";
+import { esc, ago, fullDate, num, plural, safeUrl, profileHref, bskyProfile, bskyPost, richText, cleanHandle } from "./util.js?v=20261008032104";
 
 const view = document.getElementById("view");
 const $ = (sel, root = document) => root.querySelector(sel);

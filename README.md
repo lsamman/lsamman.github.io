@@ -60,7 +60,7 @@ The **Settings** category has music, rain (sound and drops on the glass), sound 
 
 ## The willow copy
 
-`/willow/` is the older `willow` branch kept as a site inside this repo (https://lsamman.github.io/willow/). `./bump-version.sh` first runs `./sync-willow.sh`, which copies the shared engine files (`js/scene.js`, `rain.js`, `audio.js`, `detail.js`, `sun.js`, `launches.js`, `nowplaying.js` and the music) into it, so changes to those go live on both. Its own pages and content (`willow/index.html`, `willow/css/`, `willow/js/xmb.js`, `willow/js/content.js`, `willow/dbyc/`) are separate: edit them there too when a change should apply to both.
+`/willow/` (https://lsamman.github.io/willow/) is a full mirror of this site: same tabs, apps, skyline and weather. `./bump-version.sh` runs `./sync-willow.sh` first, which copies the page, styles, scripts, assets and apps into `willow/` (deleting anything no longer here), so every change you make on the main site reaches both. The only differences live in `willow/js/willow.js`, which loads after `js/content.js`: the gender/pronoun line on "Hi, I'm Dreamliner" and the willow email on Contact. Edit that file, not the rest of `willow/`.
 
 ## How it's built
 

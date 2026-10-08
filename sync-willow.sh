@@ -1,12 +1,20 @@
 #!/bin/sh
-# Keep the /willow/ copy of the site in step with the main one.
-# Copies the shared engine files (background, weather, audio, detail panel...) from the main site into willow/,
-# so a change to them goes live on both. willow's own pages and content (index.html, css/, js/xmb.js, js/content.js,
-# dbyc/) are NOT touched: edit those in willow/ by hand when a change should apply there too.
-# ./bump-version.sh runs this automatically.
+# Keep /willow/ identical to the main site, except for what willow/js/willow.js changes
+# (the "Hi, I'm Dreamliner" item and the Contact email).
+# Mirrors the page, styles, scripts, assets and apps from the main site into willow/, deleting
+# anything in willow/ that is no longer in the main site, then loads willow/js/willow.js right
+# after js/content.js. ./bump-version.sh runs this automatically.
 set -e
 cd "$(dirname "$0")"
-mkdir -p willow/js willow/assets/audio
-for f in js/rain.js js/scene.js js/audio.js js/sun.js js/launches.js js/nowplaying.js js/detail.js assets/audio/neverending-night.mp3; do
-  cmp -s "$f" "willow/$f" 2>/dev/null || { cp "$f" "willow/$f"; echo "synced $f"; }
+keep=$(mktemp)
+cp willow/js/willow.js "$keep"
+for d in css js assets bluebird dbyc facebook podcasts settings snapchat; do
+  rm -rf "willow/$d"
+  cp -R "$d" "willow/$d"
 done
+cp "$keep" willow/js/willow.js
+rm -f "$keep"
+cp index.html willow/index.html
+sed -i 's#^\( *\)<script src="js/content.js?v=\([0-9]*\)"></script>#&\n\1<script src="js/willow.js?v=\2"></script>#' willow/index.html
+rm -f willow/README.md willow/bump-version.sh
+echo "willow/ mirrors the main site"

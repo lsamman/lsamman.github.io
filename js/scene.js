@@ -361,13 +361,13 @@
     P.hazeA = Math.max(P.hazeA, 0.38);
     P.starA = Math.max(P.starA, 0.9);
     P.sunA *= 0.3;
-    P.moonA = Math.max(P.moonA, 0.5);
+    P.moonA = 0;
     P.day *= 0.25;
     return P;
   }
 
   function paletteAt(h) {
-    return darkWorld(rawPaletteAt(h));
+    return darkWorld(mixPalette(NIGHT, NIGHT, 0));   // always dark, whatever the hour
   }
 
   function rawPaletteAt(h) {
@@ -1378,7 +1378,7 @@
     updateWindowAnims(dt);
 
     // Distant rocket launches (js/launches.js).
-    if (window.Launches) window.Launches.update(dt);
+    // (rocket launches are switched off)
   }
 
   // Draw one full frame.
@@ -1394,10 +1394,8 @@
 
     drawSky(P);
     drawStars(P);
-    drawMoon(P);
     drawSun(P);
     drawFountain(P, Date.now());
-    if (window.Launches) window.Launches.draw(ctx, { W: W, H: H, P: P, sunElev: sunElevAtHour(hour) });   // behind the city
     ctx.drawImage(farLayer.canvas, 0, 0, W, H);
     drawHaze(P);
     ctx.drawImage(nearLayer.canvas, 0, 0, W, H);

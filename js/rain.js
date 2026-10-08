@@ -1,7 +1,7 @@
 /*
  * rain.js — a perpetual rainstorm seen through a window.
  *
- * A full-screen canvas sits over everything (it's the glass): streaks of rain
+ * A full-screen canvas sits just above the city but behind the whole GUI (it's the glass): streaks of rain
  * fall outside, and beads of water collect on the pane, slide down in
  * stop-and-go jerks, leave trails and merge. Big drops landing on the glass
  * tap out a sound through Sound.tap() (js/audio.js).

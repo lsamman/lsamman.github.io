@@ -1,6 +1,6 @@
 # My résumé site
 
-A personal résumé website styled like a dark, gritty 2010-era console dashboard. Flat tiles sit over a city skyline that lights up to match the visitor's time of day, and atmospheric jungle music is generated live in the browser.
+A personal résumé website styled like a dark, gritty 2010-era console dashboard. Flat tiles sit over a city skyline that lights up to match the visitor's time of day, "Neverending Night" loops as the background music (`assets/audio/neverending-night.mp3`; the old jungle synth plays if it can't load), and a perpetual rainstorm plays underneath it, with drops running down the screen like a window.
 
 Live at **https://lsamman.github.io** (once published).
 
@@ -56,7 +56,7 @@ The live site updates in about a minute. (Or just ask Claude to "publish my chan
 | Open | Enter | click the highlighted item | tap the highlighted item |
 | Back | Esc | ✕ button or click outside | ✕ button |
 
-The **Settings** category has music, sound effects, volume, time of day (preview dawn/day/dusk/night), accent colour and reduce-motion options. Choices are remembered per visitor.
+The **Settings** category has music, rain (sound and drops on the glass), sound effects, volume, time of day (preview dawn/day/dusk/night), accent colour and reduce-motion options. Choices are remembered per visitor.
 
 ## How it's built
 
@@ -68,5 +68,6 @@ Plain HTML, CSS and JavaScript, with no frameworks or build step.
 | `js/xmb.js` | The menu: layout, controls, settings, start screen |
 | `js/detail.js` | The detail panel, its turnstile open/close animation, and links like `#/projects/project-1` |
 | `js/scene.js` | The background: time-of-day sky, procedural city with lit windows, wave ribbons (canvas) |
-| `js/audio.js` | Jungle music and sound effects, synthesised with the Web Audio API (no audio files or samples) |
+| `js/rain.js` | The rain on the window: falling streaks, beads of water that run, trail and merge (canvas) |
+| `js/audio.js` | Jungle music, rain and sound effects, synthesised with the Web Audio API (no audio files or samples) |
 | `css/style.css` | All the styling. `--hue` at the top is the default accent colour |

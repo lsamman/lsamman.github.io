@@ -1,8 +1,8 @@
 // Snaps: the camera, the caption bar, doodles, the timer, and sending.
 // The rear camera is preferred. A lens that faces you is refused ("to avoid self-reflection") unless you accept it.
-import { get, set, $, toast, bumpStreak, plural } from "./store.js?v=20261007174732";
-import { SELF_REFLECTION } from "./lore.js?v=20261007174732";
-import { loadImage, makeGhost, showResult, expiryChips } from "./ghost.js?v=20261007174732";
+import { get, set, $, toast, bumpStreak, plural } from "./store.js?v=20261008142811";
+import { SELF_REFLECTION } from "./lore.js?v=20261008142811";
+import { loadImage, makeGhost, showResult, expiryChips } from "./ghost.js?v=20261008142811";
 
 const MAX_EDGE = 2048;
 const COLORS = ["#FFFC00", "#FF2D2D", "#FFFFFF", "#111111", "#2F7BFF", "#3DDC84"];

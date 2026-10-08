@@ -48,6 +48,7 @@
   var prefs = {
     music: readPref('xmb.music', 'on') !== 'off',
     sfx: readPref('xmb.sfx', 'on') !== 'off',
+    rain: readPref('xmb.rain', 'on') !== 'off',
     volume: clamp01(readPref('xmb.volume', '0.5'))
   };
 
@@ -77,6 +78,17 @@
   var lfoDepth = null;     // how far (in Hz) the LFO moves each filter
   var noiseBuffer = null;  // 2s of white noise, shared by every noise sound
 
+  var rainBus = null;      // the rainstorm layer (its own fader, not the music's)
+  var rainSrc = null;      // the looping rain noise source
+  var rainBuffer = null;
+  var lastTapTime = 0;     // rate limit for window-pane taps
+
+  var RAIN_LEVEL = 0.2;    // rain sits under the music (MUSIC_LEVEL)
+  var TRACK_URL = 'assets/audio/neverending-night.mp3';
+  var TRACK_LEVEL = 0.5;   // the looping song (the synth is only a fallback)
+  var trackBuffer = null;
+  var trackSrc = null;
+  var trackState = 'idle'; // idle | loading | ready | failed
   var MUSIC_LEVEL = 0.22;  // music is background: much quieter than sfx
   var FADE_TIME = 2;       // seconds for music fade in/out
 
@@ -519,6 +531,11 @@
     lfoDepth.gain.value = 350;         // +/- 350 Hz cutoff sweep
     lfo.connect(lfoDepth);
     lfo.start();
+
+    // Rain layer: its own fader into master, so the music fade never touches it.
+    rainBus = ctx.createGain();
+    rainBus.gain.value = 0;
+    rainBus.connect(master);
 
     noiseBuffer = makeNoise(2);
     crackleBuffer = makeCrackle(7);
@@ -980,6 +997,47 @@
     stopCrackle();
   }
 
+  /* The background song: an mp3 looped seamlessly through Web Audio.
+     If it can't be loaded, the synthesized jungle music plays instead. */
+  function loadTrack() {
+    if (trackState !== 'idle') return;
+    trackState = 'loading';
+    var ver = (document.querySelector('script[src*="audio.js"]') || {}).src || '';
+    var q = (ver.match(/\?v=\d+/) || [''])[0];
+    window.fetch(TRACK_URL + q)
+      .then(function (r) { if (!r.ok) throw new Error('track ' + r.status); return r.arrayBuffer(); })
+      .then(function (data) {
+        return new Promise(function (ok, bad) { ctx.decodeAudioData(data, ok, bad); });
+      })
+      .then(function (buf) {
+        trackBuffer = buf;
+        trackState = 'ready';
+        if (musicPlaying && stopTimeoutId === null) playTrack();
+      })
+      .then(null, function () {
+        trackState = 'failed';
+        if (musicPlaying && stopTimeoutId === null) rampTo(musicBus.gain, MUSIC_LEVEL, FADE_TIME);
+        if (musicPlaying && stopTimeoutId === null && !document.hidden) startScheduler();
+      });
+  }
+
+  function playTrack() {
+    if (trackSrc || !trackBuffer) return;
+    stopScheduler();                       // the track replaces the synth
+    trackSrc = ctx.createBufferSource();
+    trackSrc.buffer = trackBuffer;
+    trackSrc.loop = true;
+    trackSrc.connect(musicBus);
+    trackSrc.start(ctx.currentTime + 0.05);
+  }
+
+  function stopTrack() {
+    if (!trackSrc) return;
+    try { trackSrc.stop(); } catch (e) { /* ignore */ }
+    try { trackSrc.disconnect(); } catch (e) { /* ignore */ }
+    trackSrc = null;
+  }
+
   function startMusic() {
     if (!ctx || !unlocked) return;
     if (stopTimeoutId !== null) {          // cancel a pending fade-out stop
@@ -991,8 +1049,10 @@
       resetArrangement();                  // always start from the intro
       nextStepTime = ctx.currentTime + 0.1;
     }
-    rampTo(musicBus.gain, MUSIC_LEVEL, FADE_TIME);
-    if (!document.hidden) startScheduler();
+    if (trackState === 'idle') loadTrack();
+    rampTo(musicBus.gain, trackState === 'failed' ? MUSIC_LEVEL : TRACK_LEVEL, FADE_TIME);
+    if (trackState === 'ready') playTrack();
+    else if (trackState === 'failed' && !document.hidden) startScheduler();
   }
 
   function stopMusic() {
@@ -1004,6 +1064,7 @@
       stopTimeoutId = null;
       musicPlaying = false;
       stopScheduler();
+      stopTrack();
     }, FADE_TIME * 1000 + 50);
   }
 
@@ -1012,11 +1073,113 @@
     try {
       if (document.hidden) {
         stopScheduler();
-      } else if (musicPlaying && stopTimeoutId === null) {
+      } else if (musicPlaying && stopTimeoutId === null && trackState === 'failed') {
         startScheduler();
       }
     } catch (e) { /* never throw */ }
   });
+
+
+  /* ------------------------------------------------------------------ */
+  /* 7b. Rain: a steady storm bed under the music                        */
+  /* ------------------------------------------------------------------ */
+
+  // Stereo noise (each side different, so the rain is wide) that loops.
+  function makeRainNoise(seconds) {
+    var rate = ctx.sampleRate;
+    var length = Math.floor(rate * seconds);
+    var buf = ctx.createBuffer(2, length, rate);
+    for (var ch = 0; ch < 2; ch++) {
+      var data = buf.getChannelData(ch);
+      for (var i = 0; i < length; i++) data[i] = Math.random() * 2 - 1;
+    }
+    return buf;
+  }
+
+  function startRain() {
+    if (!ctx || !unlocked || !rainBus) return;
+    if (!rainSrc) {
+      if (!rainBuffer) rainBuffer = makeRainNoise(6);
+      rainSrc = ctx.createBufferSource();
+      rainSrc.buffer = rainBuffer;
+      rainSrc.loop = true;
+
+      // Hiss of drops: band-passed noise whose level drifts like gusts of wind.
+      var hissHP = ctx.createBiquadFilter();
+      hissHP.type = 'highpass';
+      hissHP.frequency.value = 1400;
+      var hissLP = ctx.createBiquadFilter();
+      hissLP.type = 'lowpass';
+      hissLP.frequency.value = 7000;
+      var hissGain = ctx.createGain();
+      hissGain.gain.value = 0.55;
+      rainSrc.connect(hissHP);
+      hissHP.connect(hissLP);
+      hissLP.connect(hissGain);
+      hissGain.connect(rainBus);
+
+      // Rumble of the storm: very quiet low end.
+      var rumbleLP = ctx.createBiquadFilter();
+      rumbleLP.type = 'lowpass';
+      rumbleLP.frequency.value = 280;
+      var rumbleGain = ctx.createGain();
+      rumbleGain.gain.value = 0.35;
+      rainSrc.connect(rumbleLP);
+      rumbleLP.connect(rumbleGain);
+      rumbleGain.connect(rainBus);
+
+      // Gusts: a slow LFO nudges the hiss level up and down.
+      var gust = ctx.createOscillator();
+      gust.type = 'sine';
+      gust.frequency.value = 0.07;
+      var gustDepth = ctx.createGain();
+      gustDepth.gain.value = 0.12;
+      gust.connect(gustDepth);
+      gustDepth.connect(hissGain.gain);
+      gust.start();
+      rainSrc._gust = gust;
+
+      rainSrc.start(0, Math.random() * 5);
+    }
+    rampTo(rainBus.gain, RAIN_LEVEL, FADE_TIME);
+  }
+
+  function stopRain() {
+    if (!ctx || !rainBus || !rainSrc) return;
+    rampTo(rainBus.gain, 0, FADE_TIME);
+    var src = rainSrc;
+    rainSrc = null;
+    window.setTimeout(function () {
+      try { src.stop(); src._gust.stop(); } catch (e) { /* ignore */ }
+    }, FADE_TIME * 1000 + 100);
+  }
+
+  // One drop tapping the glass: a tiny bright click. `size` 0..1, `pan` -1..1.
+  function glassTap(size, pan) {
+    var t = ctx.currentTime;
+    if (t - lastTapTime < 0.12) return;      // at most ~8 a second
+    lastTapTime = t;
+    var src = ctx.createBufferSource();
+    src.buffer = noiseBuffer;
+    src.loopStart = 0;
+    var bp = ctx.createBiquadFilter();
+    bp.type = 'bandpass';
+    bp.frequency.value = 1800 + Math.random() * 2600;
+    bp.Q.value = 3 + Math.random() * 4;
+    var g = ctx.createGain();
+    var peak = 0.18 + 0.4 * size;
+    g.gain.setValueAtTime(0, t);
+    g.gain.linearRampToValueAtTime(peak, t + 0.002);
+    g.gain.exponentialRampToValueAtTime(0.0005, t + 0.03 + 0.03 * size);
+    var p = makePanner(pan);
+    src.connect(bp);
+    bp.connect(g);
+    g.connect(p);
+    p.connect(rainBus);
+    src.start(t, Math.random() * 1.5);
+    src.stop(t + 0.1);
+    cleanupWhenDone(src, [src, bp, g, p]);
+  }
 
   /* ------------------------------------------------------------------ */
   /* 8. Sound effects                                                    */
@@ -1182,6 +1345,7 @@
         var afterResume = function () {
           unlocked = true;
           if (prefs.music && !musicPlaying) startMusic();
+          if (prefs.rain) startRain();
         };
         if (ctx.state === 'suspended' && ctx.resume) {
           return ctx.resume().then(afterResume, function () { /* ignore */ })
@@ -1234,6 +1398,26 @@
 
     isSfxOn: function () {
       return prefs.sfx;
+    },
+
+    setRain: function (on) {
+      prefs.rain = !!on;
+      writePref('xmb.rain', prefs.rain ? 'on' : 'off');
+      try {
+        if (prefs.rain) startRain(); else stopRain();
+      } catch (e) { /* never throw */ }
+    },
+
+    isRainOn: function () {
+      return prefs.rain;
+    },
+
+    // A raindrop landing on the glass. size 0..1, pan -1 (left) .. 1 (right).
+    tap: function (size, pan) {
+      try {
+        if (!ctx || !unlocked || !prefs.rain || !rainSrc || ctx.state !== 'running') return;
+        glassTap(size || 0.5, Math.max(-1, Math.min(1, pan || 0)));
+      } catch (e) { /* never throw */ }
     }
   };
 })();

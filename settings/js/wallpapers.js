@@ -1,6 +1,6 @@
 // Home-screen wallpapers for the iPhone 3G on the wiki. Each one is a CSS `background` value,
 // saved under loc.phone.wallpaper. Everything here is drawn with gradients: no image files.
-import { raw, put, drop } from "./store.js?v=20261008184847";
+import { raw, put, drop } from "./store.js?v=20261008185244";
 
 export const KEY = "loc.phone.wallpaper";
 

@@ -111,6 +111,10 @@
     { h: 24, p: NIGHT }
   ];
 
+  // Cyber City neon: pink, cyan, yellow, violet, blue.
+  var NEON = [[255, 62, 190], [58, 228, 255], [255, 230, 90], [176, 96, 255], [80, 130, 255]];
+  var CITY_TINT = [62, 32, 128];   // far buildings lean deep violet
+
   // Window light colours: 4 warm tones, 2 cool fluorescent tones, then
   // index 6 = the accent hue (filled in at bake time).
   var WINDOW_COLOURS = [
@@ -167,6 +171,7 @@
   var H = 0;
   var dpr = 1;
   var unit = 1;     // building scale factor, based on the screen width
+  var farNeon = []; // neon trim for the far buildings (Cyber City style)
 
   var rafId = 0;
   var lastTime = 0;   // timestamp of the previous frame (ms)
@@ -555,6 +560,38 @@
     }
   }
 
+  // Neon trim on a far building: glowing vertical strips, a sign block,
+  // a stripe or two across the facade, and sometimes a glowing orb on a mast.
+  function addFarNeon(b, rng) {
+    var u = unit;
+    var top = H - b.h;
+    var col = Math.floor(rng() * NEON.length);
+    var col2 = (col + 1 + Math.floor(rng() * (NEON.length - 1))) % NEON.length;
+    var sx = Math.max(2, Math.round(2.4 * u));
+    // glowing edge strips down the sides
+    if (rng() < 0.7) farNeon.push({ x: Math.round(b.x), y: top, w: sx, h: b.h * (0.4 + rng() * 0.6), c: col });
+    if (rng() < 0.5) farNeon.push({ x: Math.round(b.x + b.w - sx), y: top, w: sx, h: b.h * (0.3 + rng() * 0.6), c: col2 });
+    // a centre strip, sometimes
+    if (rng() < 0.35) farNeon.push({ x: Math.round(b.x + b.w * (0.3 + rng() * 0.4)), y: top + 4 * u, w: sx, h: b.h * (0.3 + rng() * 0.5), c: col2 });
+    // horizontal bands
+    var bands = Math.floor(rng() * 3);
+    for (var i = 0; i < bands; i++) {
+      farNeon.push({ x: Math.round(b.x), y: Math.round(top + b.h * (0.12 + rng() * 0.7)), w: b.w, h: Math.max(2, Math.round(1.8 * u)), c: rng() < 0.5 ? col : col2, dim: true });
+    }
+    // a sign: a bright block of "text" on the facade
+    if (rng() < 0.35 && b.w > 30 * u) {
+      var sw = b.w * (0.3 + rng() * 0.3);
+      farNeon.push({ x: Math.round(b.x + (b.w - sw) / 2), y: Math.round(top + b.h * (0.1 + rng() * 0.3)), w: sw, h: Math.round(5 * u), c: col2, sign: true });
+    }
+    // an orb on a thin mast
+    if (rng() < 0.25) {
+      var mx = Math.round(b.x + b.w * (0.25 + rng() * 0.5));
+      var mh = H * (0.03 + rng() * 0.05);
+      farNeon.push({ x: mx, y: top - mh, w: Math.max(1, Math.round(u)), h: mh, c: col, mast: true });
+      farNeon.push({ x: mx, y: top - mh, r: 2.2 * u + 1, c: col2, orb: true });
+    }
+  }
+
   function generateCity() {
     var rng = mulberry32(CITY_SEED);
     unit = clamp(W / 1400, 0.42, 1.8);
@@ -564,14 +601,17 @@
     // --- Far layer: shorter-ish, packed tightly, slight overlaps allowed.
     farShapes = [];
     farWindows = [];
+    farNeon = [];
+    var nrng = mulberry32(CITY_SEED + 7);   // own sequence: the near city stays unchanged
     x = -rng() * 30 * u;
     while (x < W + 10) {
       w = (36 + rng() * 70) * u;
-      h = H * (0.13 + 0.23 * rng());
+      h = H * (0.2 + 0.34 * Math.pow(rng(), 0.8));   // taller than before: the neon towers show above the near city
       b = { x: x, w: w, h: h, tall: false };
       shapeBuilding(b, rng, false);
       Array.prototype.push.apply(farShapes, b.shapes);
       addFarWindows(b, rng);
+      addFarNeon(b, nrng);
       x += w + (rng() * 10 - 4) * u;
     }
 
@@ -761,15 +801,52 @@
   // Far layer: flat hazy silhouettes + tiny dim windows.
   function renderFar(P) {
     var c = clearLayer(farLayer);
-    c.fillStyle = rgb(P.far);
-    fillShapes(c, farShapes, 0);
+    var fill = mixRGB(P.far, CITY_TINT, 0.6);
+    var neon = 0.65 + 0.35 * (1 - P.day);          // neon is strongest after dark
+    var edgePx = Math.max(2, Math.round(2.2 * unit));
 
+    // Neon roofline: draw the shapes in pink, then the body colour over them, a pixel or two lower.
+    c.fillStyle = 'rgba(' + NEON[0].join(',') + ',' + (0.9 * neon).toFixed(3) + ')';
+    fillShapes(c, farShapes, 0);
+    c.fillStyle = rgb(fill);
+    fillShapes(c, farShapes, edgePx);
+
+    // Neon trim, additive so it glows against the dark facades.
+    c.globalCompositeOperation = 'lighter';
+    for (var n = 0; n < farNeon.length; n++) {
+      var s = farNeon[n];
+      var rgbc = NEON[s.c].join(',');
+      if (s.orb) {
+        var g = c.createRadialGradient(s.x, s.y, 0, s.x, s.y, s.r * 4);
+        g.addColorStop(0, 'rgba(' + rgbc + ',' + (0.9 * neon).toFixed(3) + ')');
+        g.addColorStop(0.25, 'rgba(' + rgbc + ',' + (0.35 * neon).toFixed(3) + ')');
+        g.addColorStop(1, 'rgba(' + rgbc + ',0)');
+        c.fillStyle = g;
+        c.fillRect(s.x - s.r * 4, s.y - s.r * 4, s.r * 8, s.r * 8);
+        continue;
+      }
+      var a = s.mast ? 0.7 : s.dim ? 0.55 : s.sign ? 0.9 : 1;
+      // soft halo, then the bright core
+      c.fillStyle = 'rgba(' + rgbc + ',' + (a * 0.3 * neon).toFixed(3) + ')';
+      c.fillRect(s.x - 3, s.y - 3, s.w + 6, s.h + 6);
+      c.fillStyle = 'rgba(' + rgbc + ',' + (a * neon).toFixed(3) + ')';
+      c.fillRect(s.x, s.y, s.w, s.h);
+      if (s.sign) {                               // gaps make the sign read as lettering
+        c.fillStyle = rgb(fill);
+        for (var gx = s.x + 3; gx < s.x + s.w - 2; gx += 6) c.fillRect(gx, s.y + 1, 2, s.h - 2);
+      }
+    }
+    c.globalCompositeOperation = 'source-over';
+
+    // Little windows in neon colours.
     if (P.lit > 0.01) {
-      c.fillStyle = rgb(mixRGB([222, 184, 120], P.far, 0.3));
-      c.globalAlpha = 0.25 + 0.3 * (1 - P.day);
+      c.globalAlpha = 0.3 + 0.4 * (1 - P.day);
       for (var i = 0; i < farWindows.length; i++) {
         var w = farWindows[i];
-        if (w.th < P.lit) c.fillRect(w.x, w.y, w.s, w.s);
+        if (w.th < P.lit) {
+          c.fillStyle = rgb(NEON[Math.floor(w.th * 997) % NEON.length]);
+          c.fillRect(w.x, w.y, w.s, w.s);
+        }
       }
       c.globalAlpha = 1;
     }

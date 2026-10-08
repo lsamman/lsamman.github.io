@@ -27,6 +27,7 @@
   var rafId = 0, lastTime = 0, spawnAcc = 0;
   var drops = [], streaks = [], trails = [];
   var sprite = null, SPRITE = 64;
+  var mistSprite = null, mist = [];
   var hue = 200;
 
   function rnd(a, b) { return a + Math.random() * (b - a); }
@@ -59,6 +60,33 @@
     g.fillStyle = 'rgba(255,255,255,0.85)';
     g.beginPath(); g.ellipse(r * 0.68, r * 0.62, r * 0.17, r * 0.11, -0.6, 0, Math.PI * 2); g.fill();
     return c;
+  }
+
+  // One soft puff of mist.
+  function makeMistSprite() {
+    var c = document.createElement('canvas');
+    c.width = c.height = 128;
+    var g = c.getContext('2d');
+    if (!g) return null;
+    var grad = g.createRadialGradient(64, 64, 0, 64, 64, 64);
+    grad.addColorStop(0, 'rgba(165,185,210,0.55)');
+    grad.addColorStop(1, 'rgba(165,185,210,0)');
+    g.fillStyle = grad;
+    g.fillRect(0, 0, 128, 128);
+    return c;
+  }
+
+  // Slow banks of rain-mist drifting in the distance, low over the city.
+  function makeMist() {
+    mist = [];
+    var n = Math.max(6, Math.min(16, Math.round(W / 130)));
+    for (var i = 0; i < n; i++) {
+      mist.push({
+        x: rnd(-200, W + 200), y: H * rnd(0.45, 0.85),
+        r: rnd(180, 420), a: rnd(0.12, 0.3),
+        v: rnd(4, 14) * (Math.random() < 0.5 ? -1 : 1)
+      });
+    }
   }
 
   function makeStreaks() {
@@ -107,6 +135,7 @@
     canvas.width = Math.round(W * dpr);
     canvas.height = Math.round(H * dpr);
     makeStreaks();
+    makeMist();
     seed();
   }
 
@@ -173,6 +202,27 @@
     fog.addColorStop(1, 'rgba(150,175,205,0.10)');
     ctx.fillStyle = fog;
     ctx.fillRect(0, H * 0.7, W, H * 0.3);
+
+    // distant rain-mist: a haze over the skyline plus slow drifting banks
+    var haze = ctx.createLinearGradient(0, H * 0.3, 0, H * 0.9);
+    haze.addColorStop(0, 'rgba(150,170,195,0)');
+    haze.addColorStop(0.6, 'rgba(150,170,195,0.14)');
+    haze.addColorStop(1, 'rgba(150,170,195,0.04)');
+    ctx.fillStyle = haze;
+    ctx.fillRect(0, H * 0.3, W, H * 0.6);
+    if (mistSprite) {
+      for (var m = 0; m < mist.length; m++) {
+        var p = mist[m];
+        if (!reduced) {
+          p.x += p.v * dt;
+          if (p.x < -p.r - 100) p.x = W + p.r + 100;
+          else if (p.x > W + p.r + 100) p.x = -p.r - 100;
+        }
+        ctx.globalAlpha = p.a;
+        ctx.drawImage(mistSprite, p.x - p.r, p.y - p.r * 0.45, p.r * 2, p.r * 0.9);
+      }
+      ctx.globalAlpha = 1;
+    }
 
     // rain falling outside
     if (!reduced) {
@@ -247,6 +297,7 @@
     try { ctx = canvas.getContext('2d'); } catch (e) { ctx = null; }
     if (!ctx) return;
     sprite = makeSprite();
+    mistSprite = makeMistSprite();
     if (!sprite) { ctx = null; return; }
     enabled = readEnabled();
     reduced = document.documentElement.classList.contains('reduce-motion');

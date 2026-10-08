@@ -747,6 +747,29 @@ window.SITE = {
     },
 
     {
+      id: "space-program",
+      label: "My Space Program",
+      icon: "assets/icons/space-program.svg",
+      items: [
+        {
+          id: "ksp-tracker",
+          icon: "assets/icons/space-program.svg",
+          title: "My Space Program",
+          subtitle: "lsamman.github.io/ksp-tracker",
+          summary: "See whats up In my ksp save right now!",
+          body: [
+            "A live 3D map of my Kerbal Space Program save. Every vessel is shown at true scale in the solar system, with its flight info. A mod I wrote sends the game's telemetry to the site as I play."
+          ],
+          tags: ["Kerbal Space Program", "C#", "Three.js", "GitHub Pages"],
+          links: [
+            { label: "Open the tracker", url: "https://lsamman.github.io/ksp-tracker/" },
+            { label: "Source on GitHub", url: "https://github.com/lsamman/ksp-tracker" }
+          ]
+        }
+      ]
+    },
+
+    {
       id: "desktop",
       label: "Desktop",
       icon: "assets/icons/desktop.svg",

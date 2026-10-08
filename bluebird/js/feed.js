@@ -2,7 +2,7 @@
 // Everything is worked out from the date, so there's no server: every visitor sees the same tweets,
 // each one appears at its own random time, and a new day brings a new set.
 // Only fictional and book-invented characters post here (Elon Mush, not Elon Musk), never real living people.
-import { ACCOUNTS } from "./canon.js?v=20261007174732";
+import { ACCOUNTS } from "./canon.js?v=20261008031715";
 
 // ---------- the cast ----------
 // lines: templates in the character's voice. Slots: {place} {item} {faction} {event} {concept} {food} {@} (another character) {n}

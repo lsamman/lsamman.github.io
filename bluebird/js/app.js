@@ -3,8 +3,8 @@
 // X's API isn't open to a plain web page, so Bluebird posts through X's own share page (one tab per part),
 // shows real tweets and the accounts you follow through X's embeds, and keeps favorites, drafts and saved
 // tweets on this device. Alongside them, the Timeline fills up through the day with tweets from the book's characters (feed.js).
-import { ACCOUNTS, CANON, TRENDS, BOOT_LINES } from "./canon.js?v=20261008032104";
-import { timeline, byId } from "./feed.js?v=20261008032104";
+import { ACCOUNTS, CANON, TRENDS, BOOT_LINES } from "./canon.js?v=20261008032345";
+import { timeline, byId } from "./feed.js?v=20261008032345";
 
 const view = document.getElementById("view");
 const $ = (sel, root = document) => root.querySelector(sel);

@@ -330,6 +330,18 @@
     e.preventDefault();
   });
 
+  // Middle mouse button works like the space bar: start, then open the highlighted item.
+  document.addEventListener("mousedown", function (e) {
+    if (e.button === 1) e.preventDefault();   // no autoscroll cursor
+  });
+  document.addEventListener("auxclick", function (e) {
+    if (e.button !== 1) return;
+    e.preventDefault();
+    if (!started) { start(); return; }
+    if (window.Detail.isOpen()) return;
+    activate();
+  });
+
   var wheelLock = 0;
   document.getElementById("xmb").addEventListener("wheel", function (e) {
     e.preventDefault();

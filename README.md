@@ -60,7 +60,7 @@ The **Settings** category has music, rain (sound and drops on the glass), sound 
 
 ## The willow copy
 
-`/willow/` (https://lsamman.github.io/willow/) is a full mirror of this site: same tabs, apps, skyline and weather. `./bump-version.sh` runs `./sync-willow.sh` first, which copies the page, styles, scripts, assets and apps into `willow/` (deleting anything no longer here), so every change you make on the main site reaches both. The only differences live in `willow/js/willow.js`, which loads after `js/content.js`: the gender/pronoun line and profile picture (`willow/willow-avatar.png`) on "Hi, I'm Dreamliner", and the willow email on Contact. Edit that file, not the rest of `willow/`.
+`/willow/` (https://lsamman.github.io/willow/) is a full mirror of this site: same tabs, apps, skyline and weather. `./bump-version.sh` runs `./sync-willow.sh` first, which copies the page, styles, scripts, assets and apps into `willow/` (deleting anything no longer here), so every change you make on the main site reaches both. The only differences live in `willow/js/willow.js`, which loads after `js/content.js`: the gender/pronoun line and profile picture (`willow/willow-avatar.png`) on "Hi, I'm Dreamliner", and the willow email and X link on Contact. Edit that file, not the rest of `willow/`.
 
 ## How it's built
 

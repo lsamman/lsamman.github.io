@@ -49,15 +49,13 @@
 
   // ---------- The Settings category (built in) ------------------------------
 
-  var snowing = !!(window.RainFX && RainFX.weather && RainFX.weather() === "snow");
   var settingsCat = {
     id: "settings", label: "Settings", icon: "assets/icons/settings.svg", isSettings: true,
     items: [
       { id: "music", title: "Background music", summary: "Neverending Night, on a loop",
         value: function () { return Sound.isMusicOn() ? "on" : "off"; },
         change: function () { Sound.setMusic(!Sound.isMusicOn()); syncMute(); } },
-      { id: "rain", title: snowing ? "Snow" : "Rain",
-        summary: snowing ? "A snowstorm, a soft wind and snow on the roofs" : "A perpetual storm on the window",
+      { id: "rain", title: "Weather", summary: "Rain or snow on the window, with its sound",
         value: function () { return Sound.isRainOn() ? "on" : "off"; },
         change: function () {
           var on = !Sound.isRainOn();
@@ -65,6 +63,9 @@
           if (window.RainFX) RainFX.setEnabled(on);
           syncMute();
         } },
+      { id: "weather", title: "Rain or snow", summary: "Pick one for now; it goes back to the season's weather when the season changes",
+        value: function () { return window.RainFX ? RainFX.weather() : "rain"; },
+        change: function () { if (window.RainFX) RainFX.setWeather(RainFX.weather() === "snow" ? "rain" : "snow"); } },
       { id: "sfx", title: "Sound effects", summary: "Menu clicks and blips",
         value: function () { return Sound.isSfxOn() ? "on" : "off"; },
         change: function () { Sound.setSfx(!Sound.isSfxOn()); } },
@@ -75,12 +76,6 @@
           var i = VOLUMES.findIndex(function (x) { return x > v + 0.01; });
           Sound.setVolume(i === -1 ? VOLUMES[0] : VOLUMES[i]);
         } },
-      { id: "time", title: "Time of day", summary: "auto follows your clock",
-        value: function () { return TIMES[timeIndex]; },
-        change: function () { timeIndex = (timeIndex + 1) % TIMES.length; save("xmb.time", TIMES[timeIndex]); Scene.setTimeOfDay(TIMES[timeIndex]); } },
-      { id: "launches", title: "Rocket launches", summary: "Real vehicles, launching from the distant coast",
-        value: function () { return Launches.isEnabled() ? "on" : "off"; },
-        change: function () { Launches.setEnabled(!Launches.isEnabled()); save("xmb.launches", Launches.isEnabled() ? "on" : "off"); } },
       { id: "theme", title: "Accent colour", summary: "Tiles, highlights and city lights",
         value: function () { return THEMES[themeIndex].name.toLowerCase(); },
         change: function () { themeIndex = (themeIndex + 1) % THEMES.length; save("xmb.theme", THEMES[themeIndex].name); applyTheme(); } },
@@ -513,10 +508,10 @@
 
   makeGrain();
   // Saved choices go in before init so the first frame is already right (no tween on load)
-  Scene.setTimeOfDay(TIMES[timeIndex]);
+  Scene.setTimeOfDay("night");   // always dark
   applyTheme();
   applyMotion();
-  Launches.setEnabled(load("xmb.launches", "on") === "on");
+  Launches.setEnabled(false);   // no rocket launches in the sky
   Scene.init(document.getElementById("bg"));
   buildCategories();
   buildItems(false);

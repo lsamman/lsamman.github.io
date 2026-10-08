@@ -64,7 +64,6 @@ window.SITE = {
           title: "Hi, I'm Dreamliner",
           photo: "assets/images/avatar.png",   // made with nikonautic's Picrew maker
           subtitle: "High school senior · Class of 2027",
-          identity: { flag: "nonbinary", label: "Non-binary", pronouns: ["They/Them", "She/Her"] },
           summary: "Rockets, materials science, sound and building things",
           body: [
             "I'm a high school senior who likes building things that fly, make sound, or teach someone something new. I've tested materials to failure in university lab camps, designed and flown rockets, written a published guide to sport rocketry, and run the sound for every school play and concert.",
@@ -251,11 +250,13 @@ window.SITE = {
           summary: "The Chris Files",
           body: [
             "A fan wiki for The Legend Of Chris, an absurdist comedy book written with friends. It has over 300 articles covering every character, place, planet, item and event, with search, categories and backlinks. It's styled to look like the original document.",
-            "The site is generated from the article text by a small Python script and deployed automatically with GitHub Pages."
+            "The site is generated from the article text by a small Python script and deployed automatically with GitHub Pages.",
+            "Tap the phone in its toolbar and Steve Jobs's iPhone 3G flies to the front of the screen, sideways and cracked, (or the Nokia I-4500 flip phone, if you'd rather) with the six Sacred Apps on it, each a real app I built: MySpace v1.3.3 (YouTube with no ads or Shorts), Twitter: Bluebird Variant (X with no character limit), Snapchat: Ghost Protocol Edition (self-destructing messages), Facebook (Pre-Cringe) (a 2007-style Bluesky client), Apple Podcasts 2 (a podcast player) and Settings (Full access), which runs them all."
           ],
           tags: ["Static site generator", "Python", "HTML", "CSS", "JavaScript", "GitHub Pages"],
           links: [
             { label: "Visit site", url: "https://lsamman.github.io/legend-of-chris-wiki/" },
+            { label: "Open the iPhone 3G", url: "https://lsamman.github.io/legend-of-chris-wiki/#iphone-3g" },
             { label: "Source on GitHub", url: "https://github.com/lsamman/legend-of-chris-wiki" }
           ]
         },
@@ -269,6 +270,21 @@ window.SITE = {
           links: [
             { label: "More about this site", url: "#/projects/this-site" },
             { label: "Source on GitHub", url: "https://github.com/lsamman/lsamman.github.io" }
+          ]
+        },
+        {
+          id: "ksp-tracker",
+          icon: "assets/icons/space-program.svg",
+          title: "My Space Program",
+          subtitle: "lsamman.github.io/ksp-tracker",
+          summary: "See whats up In my ksp save right now!",
+          body: [
+            "A live 3D map of my Kerbal Space Program save. Every vessel is shown at true scale in the solar system, with its flight info. A mod I wrote sends the game's telemetry to the site as I play."
+          ],
+          tags: ["Kerbal Space Program", "C#", "Three.js", "GitHub Pages"],
+          links: [
+            { label: "Open the tracker", url: "https://lsamman.github.io/ksp-tracker/" },
+            { label: "Source on GitHub", url: "https://github.com/lsamman/ksp-tracker" }
           ]
         }
       ]
@@ -864,27 +880,6 @@ window.SITE = {
     },
 
     {
-      id: "iphone-3g",
-      label: "Virtual iPhone 3G",
-      icon: "assets/icons/iphone.svg",
-      items: [
-        {
-          id: "myspace",
-          title: "MySpace v1.3.3",
-          photo: "assets/icons/myspace.png",
-          subtitle: "Dreamliner's Better YouTube Client",
-          summary: "YouTube with no ads and no Shorts",
-          body: [
-            "In The Legend Of Chris, the Sacred Apps only run on the iPhone 3G, and MySpace v1.3.3 is the first of them. So here it is, on a virtual one.",
-            "It's my own YouTube client. Videos play ad-free, Shorts are filtered out of everything, and signing in with Google brings in my subscriptions, playlists and likes. It's styled like a 2009 dream: frosted glass, glossy orbs and an animated sky, in light and dark."
-          ],
-          tags: ["No ads", "No Shorts", "Subscriptions", "Frutiger Aero"],
-          links: [{ label: "Open MySpace", url: "dbyc/" }]
-        }
-      ]
-    },
-
-    {
       id: "contact",
       label: "Contact",
       icon: "assets/icons/contact.svg",
@@ -898,7 +893,7 @@ window.SITE = {
             "Discord: dreamliners"
           ],
           links: [
-            { label: "Email: willow_vella@icloud.com", url: "mailto:willow_vella@icloud.com" },
+            { label: "Email: william_vella@icloud.com", url: "mailto:william_vella@icloud.com" },
             { label: "GitHub: lsamman", url: "https://github.com/lsamman" }
           ]
         },

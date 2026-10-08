@@ -2,9 +2,9 @@
 // Snaps: take a photo with the rear camera (the front one is refused, to avoid self-reflection), caption it,
 // doodle on it, then share or save it. Ghosts: messages sealed with AES-GCM in the browser, with the key in the
 // link's # part, that self-destruct after reading. No server. Everything else stays on this device.
-import { get, set, wipe, $, toast, streak, sessionGet, sessionSet } from "./store.js?v=20261008185704";
-import { initCompose, updateFrom, renderSent, openMission, closeMission } from "./ghost.js?v=20261008185704";
-import { enterSnap, leaveSnap, editorOpen } from "./camera.js?v=20261008185704";
+import { get, set, wipe, $, toast, streak, sessionGet, sessionSet } from "./store.js?v=20261008185755";
+import { initCompose, updateFrom, renderSent, openMission, closeMission } from "./ghost.js?v=20261008185755";
+import { enterSnap, leaveSnap, editorOpen } from "./camera.js?v=20261008185755";
 
 const VIEWS = ["snap", "ghost", "dossier"];
 

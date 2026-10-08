@@ -1030,86 +1030,134 @@
     ctx.fillRect(0, 0, W, H);
   }
 
-  // The Dark Fountain: a huge column of darkness rising from the far right
-  // of the city, flaring into a slowly turning vortex high in the sky.
+  // The Dark Fountain, as in the game: a colossal geyser of glowing cyan-blue,
+  // like a frozen flame, with sweeping light and dark blue streaks and curling
+  // tendrils at its sides. It stands in the far right, climbing out of the top of
+  // the screen. Drawn small in flat colours and scaled up, for the pixel-art look.
+  var fountainCv = null, fountainCtx = null, FOUNTAIN_PX = 3;
+  var FT = { sky: 'rgb(150,238,255)', light: 'rgb(98,214,255)', mid: 'rgb(54,160,247)', dark: 'rgb(30,86,222)', deep: 'rgb(22,48,170)' };
+
   function drawFountain(P, now) {
     var tt = now / 1000;
     var cx = W * 0.8;
-    var baseY = H * 0.72;
-    var topY = H * 0.06;
-    var baseW = W * 0.13, neckW = W * 0.028, flareW = W * 0.05;
-    var sway = Math.sin(tt * 0.2) * W * 0.004;
+    var baseY = H * 0.78;
+    var span = W * 0.3;                                   // width of the strip it is drawn into
+    var x0 = Math.round(cx - span / 2);
+    var cw = Math.ceil(span / FOUNTAIN_PX), ch = Math.ceil(H / FOUNTAIN_PX);
+    if (!fountainCv) {
+      fountainCv = document.createElement('canvas');
+      fountainCtx = fountainCv.getContext('2d');
+    }
+    if (!fountainCtx) return;
+    if (fountainCv.width !== cw || fountainCv.height !== ch) { fountainCv.width = cw; fountainCv.height = ch; }
+    var g = fountainCtx;
+    g.setTransform(1, 0, 0, 1, 0, 0);
+    g.clearRect(0, 0, cw, ch);
+    g.setTransform(1 / FOUNTAIN_PX, 0, 0, 1 / FOUNTAIN_PX, -x0 / FOUNTAIN_PX, 0);
 
-    // violet glow in the sky behind it, so the dark shape reads
-    var halo = ctx.createRadialGradient(cx, H * 0.3, 0, cx, H * 0.3, W * 0.28);
-    halo.addColorStop(0, 'rgba(120,60,210,0.30)');
-    halo.addColorStop(0.5, 'rgba(70,30,150,0.14)');
-    halo.addColorStop(1, 'rgba(70,30,150,0)');
+    var lean = W * 0.012;
+    // outline profile: wide at the foot, pinching in the middle, bulging again overhead
+    function half(y) {
+      var f = clamp((baseY - y) / baseY, 0, 1.1);          // 0 at the foot .. 1 at the top
+      return W * (0.115 - 0.045 * Math.sin(Math.min(f, 1) * Math.PI * 0.85) + 0.02 * f) +
+             Math.sin(y * 0.021 + tt * 0.7) * W * 0.004;
+    }
+    function mid(y) {
+      var f = clamp((baseY - y) / baseY, 0, 1.1);
+      return cx - lean * f + Math.sin(tt * 0.25 + f * 2) * W * 0.004;
+    }
+    function body(inset, shiftX, y1) {                      // the column as a path, optionally narrower / shifted
+      g.beginPath();
+      var y;
+      g.moveTo(mid(baseY) - half(baseY) * inset + shiftX, baseY);
+      for (y = baseY; y >= y1; y -= 12) g.lineTo(mid(y) - half(y) * inset + shiftX, y);
+      for (y = y1; y <= baseY; y += 12) g.lineTo(mid(y) + half(y) * inset + shiftX, y);
+      g.closePath();
+    }
+
+    // the whole column in mid blue, then lighter cores inside it
+    g.fillStyle = FT.mid;
+    body(1, 0, -20);
+    g.fill();
+    g.fillStyle = FT.light;
+    body(0.78, -W * 0.012, -20);
+    g.fill();
+    g.fillStyle = FT.sky;
+    body(0.5, -W * 0.02, -20);
+    g.fill();
+
+    // dark blue shadow down the right-hand edge
+    g.fillStyle = FT.dark;
+    g.beginPath();
+    var y;
+    for (y = baseY; y >= -20; y -= 12) (y === baseY ? g.moveTo : g.lineTo).call(g, mid(y) + half(y), y);
+    for (y = -20; y <= baseY; y += 12) g.lineTo(mid(y) + half(y) * (0.8 + 0.06 * Math.sin(y * 0.02 + tt * 0.5)), y);
+    g.closePath();
+    g.fill();
+    g.fillStyle = FT.deep;
+    g.beginPath();
+    for (y = baseY; y >= -20; y -= 12) (y === baseY ? g.moveTo : g.lineTo).call(g, mid(y) + half(y), y);
+    for (y = -20; y <= baseY; y += 12) g.lineTo(mid(y) + half(y) * 0.93, y);
+    g.closePath();
+    g.fill();
+
+    // a sweeping streak: a crescent running from (xa,ya) to (xb,yb) bulging to one side
+    function streak(xa, ya, xb, yb, bulge, thick, fill) {
+      var mx = (xa + xb) / 2, my = (ya + yb) / 2;
+      var dx = yb - ya, dy = xa - xb;                        // normal to the chord
+      var len = Math.sqrt(dx * dx + dy * dy) || 1;
+      var nx = dx / len, ny = dy / len;
+      g.fillStyle = fill;
+      g.beginPath();
+      g.moveTo(xa, ya);
+      g.quadraticCurveTo(mx + nx * bulge, my + ny * bulge, xb, yb);
+      g.quadraticCurveTo(mx + nx * (bulge - thick), my + ny * (bulge - thick), xa, ya);
+      g.closePath();
+      g.fill();
+    }
+    var hw0 = W * 0.1;
+    var sw = Math.sin(tt * 0.3) * W * 0.004;
+    // light streaks curving up from lower left to upper right, like licks of flame
+    streak(cx - hw0 * 0.8 + sw, baseY - H * 0.04, cx - hw0 * 0.1, H * 0.32, W * 0.03, W * 0.012, FT.sky);
+    streak(cx - hw0 * 0.4 - sw, baseY - H * 0.12, cx + hw0 * 0.3, H * 0.12, W * 0.025, W * 0.009, FT.sky);
+    streak(cx - hw0 * 0.3 + sw, H * 0.55, cx - hw0 * 0.05, H * 0.2, -W * 0.02, W * 0.008, FT.light);
+    streak(cx + hw0 * 0.2 - sw, baseY - H * 0.06, cx + hw0 * 0.55, H * 0.38, W * 0.018, W * 0.007, FT.mid);
+    // darker folds
+    streak(cx + hw0 * 0.3 + sw, baseY - H * 0.02, cx + hw0 * 0.4, H * 0.44, -W * 0.02, W * 0.01, FT.dark);
+    streak(cx - hw0 * 0.6, H * 0.34, cx - hw0 * 0.3, -10, -W * 0.015, W * 0.008, FT.mid);
+
+    // curling tendrils flicking off the sides, high up
+    var hk = Math.sin(tt * 0.6) * W * 0.004;
+    streak(mid(H * 0.34) - half(H * 0.34) + W * 0.01, H * 0.36, mid(H * 0.2) - half(H * 0.2) - W * 0.035 + hk, H * 0.17, -W * 0.02, W * 0.008, FT.dark);
+    streak(mid(H * 0.3) + half(H * 0.3) - W * 0.01, H * 0.33, mid(H * 0.16) + half(H * 0.16) + W * 0.03 - hk, H * 0.13, W * 0.02, W * 0.007, FT.deep);
+    streak(mid(H * 0.5) - half(H * 0.5), H * 0.52, mid(H * 0.42) - half(H * 0.42) - W * 0.02, H * 0.4, -W * 0.01, W * 0.005, FT.mid);
+
+    // flat bright rim where it meets the ground
+    g.fillStyle = FT.light;
+    g.fillRect(mid(baseY) - half(baseY) * 1.15, baseY - 3, half(baseY) * 2.3, 6);
+
+    // soft cyan glow in the sky around it
+    var halo = ctx.createRadialGradient(cx, H * 0.4, 0, cx, H * 0.4, W * 0.3);
+    halo.addColorStop(0, 'rgba(60,170,255,0.22)');
+    halo.addColorStop(1, 'rgba(60,170,255,0)');
     ctx.fillStyle = halo;
     ctx.fillRect(cx - W * 0.3, 0, W * 0.6, H);
 
-    // the silhouette: wide base, narrow neck, flaring up into the vortex
-    function shape() {
-      var nk = H * 0.46, fl = H * 0.2;    // where the neck starts / where it flares
-      ctx.beginPath();
-      ctx.moveTo(cx - baseW / 2, baseY);
-      ctx.bezierCurveTo(cx - baseW * 0.2, baseY - H * 0.04, cx - neckW * 0.6, nk + H * 0.05, cx - neckW / 2 + sway, nk);
-      ctx.lineTo(cx - neckW / 2 + sway, fl);
-      ctx.bezierCurveTo(cx - neckW / 2 + sway, fl - H * 0.05, cx - flareW * 0.8, topY + H * 0.08, cx - flareW, topY);
-      ctx.lineTo(cx + flareW, topY);
-      ctx.bezierCurveTo(cx + flareW * 0.8, topY + H * 0.08, cx + neckW / 2 + sway, fl - H * 0.05, cx + neckW / 2 + sway, fl);
-      ctx.lineTo(cx + neckW / 2 + sway, nk);
-      ctx.bezierCurveTo(cx + neckW * 0.6, nk + H * 0.05, cx + baseW * 0.2, baseY - H * 0.04, cx + baseW / 2, baseY);
-      ctx.closePath();
-    }
+    // drawn pixel-sharp, slightly veiled so it sits far away
     ctx.save();
-    shape();
-    var body = ctx.createLinearGradient(0, topY, 0, baseY);
-    body.addColorStop(0, 'rgb(4,2,14)');
-    body.addColorStop(1, 'rgb(10,5,26)');
-    ctx.fillStyle = body;
-    ctx.fill();
-    ctx.clip();
-
-    // slow dark-violet bands spiralling up the column
-    ctx.lineWidth = Math.max(1, W * 0.002);
-    var span = baseY - topY, n = 9;
-    for (var i = 0; i < n; i++) {
-      var f = ((i / n) + tt * 0.025) % 1;            // 0 top .. 1 base, drifting upward
-      var y = topY + (1 - f) * span;
-      var wd = y < H * 0.2 ? neckW + (H * 0.2 - y) / (H * 0.14) * (flareW * 2 - neckW) : y < H * 0.46 ? neckW : neckW + (y - H * 0.46) / (baseY - H * 0.46) * baseW;
-      ctx.strokeStyle = 'rgba(130,70,220,' + (0.10 + 0.18 * Math.sin(f * Math.PI)).toFixed(3) + ')';
-      ctx.beginPath();
-      ctx.ellipse(cx + sway, y, wd * 0.5, wd * 0.09, -0.12, 0, Math.PI);
-      ctx.stroke();
-    }
+    ctx.imageSmoothingEnabled = false;
+    ctx.globalAlpha = 0.9;
+    ctx.drawImage(fountainCv, x0, 0, cw * FOUNTAIN_PX, ch * FOUNTAIN_PX);
     ctx.restore();
 
-    // glowing rim along both edges
-    shape();
-    ctx.strokeStyle = 'rgba(150,90,255,0.22)';
-    ctx.lineWidth = Math.max(1, W * 0.0015);
-    ctx.stroke();
-
-    // swirling dark cloud at the top, turning slowly
-    for (var k = 0; k < 7; k++) {
-      var a = tt * (0.1 + k * 0.01) + k * 0.9;
-      var rx = flareW * (0.9 + 0.5 * Math.sin(k * 1.7)), ry = H * 0.026;
-      var px = cx + Math.cos(a) * flareW * 0.55 + sway, py = topY + H * 0.02 + Math.sin(a) * H * 0.012 + k * H * 0.006;
-      ctx.fillStyle = 'rgba(5,3,16,0.8)';
-      ctx.beginPath(); ctx.ellipse(px, py, rx, ry, Math.sin(a) * 0.12, 0, Math.PI * 2); ctx.fill();
-      ctx.strokeStyle = 'rgba(140,80,230,0.16)';
-      ctx.lineWidth = 1;
-      ctx.beginPath(); ctx.ellipse(px, py, rx, ry, Math.sin(a) * 0.12, Math.PI * 1.05, Math.PI * 1.95); ctx.stroke();
-    }
-
-    // dark wisps drifting off the top
-    for (var j = 0; j < 12; j++) {
-      var u2 = (tt * 0.04 + j / 12) % 1;
-      var wx = cx + (Math.sin(j * 5.1) * 0.9) * flareW * (0.4 + u2) + sway;
-      var wy = topY - u2 * H * 0.08;
-      ctx.fillStyle = 'rgba(8,4,22,' + (0.5 * (1 - u2)).toFixed(3) + ')';
-      ctx.beginPath(); ctx.arc(wx, wy, W * 0.006 * (1 + u2 * 2), 0, Math.PI * 2); ctx.fill();
+    // specks of light drifting around it
+    ctx.fillStyle = 'rgba(160,230,255,0.8)';
+    for (var s = 0; s < 14; s++) {
+      var tw = Math.sin(tt * 1.3 + s * 2.4);
+      if (tw < 0) continue;
+      var sx = cx + Math.sin(s * 12.9) * span * 0.5;
+      var sy = H * (0.05 + 0.5 * ((Math.sin(s * 7.7) + 1) / 2));
+      ctx.fillRect(Math.round(sx), Math.round(sy), 2, 2);
     }
   }
 

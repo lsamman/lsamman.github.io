@@ -1039,6 +1039,7 @@
 
   function drawFountain(P, now) {
     var tt = now / 1000;
+    var Wf = W * 0.5;                                     // the geyser is far away: tall and slim, not wide
     var cx = W * 0.8;
     var baseY = H * 0.78;
     var span = W * 0.3;                                   // width of the strip it is drawn into
@@ -1059,12 +1060,12 @@
     // outline profile: wide at the foot, pinching in the middle, bulging again overhead
     function half(y) {
       var f = clamp((baseY - y) / baseY, 0, 1.1);          // 0 at the foot .. 1 at the top
-      return W * (0.115 - 0.045 * Math.sin(Math.min(f, 1) * Math.PI * 0.85) + 0.02 * f) +
-             Math.sin(y * 0.021 + tt * 0.7) * W * 0.004;
+      return Wf * (0.115 - 0.045 * Math.sin(Math.min(f, 1) * Math.PI * 0.85) + 0.02 * f) +
+             Math.sin(y * 0.021 + tt * 0.7) * Wf * 0.004;
     }
     function mid(y) {
       var f = clamp((baseY - y) / baseY, 0, 1.1);
-      return cx - lean * f + Math.sin(tt * 0.25 + f * 2) * W * 0.004;
+      return cx - lean * f + Math.sin(tt * 0.25 + f * 2) * Wf * 0.004;
     }
     function body(inset, shiftX, y1) {                      // the column as a path, optionally narrower / shifted
       g.beginPath();
@@ -1080,10 +1081,10 @@
     body(1, 0, -20);
     g.fill();
     g.fillStyle = FT.light;
-    body(0.78, -W * 0.012, -20);
+    body(0.78, -Wf * 0.012, -20);
     g.fill();
     g.fillStyle = FT.sky;
-    body(0.5, -W * 0.02, -20);
+    body(0.5, -Wf * 0.02, -20);
     g.fill();
 
     // dark blue shadow down the right-hand edge
@@ -1115,22 +1116,22 @@
       g.closePath();
       g.fill();
     }
-    var hw0 = W * 0.1;
-    var sw = Math.sin(tt * 0.3) * W * 0.004;
+    var hw0 = Wf * 0.1;
+    var sw = Math.sin(tt * 0.3) * Wf * 0.004;
     // light streaks curving up from lower left to upper right, like licks of flame
-    streak(cx - hw0 * 0.8 + sw, baseY - H * 0.04, cx - hw0 * 0.1, H * 0.32, W * 0.03, W * 0.012, FT.sky);
-    streak(cx - hw0 * 0.4 - sw, baseY - H * 0.12, cx + hw0 * 0.3, H * 0.12, W * 0.025, W * 0.009, FT.sky);
-    streak(cx - hw0 * 0.3 + sw, H * 0.55, cx - hw0 * 0.05, H * 0.2, -W * 0.02, W * 0.008, FT.light);
-    streak(cx + hw0 * 0.2 - sw, baseY - H * 0.06, cx + hw0 * 0.55, H * 0.38, W * 0.018, W * 0.007, FT.mid);
+    streak(cx - hw0 * 0.8 + sw, baseY - H * 0.04, cx - hw0 * 0.1, H * 0.32, Wf * 0.03, Wf * 0.012, FT.sky);
+    streak(cx - hw0 * 0.4 - sw, baseY - H * 0.12, cx + hw0 * 0.3, H * 0.12, Wf * 0.025, Wf * 0.009, FT.sky);
+    streak(cx - hw0 * 0.3 + sw, H * 0.55, cx - hw0 * 0.05, H * 0.2, -Wf * 0.02, Wf * 0.008, FT.light);
+    streak(cx + hw0 * 0.2 - sw, baseY - H * 0.06, cx + hw0 * 0.55, H * 0.38, Wf * 0.018, Wf * 0.007, FT.mid);
     // darker folds
-    streak(cx + hw0 * 0.3 + sw, baseY - H * 0.02, cx + hw0 * 0.4, H * 0.44, -W * 0.02, W * 0.01, FT.dark);
-    streak(cx - hw0 * 0.6, H * 0.34, cx - hw0 * 0.3, -10, -W * 0.015, W * 0.008, FT.mid);
+    streak(cx + hw0 * 0.3 + sw, baseY - H * 0.02, cx + hw0 * 0.4, H * 0.44, -Wf * 0.02, Wf * 0.01, FT.dark);
+    streak(cx - hw0 * 0.6, H * 0.34, cx - hw0 * 0.3, -10, -Wf * 0.015, Wf * 0.008, FT.mid);
 
     // curling tendrils flicking off the sides, high up
-    var hk = Math.sin(tt * 0.6) * W * 0.004;
-    streak(mid(H * 0.34) - half(H * 0.34) + W * 0.01, H * 0.36, mid(H * 0.2) - half(H * 0.2) - W * 0.035 + hk, H * 0.17, -W * 0.02, W * 0.008, FT.dark);
-    streak(mid(H * 0.3) + half(H * 0.3) - W * 0.01, H * 0.33, mid(H * 0.16) + half(H * 0.16) + W * 0.03 - hk, H * 0.13, W * 0.02, W * 0.007, FT.deep);
-    streak(mid(H * 0.5) - half(H * 0.5), H * 0.52, mid(H * 0.42) - half(H * 0.42) - W * 0.02, H * 0.4, -W * 0.01, W * 0.005, FT.mid);
+    var hk = Math.sin(tt * 0.6) * Wf * 0.004;
+    streak(mid(H * 0.34) - half(H * 0.34) + Wf * 0.01, H * 0.36, mid(H * 0.2) - half(H * 0.2) - Wf * 0.035 + hk, H * 0.17, -Wf * 0.02, Wf * 0.008, FT.dark);
+    streak(mid(H * 0.3) + half(H * 0.3) - Wf * 0.01, H * 0.33, mid(H * 0.16) + half(H * 0.16) + Wf * 0.03 - hk, H * 0.13, Wf * 0.02, Wf * 0.007, FT.deep);
+    streak(mid(H * 0.5) - half(H * 0.5), H * 0.52, mid(H * 0.42) - half(H * 0.42) - Wf * 0.02, H * 0.4, -Wf * 0.01, Wf * 0.005, FT.mid);
 
     // flat bright rim where it meets the ground
     g.fillStyle = FT.light;

@@ -4,15 +4,17 @@
 # Run this before committing: ./bump-version.sh && git add -A && git commit -m "..." && git push
 set -e
 cd "$(dirname "$0")"
+./sync-willow.sh
 V=$(date -u +%Y%m%d%H%M%S)
 sed -i.bak -E "s/\?v=[0-9]+/?v=$V/g; s/SITE_VERSION = \"[0-9]+\"/SITE_VERSION = \"$V\"/" index.html
 rm -f index.html.bak
 # The apps (dbyc/, bluebird/, snapchat/, facebook/, podcasts/, settings/) use the same version,
 # on their pages and on the imports between their scripts.
-for f in */index.html */js/*.js; do
+for f in */index.html */js/*.js willow/*/index.html willow/*/js/*.js; do
   [ -f "$f" ] || continue
   sed -i.bak -E "s/\?v=[0-9]+/?v=$V/g; s/SITE_VERSION = \"[0-9]+\"/SITE_VERSION = \"$V\"/" "$f"
   rm -f "$f.bak"
 done
 printf '{ "v": "%s" }\n' "$V" > version.json
+cp version.json willow/version.json
 echo "Version $V"

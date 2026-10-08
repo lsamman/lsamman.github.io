@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#0e1011">
+  <title>Home</title>
+  <meta name="description" content="A start page of shortcuts over the Dreamliner skyline">
+  <meta http-equiv="Cache-Control" content="no-cache">
+  <!-- Self-update: always run the latest published version, even in a tab left open for days or restored with Back.
+       Checks version.json on load, when the tab comes back into view, when it's restored from the back/forward cache,
+       and every 5 minutes. A newer version found on load reloads at once; one found later waits for a moment that
+       won't lose anything (a page change, or coming back to the tab) and never interrupts typing or a playing video.
+       SITE_VERSION and the ?v= tags are kept in sync by ./bump-version.sh -->
+  <script>
+    (function () {
+      var SITE_VERSION = "20261008182449";
+      if (!window.fetch) return;
+      var newer = null, last = 0;
+      function busy() {
+        var a = document.activeElement, m = document.querySelectorAll("video, audio");
+        if (a && /^(TEXTAREA|INPUT)$/.test(a.tagName) && a.value) return true;
+        for (var i = 0; i < m.length; i++) if (!m[i].paused && !m[i].ended) return true;
+        return false;
+      }
+      function reload() {
+        if (!newer || busy()) return;
+        var key = "home.reloaded." + newer;   // reload at most once per new version
+        try { if (sessionStorage.getItem(key)) return; sessionStorage.setItem(key, "1"); } catch (e) {}
+        var v = newer;
+        function go() {
+          var u = new URL(location.href);
+          u.searchParams.set("v", v);          // a new URL, so the browser fetches fresh HTML
+          location.replace(u.toString());
+        }
+        var clears = [];
+        if (window.caches && caches.keys) clears.push(caches.keys().then(function (ks) { return Promise.all(ks.map(function (k) { return caches.delete(k); })); }));
+        if (navigator.serviceWorker && navigator.serviceWorker.getRegistrations) clears.push(navigator.serviceWorker.getRegistrations().then(function (rs) { return Promise.all(rs.map(function (r) { return r.unregister(); })); }));
+        Promise.all(clears).catch(function () {}).then(go, go);
+      }
+      function check(now) {
+        if (newer) { if (now) reload(); return; }
+        if (Date.now() - last < 10000) return;  // at most every 10 seconds
+        last = Date.now();
+        fetch("../version.json?t=" + last, { cache: "no-store" })
+          .then(function (r) { return r.ok ? r.json() : null; })
+          .then(function (d) {
+            if (!d || !d.v || d.v === SITE_VERSION) return;
+            newer = d.v;
+            if (now) reload();
+          })
+          .catch(function () {});
+      }
+      check(true);
+      addEventListener("pageshow", function (e) { if (e.persisted) { last = 0; check(true); } });
+      addEventListener("hashchange", function () { check(true); });
+      addEventListener("focus", function () { check(true); });
+      document.addEventListener("visibilitychange", function () { if (document.visibilityState === "visible") check(true); });
+      setInterval(function () { check(false); }, 5 * 60 * 1000);
+    })();
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600&family=Barlow+Condensed:wght@300;500;600&display=swap">
+  <link rel="stylesheet" href="css/home.css?v=20261008182449">
+</head>
+<body>
+  <!-- City background (../js/scene.js) -->
+  <canvas id="bg" aria-hidden="true"></canvas>
+
+  <!-- Gritty overlays + the weather on the window pane (../js/rain.js: rain Mar-Oct, snow Nov-Feb) -->
+  <div id="grain" aria-hidden="true"></div>
+  <div id="scanlines" aria-hidden="true"></div>
+  <canvas id="rain" aria-hidden="true"></canvas>
+
+  <header id="status">
+    <div id="clock"><span class="clock-time"></span><span class="clock-date"></span></div>
+    <button id="edit" type="button" aria-pressed="false">Edit</button>
+    <button id="weather" type="button" title="Switch between rain and snow until the season changes"></button>
+    <button id="mute" type="button" aria-label="Toggle sound" title="Sound on/off">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path class="spk" d="M4 9h4l5-4v14l-5-4H4z"/><path class="wave1" d="M16 9a4 4 0 0 1 0 6"/><path class="wave2" d="M18.5 6.5a7.5 7.5 0 0 1 0 11"/><path class="cross" d="M16 9l6 6M22 9l-6 6"/></svg>
+    </button>
+  </header>
+
+  <!-- The shortcut grid (js/grid.js builds the contents) -->
+  <main id="home">
+    <div id="grid" aria-label="Shortcuts"></div>
+    <p id="hint" class="hint" hidden>drag icons to move them · tap an icon to edit it · tap + to add one</p>
+  </main>
+
+  <!-- Add / edit a shortcut -->
+  <div id="editor" hidden>
+    <form class="card" autocomplete="off">
+      <h2 id="editor-title">Shortcut</h2>
+      <label>Name <input name="name" maxlength="24" required></label>
+      <label>Address <input name="url" inputmode="url" placeholder="example.com" required></label>
+      <label>Icon <input name="emoji" maxlength="4" placeholder="emoji or letters (blank = site icon)"></label>
+      <div class="field"><span>Colour</span><div id="swatches"></div></div>
+      <div class="buttons">
+        <button type="button" class="danger" id="editor-delete">Delete</button>
+        <span class="spacer"></span>
+        <button type="button" id="editor-cancel">Cancel</button>
+        <button type="submit" class="primary">Save</button>
+      </div>
+    </form>
+  </div>
+
+  <noscript><div class="noscript">This page needs JavaScript.</div></noscript>
+
+  <script>window.SOUND_BASE = "../";</script>
+  <script src="../js/sun.js?v=20261008182449"></script>
+  <script src="../js/scene.js?v=20261008182449"></script>
+  <script src="../js/rain.js?v=20261008182449"></script>
+  <script src="../js/audio.js?v=20261008182449"></script>
+  <script src="js/shortcuts.js?v=20261008182449"></script>
+  <script src="js/grid.js?v=20261008182449"></script>
+</body>
+</html>

@@ -1,0 +1,186 @@
+/* ==========================================================================
+   Home: a start page of rounded app icons over the Dreamliner skyline.
+   Layer, clock and mute styles match ../css/style.css.
+   ========================================================================== */
+
+:root {
+  --hue: 95;
+  --accent: hsl(var(--hue) 72% 44%);
+  --accent-hi: hsl(var(--hue) 80% 56%);
+  --bg: #0e1011;
+  --text: #f2f3f3;
+  --muted: rgba(242, 243, 243, .6);
+  --cell: 92px;       /* icon size; js/grid.js shrinks it on small screens */
+  --gap: 26px;
+  --font: "Barlow", "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+  --font-head: "Barlow Condensed", "Segoe UI", "Arial Narrow", sans-serif;
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0; height: 100%; overflow: hidden;
+  font-family: var(--font); color: var(--text); background: var(--bg);
+  -webkit-font-smoothing: antialiased; -webkit-tap-highlight-color: transparent;
+}
+button, input { font: inherit; color: inherit; }
+button { cursor: pointer; }
+[hidden] { display: none !important; }
+
+#bg { position: fixed; inset: 0; width: 100%; height: 100%; z-index: 0; display: block; }
+
+/* ---------- Grit and weather ------------------------------------------------ */
+
+#grain {
+  position: fixed; inset: -100px; z-index: 70; pointer-events: none;
+  opacity: .085; mix-blend-mode: overlay; background-size: 160px 160px;
+  animation: grain .5s steps(5) infinite;
+}
+@keyframes grain {
+  0% { transform: translate(0, 0); } 20% { transform: translate(-37px, 21px); }
+  40% { transform: translate(24px, -48px); } 60% { transform: translate(-11px, 63px); }
+  80% { transform: translate(52px, 9px); } 100% { transform: translate(0, 0); }
+}
+#rain { position: fixed; inset: 0; width: 100%; height: 100%; z-index: 65; pointer-events: none; display: block; }
+#scanlines {
+  position: fixed; inset: 0; z-index: 69; pointer-events: none;
+  background:
+    radial-gradient(ellipse at 50% 45%, transparent 55%, rgba(0,0,0,.55) 100%),
+    repeating-linear-gradient(0deg, rgba(0,0,0,.16) 0 1px, transparent 1px 3px);
+}
+
+/* ---------- Status bar: clock, edit, mute ------------------------------------ */
+
+#status {
+  position: fixed; z-index: 40;
+  top: calc(env(safe-area-inset-top, 0px) + 16px); right: 20px;
+  display: flex; align-items: center; gap: 14px;
+}
+#clock { display: flex; flex-direction: column; align-items: flex-end; line-height: 1; }
+.clock-time { font-family: var(--font-head); font-size: 1.6rem; font-weight: 500; }
+.clock-date { font-size: .78rem; color: var(--muted); margin-top: 2px; text-transform: lowercase; }
+
+#edit, #mute, #weather {
+  height: 38px; border: 1px solid rgba(255,255,255,.25); background: rgba(14,16,17,.6);
+  border-radius: 0; transition: background .15s, border-color .15s, transform .15s;
+}
+#edit { padding: 0 16px; font-family: var(--font-head); font-size: 1.05rem; letter-spacing: .04em; text-transform: uppercase; }
+#mute { width: 38px; padding: 8px; }
+#weather { width: 38px; font-size: 1.15rem; padding: 0; }
+#edit:hover, #mute:hover, #weather:hover, #edit[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); }
+#edit:active, #mute:active, #weather:active { transform: scale(.94); }
+#mute svg { width: 100%; height: 100%; fill: none; stroke: #fff; stroke-width: 2; stroke-linecap: square; }
+#mute .spk { fill: #fff; }
+#mute .cross { display: none; }
+#mute.off .wave1, #mute.off .wave2 { display: none; }
+#mute.off .cross { display: inline; }
+
+/* ---------- The icon grid ---------------------------------------------------- */
+
+#home {
+  position: fixed; inset: 0; z-index: 10; overflow-y: auto;
+  padding: calc(env(safe-area-inset-top, 0px) + 84px) 20px 60px;
+  display: flex; flex-direction: column; align-items: center;
+}
+#grid {
+  position: relative; display: grid; gap: var(--gap) var(--gap);
+  grid-template-columns: repeat(var(--cols, 5), var(--cell));
+  grid-auto-rows: calc(var(--cell) + 30px);
+}
+
+.slot { border-radius: 22%; height: var(--cell); }
+body.editing .slot { border: 2px dashed rgba(255,255,255,.18); }
+body.editing .slot.target { border-color: var(--accent-hi); background: rgba(255,255,255,.08); }
+.slot.add {
+  display: none; align-items: center; justify-content: center; font-size: 2.2rem; color: rgba(255,255,255,.5);
+  background: rgba(14,16,17,.35); border: 2px dashed rgba(255,255,255,.25); cursor: pointer;
+}
+body.editing .slot.add { display: flex; }
+body.editing .slot.add:hover { color: #fff; border-color: var(--accent-hi); }
+
+.tile {
+  position: relative; display: flex; flex-direction: column; align-items: center;
+  text-decoration: none; color: inherit; outline: none; user-select: none; -webkit-user-select: none;
+}
+.face {
+  position: relative; width: var(--cell); height: var(--cell); border-radius: 22%;
+  display: flex; align-items: center; justify-content: center; overflow: hidden;
+  background: linear-gradient(150deg, color-mix(in srgb, var(--c) 70%, #fff) 0%, var(--c) 55%, color-mix(in srgb, var(--c) 70%, #000) 100%);
+  box-shadow: 0 6px 14px rgba(0,0,0,.55), 0 1px 0 rgba(255,255,255,.55) inset, 0 -3px 6px rgba(0,0,0,.25) inset;
+  border: 1px solid rgba(0,0,0,.45);
+  transition: transform .15s cubic-bezier(.3,1.35,.45,1), box-shadow .15s;
+}
+.face::after {   /* the glossy highlight across the top half */
+  content: ""; position: absolute; left: 0; right: 0; top: 0; height: 48%;
+  background: linear-gradient(rgba(255,255,255,.5), rgba(255,255,255,.08));
+  border-radius: 22% 22% 60% 60% / 22% 22% 24% 24%; pointer-events: none;
+}
+.face img { width: 56%; height: 56%; object-fit: contain; filter: drop-shadow(0 2px 2px rgba(0,0,0,.4)); }
+.face .glyph { font-size: calc(var(--cell) * .46); line-height: 1; font-weight: 600; text-shadow: 0 2px 3px rgba(0,0,0,.45); }
+.face .glyph.text { font-family: var(--font-head); font-size: calc(var(--cell) * .4); }
+.label {
+  margin-top: 8px; max-width: calc(var(--cell) + var(--gap) - 6px); text-align: center; font-size: .86rem; font-weight: 500;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-shadow: 0 1px 3px rgba(0,0,0,.9), 0 0 8px rgba(0,0,0,.6);
+}
+body:not(.editing) .tile:hover .face, .tile:focus-visible .face { transform: translateY(-4px) scale(1.06); box-shadow: 0 12px 22px rgba(0,0,0,.6), 0 1px 0 rgba(255,255,255,.55) inset, 0 -3px 6px rgba(0,0,0,.25) inset; }
+.tile:focus-visible .face { outline: 2px solid var(--accent-hi); outline-offset: 3px; }
+.tile:active .face { transform: scale(.95); }
+
+/* edit mode: icons wiggle and can be dragged */
+body.editing .tile { touch-action: none; cursor: grab; }
+body.editing .tile .face { animation: wiggle .32s ease-in-out infinite alternate; }
+body.editing .tile:nth-child(odd) .face { animation-delay: -.16s; }
+@keyframes wiggle { from { transform: rotate(-1.6deg); } to { transform: rotate(1.6deg); } }
+.tile.dragging { position: fixed; z-index: 80; pointer-events: none; cursor: grabbing; }
+.tile.dragging .face { animation: none; transform: scale(1.12); box-shadow: 0 18px 30px rgba(0,0,0,.65), 0 1px 0 rgba(255,255,255,.55) inset; }
+.tile.ghost { opacity: .0; }
+.remove {
+  display: none; position: absolute; top: -8px; left: -8px; width: 26px; height: 26px; padding: 0; z-index: 2;
+  border-radius: 50%; border: 2px solid #fff; background: #c0392b; color: #fff; font-size: 1rem; line-height: 1;
+  box-shadow: 0 2px 5px rgba(0,0,0,.6);
+}
+body.editing .remove { display: block; }
+
+.hint { margin: 28px 0 0; color: var(--muted); font-size: .85rem; text-align: center; }
+
+/* ---------- Add / edit dialog -------------------------------------------------- */
+
+#editor {
+  position: fixed; inset: 0; z-index: 90; display: flex; align-items: center; justify-content: center;
+  background: rgba(0,0,0,.55); padding: 16px;
+}
+#editor .card {
+  width: min(380px, 100%); padding: 22px; display: flex; flex-direction: column; gap: 14px;
+  background: rgba(27,30,32,.96); border: 1px solid rgba(255,255,255,.12); box-shadow: 0 20px 50px rgba(0,0,0,.7);
+}
+#editor h2 { margin: 0; font-family: var(--font-head); font-size: 1.5rem; font-weight: 500; }
+#editor label, #editor .field { display: flex; flex-direction: column; gap: 6px; font-size: .8rem; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; }
+#editor input {
+  height: 38px; padding: 0 10px; background: rgba(0,0,0,.4); border: 1px solid rgba(255,255,255,.2);
+  font-size: 1rem; text-transform: none; letter-spacing: 0;
+}
+#editor input:focus { outline: none; border-color: var(--accent-hi); }
+#swatches { display: flex; flex-wrap: wrap; gap: 8px; }
+#swatches button { width: 28px; height: 28px; border-radius: 50%; border: 2px solid transparent; padding: 0; background: var(--c); }
+#swatches button[aria-pressed="true"] { border-color: #fff; box-shadow: 0 0 0 2px rgba(0,0,0,.6); }
+.buttons { display: flex; gap: 10px; margin-top: 4px; }
+.buttons .spacer { flex: 1; }
+.buttons button { height: 38px; padding: 0 16px; border: 1px solid rgba(255,255,255,.25); background: rgba(255,255,255,.06); }
+.buttons .primary { background: var(--accent); border-color: var(--accent); }
+.buttons .danger { color: #ff8a7a; border-color: rgba(255,138,122,.4); }
+.buttons button:hover { filter: brightness(1.2); }
+
+.noscript { position: fixed; inset: 0; z-index: 100; display: grid; place-items: center; background: var(--bg); }
+
+@media (max-width: 600px) {
+  #status { right: 12px; gap: 10px; }
+  #home { padding-left: 12px; padding-right: 12px; }
+}
+html.reduce-motion #grain { display: none; }
+@media (prefers-reduced-motion: reduce) {
+  body.editing .tile .face { animation: none; }
+  #grain { display: none; }
+}
+
+/* where a dragged icon will land */
+.mark { height: var(--cell); border: 2px solid var(--accent-hi); border-radius: 22%; background: rgba(255,255,255,.1); pointer-events: none; z-index: 1; }

@@ -73,12 +73,6 @@
           var i = VOLUMES.findIndex(function (x) { return x > v + 0.01; });
           Sound.setVolume(i === -1 ? VOLUMES[0] : VOLUMES[i]);
         } },
-      { id: "time", title: "Time of day", summary: "auto follows your clock",
-        value: function () { return TIMES[timeIndex]; },
-        change: function () { timeIndex = (timeIndex + 1) % TIMES.length; save("xmb.time", TIMES[timeIndex]); Scene.setTimeOfDay(TIMES[timeIndex]); } },
-      { id: "launches", title: "Rocket launches", summary: "Real vehicles, launching from the distant coast",
-        value: function () { return Launches.isEnabled() ? "on" : "off"; },
-        change: function () { Launches.setEnabled(!Launches.isEnabled()); save("xmb.launches", Launches.isEnabled() ? "on" : "off"); } },
       { id: "theme", title: "Accent colour", summary: "Tiles, highlights and city lights",
         value: function () { return THEMES[themeIndex].name.toLowerCase(); },
         change: function () { themeIndex = (themeIndex + 1) % THEMES.length; save("xmb.theme", THEMES[themeIndex].name); applyTheme(); } },
@@ -511,10 +505,10 @@
 
   makeGrain();
   // Saved choices go in before init so the first frame is already right (no tween on load)
-  Scene.setTimeOfDay(TIMES[timeIndex]);
+  Scene.setTimeOfDay("night");   // always dark
   applyTheme();
   applyMotion();
-  Launches.setEnabled(load("xmb.launches", "on") === "on");
+  Launches.setEnabled(false);   // no rocket launches in the sky
   Scene.init(document.getElementById("bg"));
   buildCategories();
   buildItems(false);

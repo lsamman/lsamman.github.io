@@ -1061,11 +1061,11 @@
     function half(y) {
       var f = clamp((baseY - y) / baseY, 0, 1.1);          // 0 at the foot .. 1 at the top
       return Wf * (0.115 - 0.045 * Math.sin(Math.min(f, 1) * Math.PI * 0.85) + 0.02 * f) +
-             Math.sin(y * 0.021 + tt * 0.7) * Wf * 0.004;
+             (Math.sin(y * 0.021 + tt * 2.2) * 0.007 + Math.sin(y * 0.047 + tt * 3.1) * 0.003) * Wf;   // ripples running up the sides
     }
     function mid(y) {
       var f = clamp((baseY - y) / baseY, 0, 1.1);
-      return cx - lean * f + Math.sin(tt * 0.25 + f * 2) * Wf * 0.004;
+      return cx - lean * f + Math.sin(tt * 0.5 + f * 3) * Wf * 0.008;   // the whole column sways
     }
     function body(inset, shiftX, y1) {                      // the column as a path, optionally narrower / shifted
       g.beginPath();
@@ -1092,7 +1092,7 @@
     g.beginPath();
     var y;
     for (y = baseY; y >= -20; y -= 12) (y === baseY ? g.moveTo : g.lineTo).call(g, mid(y) + half(y), y);
-    for (y = -20; y <= baseY; y += 12) g.lineTo(mid(y) + half(y) * (0.8 + 0.06 * Math.sin(y * 0.02 + tt * 0.5)), y);
+    for (y = -20; y <= baseY; y += 12) g.lineTo(mid(y) + half(y) * (0.8 + 0.08 * Math.sin(y * 0.02 + tt * 1.8)), y);
     g.closePath();
     g.fill();
     g.fillStyle = FT.deep;
@@ -1116,22 +1116,32 @@
       g.closePath();
       g.fill();
     }
-    var hw0 = Wf * 0.1;
-    var sw = Math.sin(tt * 0.3) * Wf * 0.004;
-    // light streaks curving up from lower left to upper right, like licks of flame
-    streak(cx - hw0 * 0.8 + sw, baseY - H * 0.04, cx - hw0 * 0.1, H * 0.32, Wf * 0.03, Wf * 0.012, FT.sky);
-    streak(cx - hw0 * 0.4 - sw, baseY - H * 0.12, cx + hw0 * 0.3, H * 0.12, Wf * 0.025, Wf * 0.009, FT.sky);
-    streak(cx - hw0 * 0.3 + sw, H * 0.55, cx - hw0 * 0.05, H * 0.2, -Wf * 0.02, Wf * 0.008, FT.light);
-    streak(cx + hw0 * 0.2 - sw, baseY - H * 0.06, cx + hw0 * 0.55, H * 0.38, Wf * 0.018, Wf * 0.007, FT.mid);
-    // darker folds
-    streak(cx + hw0 * 0.3 + sw, baseY - H * 0.02, cx + hw0 * 0.4, H * 0.44, -Wf * 0.02, Wf * 0.01, FT.dark);
-    streak(cx - hw0 * 0.6, H * 0.34, cx - hw0 * 0.3, -10, -Wf * 0.015, Wf * 0.008, FT.mid);
+    // licks of light and dark folds pouring upward: each one rides up the
+    // column, swinging across it as it climbs, and loops back in at the foot
+    var LICKS = [
+      [0.00, -0.55, 0.030, 0.012, FT.sky], [0.17, -0.15, 0.025, 0.009, FT.sky],
+      [0.33, -0.35, -0.02, 0.008, FT.light], [0.50, 0.25, 0.018, 0.007, FT.mid],
+      [0.62, 0.35, -0.02, 0.010, FT.dark], [0.80, -0.65, 0.022, 0.009, FT.sky],
+      [0.90, 0.05, -0.015, 0.008, FT.light]
+    ];
+    var climb = baseY + H * 0.45, len = H * 0.36;
+    for (var k = 0; k < LICKS.length; k++) {
+      var L = LICKS[k];
+      var p = (tt * 0.045 + L[0]) % 1;                   // 0 at the foot .. 1 gone out of the top
+      var yb = baseY + H * 0.1 - p * climb;              // leading tip
+      var ya = yb + len;                                 // tail
+      var swing = Math.sin(tt * 0.7 + k * 1.9) * 0.25;
+      var xa = mid(ya) + half(ya) * (L[1] - 0.25 + swing * 0.5);
+      var xb = mid(yb) + half(yb) * (L[1] + 0.35 + swing);
+      streak(xa, ya, xb, yb, Wf * L[2], Wf * L[3], L[4]);
+    }
 
     // curling tendrils flicking off the sides, high up
-    var hk = Math.sin(tt * 0.6) * Wf * 0.004;
-    streak(mid(H * 0.34) - half(H * 0.34) + Wf * 0.01, H * 0.36, mid(H * 0.2) - half(H * 0.2) - Wf * 0.035 + hk, H * 0.17, -Wf * 0.02, Wf * 0.008, FT.dark);
-    streak(mid(H * 0.3) + half(H * 0.3) - Wf * 0.01, H * 0.33, mid(H * 0.16) + half(H * 0.16) + Wf * 0.03 - hk, H * 0.13, Wf * 0.02, Wf * 0.007, FT.deep);
-    streak(mid(H * 0.5) - half(H * 0.5), H * 0.52, mid(H * 0.42) - half(H * 0.42) - Wf * 0.02, H * 0.4, -Wf * 0.01, Wf * 0.005, FT.mid);
+    var hk = Math.sin(tt * 1.4) * Wf * 0.012, hk2 = Math.sin(tt * 1.1 + 2) * Wf * 0.01;
+    var cu = Math.sin(tt * 0.9) * Wf * 0.006;
+    streak(mid(H * 0.34) - half(H * 0.34) + Wf * 0.01, H * 0.36, mid(H * 0.2) - half(H * 0.2) - Wf * 0.035 + hk, H * 0.17 + hk2, -Wf * 0.02 - cu, Wf * 0.008, FT.dark);
+    streak(mid(H * 0.3) + half(H * 0.3) - Wf * 0.01, H * 0.33, mid(H * 0.16) + half(H * 0.16) + Wf * 0.03 - hk2, H * 0.13 + hk, Wf * 0.02 + cu, Wf * 0.007, FT.deep);
+    streak(mid(H * 0.5) - half(H * 0.5), H * 0.52, mid(H * 0.42) - half(H * 0.42) - Wf * 0.02 - hk, H * 0.4, -Wf * 0.01, Wf * 0.005, FT.mid);
 
     // flat bright rim where it meets the ground
     g.fillStyle = FT.light;
@@ -1139,7 +1149,8 @@
 
     // soft cyan glow in the sky around it
     var halo = ctx.createRadialGradient(cx, H * 0.4, 0, cx, H * 0.4, W * 0.42);
-    halo.addColorStop(0, 'rgba(60,170,255,0.42)');
+    var pulse = 0.85 + 0.15 * Math.sin(tt * 0.8);
+    halo.addColorStop(0, 'rgba(60,170,255,' + (0.42 * pulse).toFixed(3) + ')');
     halo.addColorStop(0.45, 'rgba(40,120,240,0.16)');
     halo.addColorStop(1, 'rgba(60,170,255,0)');
     ctx.fillStyle = halo;
@@ -1152,13 +1163,12 @@
     ctx.drawImage(fountainCv, x0, 0, cw * FOUNTAIN_PX, ch * FOUNTAIN_PX);
     ctx.restore();
 
-    // specks of light drifting around it
-    ctx.fillStyle = 'rgba(160,230,255,0.8)';
-    for (var s = 0; s < 14; s++) {
-      var tw = Math.sin(tt * 1.3 + s * 2.4);
-      if (tw < 0) continue;
-      var sx = cx + Math.sin(s * 12.9) * span * 0.5;
-      var sy = H * (0.05 + 0.5 * ((Math.sin(s * 7.7) + 1) / 2));
+    // specks of light rising around it and fading out as they climb
+    for (var s = 0; s < 22; s++) {
+      var up = (tt * (0.03 + 0.02 * ((s * 37) % 7) / 7) + s / 22) % 1;
+      var sy = baseY - up * baseY * 1.05;
+      var sx = mid(sy) + Math.sin(s * 12.9 + tt * 0.6) * (half(sy) + span * 0.12);
+      ctx.fillStyle = 'rgba(160,230,255,' + (0.85 * (1 - up)).toFixed(3) + ')';
       ctx.fillRect(Math.round(sx), Math.round(sy), 2, 2);
     }
   }

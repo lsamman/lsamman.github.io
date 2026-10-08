@@ -1,7 +1,7 @@
 // Piped (https://github.com/TeamPiped/Piped): an open-source, ad-free front door to YouTube.
 // Public servers come and go, so every request tries several and remembers the one that worked.
-import { PIPED_INSTANCES, PIPED_INSTANCE_LIST } from "./config.js?v=20261008143344";
-import { get, set, settings } from "./store.js?v=20261008143344";
+import { PIPED_INSTANCES, PIPED_INSTANCE_LIST } from "./config.js?v=20261008143906";
+import { get, set, settings } from "./store.js?v=20261008143906";
 
 const TIMEOUT = 8000;   // give up on one server after this long
 const HEDGE = 1500;     // ask the next server too if the current one is this slow
